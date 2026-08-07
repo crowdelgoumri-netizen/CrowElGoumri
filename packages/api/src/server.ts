@@ -14,6 +14,8 @@ import { authPlugin } from "./plugins/auth.js";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
+import { parcelRoutes } from "./routes/parcels.js";
+import { tripRoutes } from "./routes/trips.js";
 
 async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -49,10 +51,10 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(healthRoutes, { prefix: "/health" });
   await app.register(authRoutes, { prefix: "/auth" });
   await app.register(meRoutes, { prefix: "/me" });
+  await app.register(parcelRoutes, { prefix: "/parcels" });
+  await app.register(tripRoutes, { prefix: "/trips" });
 
   // Route groups to be registered as phases progress:
-  //   /parcels     — Phase 2
-  //   /trips       — Phase 2
   //   /matching    — Phase 3
   //   /escrow      — Phase 4
   //   /chat        — Phase 5

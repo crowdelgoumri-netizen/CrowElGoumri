@@ -1,0 +1,462 @@
+// ════════════════════════════════════════════════════════════════
+// CrowdShipping — Prisma schema
+// Source: CROWDSHIPPING_MASTER_BLUEPRINT.md §2.2, with fixes:
+//   1. Dispute.openedBy/openedById relation conflict resolved
+//   2. Trip.parcels explicit @relation("Trip") back-reference
+//   3. Dropped non-functional GeoIndex model — geo queries via PostGIS $queryRaw
+// ════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  // Default output — pnpm workspace linking makes @prisma/client resolvable
+  // from every package that declares it as a dependency.
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // PostGIS extension enabled via migration SQL (Phase 3 geo queries use $queryRaw)
+}
+
+// ============== ENUMS ==============
+
+enum UserRole {
+  SENDER
+  TRAVELER
+  BOTH
+  ADMIN
+  AGENT
+}
+
+enum KYCLevel {
+  NONE     // default
+  BASIC    // Phone + Email verified
+  ENHANCED // ID document + Selfie
+  FULL     // Enhanced + Proof of address + Video call
+}
+
+enum TripMode {
+  FLIGHT
+  FERRY
+  BUS
+  CAR
+  TRUCK
+  TRAIN
+}
+
+enum TripStatus {
+  DRAFT
+  PUBLISHED
+  MATCHING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ParcelStatus {
+  DRAFT
+  PENDING_MATCH
+  MATCHED
+  AWAITING_PICKUP
+  IN_TRANSIT
+  CUSTOMS_CHECK
+  AWAITING_DELIVERY
+  DELIVERED
+  DISPUTED
+  CANCELLED
+  SEIZED
+}
+
+enum EscrowStatus {
+  FUNDED
+  LOCKED
+  PARTIAL_RELEASE
+  RELEASED
+  REFUNDED_SENDER
+  REFUNDED_INSURANCE
+}
+
+enum DisputeStatus {
+  OPENED
+  MEDIATING
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum DisputeReason {
+  PARCEL_NOT_DELIVERED
+  PARCEL_DAMAGED
+  PARCEL_STOLEN
+  CUSTOMS_SEIZURE
+  TRAVELER_NO_SHOW
+  SENDER_NO_SHOW
+  FRAUD_ATTEMPT
+  OTHER
+}
+
+enum Currency {
+  EUR
+  DZD
+  USD
+  CAD
+  GBP
+}
+
+enum PaymentMethod {
+  CREDIT_CARD_STRIPE
+  LEMONWAY_WALLET
+  CASH_ON_DELIVERY
+  BANK_TRANSFER
+  CCP_TRANSFER
+  BARIDI_MOB
+}
+
+enum AddressLevel {
+  OFFICIAL_GEOCODE
+  PIN_DROP
+  POI_BASED
+  LIVE_LOCATION
+  HUMAN_RELAY
+}
+
+// ============== MODELS ==============
+
+model User {
+  id              String     @id @default(uuid())
+  email           String     @unique
+  phone           String     @unique // Format: +213XXXXXXXXX or +33XXXXXXXXX
+  passwordHash    String     @db.VarChar(255)
+  firstName       String     @db.VarChar(100)
+  lastName        String     @db.VarChar(100)
+  displayName     String?    @db.VarChar(100)
+  avatarUrl       String?
+  role            UserRole   @default(BOTH)
+  kycLevel        KYCLevel   @default(NONE)
+  kycVerifiedAt   DateTime?
+  kycDocumentUrl  String?
+
+  // Trust Scoring (see packages/matching — 8-factor weighted score)
+  trustScore      Int        @default(0) // 0-100
+  completedTrips  Int        @default(0)
+  completedDeliveries Int    @default(0)
+  successRate     Float      @default(0) // 0.0 - 1.0
+  averageRating   Float      @default(0) // 0.0 - 5.0
+  trustBadge      String?    // "BRONZE" | "SILVER" | "GOLD" | "PLATINUM"
+  isBanned        Boolean    @default(false)
+  bannedAt        DateTime?
+  bannedReason    String?
+
+  // Preferences
+  blockedCategories String[] // ["Drones", "Weapons", ...]
+  maxDetourKm      Int?
+  preferredCurrency Currency @default(EUR)
+
+  // Stripe Connect (for payouts when acting as traveler)
+  stripeAccountId  String?   @unique
+  stripePayoutsEnabled Boolean @default(false)
+
+  // Meta
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  lastLoginAt     DateTime?
+  deviceTokens    String[]   // Expo Push tokens
+
+  // Relations
+  sentParcels     Parcel[]   @relation("SenderParcels")
+  travelerTrips   Trip[]     @relation("TravelerTrips")
+  ratingsGiven    Rating[]   @relation("RatingsGiven")
+  ratingsReceived Rating[]   @relation("RatingsReceived")
+  disputesOpened  Dispute[]  @relation("DisputesOpened")
+  escrowAsSender  EscrowLedger[] @relation("EscrowSender")
+  escrowAsTraveler EscrowLedger[] @relation("EscrowTraveler")
+  notifications   Notification[]
+
+  @@index([trustScore])
+  @@index([kycLevel])
+}
+
+model Trip {
+  id              String       @id @default(uuid())
+  travelerId      String
+  traveler        User         @relation("TravelerTrips", fields: [travelerId], references: [id])
+
+  // Route (CrowdShippingAddress JSON — see packages/db address types)
+  origin          Json
+  destination     Json
+  routePolyline   String?
+  totalDistanceKm Float
+  estimatedDurationHours Float?
+
+  // Schedule
+  departureTime   DateTime
+  estimatedArrival DateTime?
+  actualArrival   DateTime?
+  mode            TripMode
+  isFlexPlus12h   Boolean      @default(false) // Ferry flexibility
+
+  // Capacity
+  vehicleType     String?
+  maxWeightKg     Float
+  maxVolumeM3     Float?
+  currentWeightKg Float        @default(0)
+  maxDetourKm     Int          @default(50)
+
+  // Pricing (EUR-only in v1)
+  pricePerKg      Float?
+  priceCurrency   Currency     @default(EUR)
+  isNegotiable    Boolean      @default(true)
+  minPricePerKg   Float?
+
+  // Status
+  status          TripStatus   @default(DRAFT)
+  publishedAt     DateTime?
+
+  // Metadata
+  notes           String?      @db.Text
+  hasCooler       Boolean      @default(false)
+  acceptsFragile  Boolean      @default(false)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  parcels         Parcel[]     @relation("TripParcels")
+  checkpoints     TripCheckpoint[]
+
+  @@index([travelerId])
+  @@index([status])
+  @@index([departureTime])
+}
+
+model TripCheckpoint {
+  id              String    @id @default(uuid())
+  tripId          String
+  trip            Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  type            String    // "PICKUP" | "DEPARTURE" | "TRANSIT" | "CUSTOMS" | "ARRIVAL" | "DELIVERY"
+  location        Json      // {lat, lng, address, timestamp}
+  notes           String?
+  photoUrl        String?
+  temperatureC    Float?    // Cold-chain tracking
+  createdAt       DateTime  @default(now())
+
+  @@index([tripId])
+}
+
+model Parcel {
+  id              String       @id @default(uuid())
+  senderId        String
+  sender          User         @relation("SenderParcels", fields: [senderId], references: [id])
+
+  // Content
+  description     String       @db.Text
+  category        String       // "Electronics" | "Clothing" | "Medicine" | "Documents" | "Food" | "Cosmetics" | "Other"
+  subCategory     String?
+  weightKg        Float
+  dimensionsCm    Json         // {length, width, height}
+  estimatedValue  Decimal      @db.Decimal(12, 2)
+  valueCurrency   Currency     @default(EUR)
+  photoUrls       String[]     // max 5
+  invoiceUrl      String?
+
+  // Route (CrowdShippingAddress JSON)
+  pickupAddress   Json
+  deliveryAddress Json
+  pickupNotes     String?      @db.Text
+  deliveryNotes   String?      @db.Text
+  deliveryPin     String?      @db.VarChar(6) // 6-digit PIN for delivery validation
+
+  // Urgency
+  urgencyLevel    String       // "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  urgencyDeadline DateTime?
+
+  // Insurance (stub in v1 — model ready, partner integration deferred)
+  hasInsurance    Boolean      @default(false)
+  insurancePremium Decimal?    @db.Decimal(10, 2)
+  coverageAmount  Decimal?     @db.Decimal(12, 2)
+
+  // Pricing (EUR-only in v1)
+  offeredPrice    Decimal?     @db.Decimal(10, 2)
+  priceCurrency   Currency     @default(EUR)
+
+  // Status & matching
+  status          ParcelStatus @default(DRAFT)
+  matchedTripId   String?
+  matchedTrip     Trip?        @relation("TripParcels", fields: [matchedTripId], references: [id])
+  matchedAt       DateTime?
+
+  // Customs (manual in v1 — disclaimer in ToS, no automated engine)
+  customsCategory String?
+  requiresDeclaration Boolean   @default(false)
+  customsDeclarationId String?
+
+  // Recipient (if not the sender)
+  recipientName   String?
+  recipientPhone  String?
+  recipientHasApp Boolean      @default(false)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  escrow          EscrowLedger?
+  dispute         Dispute?
+  ratings         Rating[]
+  customsLog      CustomsClearanceLog?
+
+  @@index([senderId])
+  @@index([status])
+  @@index([matchedTripId])
+  @@index([urgencyDeadline])
+}
+
+model EscrowLedger {
+  id              String       @id @default(uuid())
+  parcelId        String       @unique
+  parcel          Parcel       @relation(fields: [parcelId], references: [id])
+
+  // FIX #1a: explicit relation fields (blueprint had scalar-only senderId/travelerId)
+  senderId        String
+  sender          User         @relation("EscrowSender", fields: [senderId], references: [id])
+  travelerId      String
+  traveler        User         @relation("EscrowTraveler", fields: [travelerId], references: [id])
+
+  status          EscrowStatus
+
+  // Amounts (all EUR in v1)
+  totalAmount     Decimal      @db.Decimal(12, 2)
+  currency        Currency
+  platformFee     Decimal      @db.Decimal(10, 2) // 10% default
+  insuranceFee    Decimal?     @db.Decimal(10, 2)
+  travelerPayout  Decimal      @db.Decimal(10, 2)
+
+  // Payment flow
+  fundingMethod   PaymentMethod
+  payoutMethod    PaymentMethod?
+
+  // Timestamps (state machine: FUNDED → LOCKED → RELEASED | REFUNDED_SENDER)
+  fundedAt        DateTime?
+  lockedAt        DateTime?
+  releasedAt      DateTime?
+  refundedAt      DateTime?
+
+  // External references
+  stripePaymentIntentId String? @unique
+  stripeTransferId      String? @unique
+  lemonwayWalletId      String? // reserved for future PSD2 escrow upgrade
+  lemonwayTransactionId String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([senderId])
+  @@index([travelerId])
+  @@index([status])
+}
+
+model Dispute {
+  id              String        @id @default(uuid())
+  parcelId        String        @unique
+  parcel          Parcel        @relation(fields: [parcelId], references: [id])
+
+  // FIX #1b: resolved openedBy/openedById conflict.
+  //   Blueprint had both `openedBy String` and `openedById User @relation(fields:[openedById])`
+  //   which won't compile. Now: openedById is the scalar FK, openedBy is the relation.
+  openedById      String
+  openedBy        User          @relation("DisputesOpened", fields: [openedById], references: [id])
+
+  reason          DisputeReason
+  description     String        @db.Text
+
+  // Evidence
+  evidenceUrls    String[]
+  chatTranscript  String?       @db.Text
+
+  // Resolution
+  status          DisputeStatus @default(OPENED)
+  resolution      String?       @db.Text
+  resolvedById    String?       // Admin userId (plain string — admins are rare, no relation needed)
+  resolvedAt      DateTime?
+  refundAmount    Decimal?      @db.Decimal(10, 2)
+  insuranceClaim  Boolean       @default(false)
+
+  // SLA — must resolve within 72h of opening
+  mustResolveBy   DateTime
+  escalatedAt     DateTime?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model CustomsClearanceLog {
+  id              String    @id @default(uuid())
+  parcelId        String    @unique
+  parcel          Parcel    @relation(fields: [parcelId], references: [id])
+
+  checkpoint      String    // "DEPARTURE_COUNTRY" | "ALGERIAN_BORDER" | "SEIZED" | "CLEARED" | "FINE_PAID"
+
+  declaredCategory String
+  declaredValue    Decimal   @db.Decimal(12, 2)
+  declaredCurrency Currency
+  franchiseApplied Boolean    @default(false)
+
+  // If seized
+  seizedBy         String?
+  seizureReason    String?   @db.Text
+  seizureDate      DateTime?
+  fineAmount       Decimal?  @db.Decimal(10, 2)
+
+  travelerNotes    String?   @db.Text
+
+  createdAt        DateTime  @default(now())
+}
+
+model Rating {
+  id              String    @id @default(uuid())
+  parcelId        String
+  parcel          Parcel    @relation(fields: [parcelId], references: [id])
+
+  fromUserId      String
+  fromUser        User      @relation("RatingsGiven", fields: [fromUserId], references: [id])
+  toUserId        String
+  toUser          User      @relation("RatingsReceived", fields: [toUserId], references: [id])
+
+  score           Int       // 1-5
+  comment         String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  @@unique([fromUserId, toUserId, parcelId])
+  @@index([toUserId])
+}
+
+model Notification {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type            String    // "MATCH_FOUND" | "PARCEL_PICKED_UP" | "IN_TRANSIT" | "DELIVERED" | "PAYOUT_SENT" | ...
+  title           String
+  body            String    @db.Text
+  data            Json?
+  isRead          Boolean   @default(false)
+  sentVia         String[]  // ["push", "sms", "email", "in_app"]
+  createdAt       DateTime  @default(now())
+
+  @@index([userId, isRead])
+}
+
+model ChatMessage {
+  id              String    @id @default(uuid())
+  parcelId        String
+  senderId        String
+  body            String    @db.Text
+  attachments     String[]  // S3 URLs
+  readAt          DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([parcelId, createdAt])
+  @@index([senderId])
+}

@@ -1,0 +1,3239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>CrowdShipping Algérie — Master Blueprint v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+/* ════════════════════════════════════════════════════════════════
+   PRINT PAGE SETUP  (A4)
+   ════════════════════════════════════════════════════════════════ */
+@page {
+  size: A4;
+  margin: 22mm 18mm 20mm 18mm;
+  @bottom-center {
+    content: counter(page);
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    color: #6b7280;
+  }
+  @top-right {
+    content: "CrowdShipping Algérie — Master Blueprint";
+    font-family: 'Inter', sans-serif;
+    font-size: 8pt;
+    color: #9ca3af;
+    letter-spacing: 0.5pt;
+  }
+}
+@page :first { margin: 0; @top-right { content: ""; } @bottom-center { content: ""; } }
+
+/* ════════════════════════════════════════════════════════════════
+   ROOT TOKENS
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  --c-bg:        #ffffff;
+  --c-paper:     #fafbfc;
+  --c-ink:       #0f172a;     /* slate-900 — body text */
+  --c-ink-soft:  #334155;     /* slate-700 */
+  --c-muted:     #64748b;     /* slate-500 */
+  --c-faint:     #94a3b8;     /* slate-400 */
+  --c-line:      #e2e8f0;     /* slate-200 */
+  --c-accent:    #1e3a5f;     /* deep indigo — Authority */
+  --c-accent-2:  #2d5f8a;     /* indigo light */
+  --c-accent-tint:#eef2f7;    /* indigo 5% */
+  --c-danger:    #b91c1c;
+  --c-warn:      #b45309;
+  --c-ok:        #15803d;
+  --c-code-bg:   #1e293b;     /* slate-800 */
+  --c-code-ink:  #e2e8f0;
+  --shadow-card: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COVER  (Template 03 — Monolith, Authority intent, light bg)
+   Resilient flow layout — NO absolute positioning, so the converter's
+   anti-overflow heuristics cannot destroy it. Uses flex column flow
+   with min-height to fill the page and push footer to bottom.
+   ════════════════════════════════════════════════════════════════ */
+.cover {
+  page-break-after: always;
+  break-after: page;
+  position: relative;
+  min-height: 253mm;          /* 297mm - 22mm top - ~22mm bottom page margin */
+  background: var(--c-bg);
+  background-image:
+    linear-gradient(to right, rgba(30,58,95,.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30,58,95,.022) 1px, transparent 1px);
+  background-size: 40px 40px;
+  color: var(--c-ink);
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.cover-bar {
+  width: 38mm; height: 4pt;
+  background: var(--c-accent);
+  margin: 0 0 14mm 0;
+}
+.cover-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.cover-kicker {
+  font-size: 10pt;
+  font-weight: 500;
+  letter-spacing: 3pt;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  margin: 0 0 10mm 0;
+}
+.cover-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 56pt;
+  line-height: 1.02;
+  color: var(--c-ink);
+  letter-spacing: -1.5pt;
+  margin: 0 0 8mm 0;
+}
+.cover-title .accent { color: var(--c-accent); }
+.cover-subtitle {
+  font-size: 16pt;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--c-ink-soft);
+  margin: 0 0 12mm 0;
+  max-width: 150mm;
+}
+.cover-summary {
+  font-size: 10.5pt;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--c-muted);
+  margin: 0 0 14mm 0;
+  max-width: 145mm;
+}
+.cover-meta-block { margin: 0 0 10mm 0; }
+.cover-meta-row {
+  display: flex;
+  margin-bottom: 4mm;
+  font-size: 10pt;
+}
+.cover-meta-label {
+  width: 38mm;
+  flex-shrink: 0;
+  color: var(--c-faint);
+  text-transform: uppercase;
+  letter-spacing: 1.5pt;
+  font-size: 8.5pt;
+  font-weight: 600;
+  padding-top: 1pt;
+}
+.cover-meta-value {
+  color: var(--c-ink-soft);
+  font-weight: 500;
+}
+.cover-confidential {
+  align-self: flex-start;
+  font-size: 8pt; font-weight: 700;
+  letter-spacing: 2pt; text-transform: uppercase;
+  color: var(--c-danger);
+  padding: 2pt 6pt;
+  border: 0.8pt solid var(--c-danger);
+  margin: 0 0 8mm 0;
+}
+.cover-footer {
+  margin-top: auto;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  font-size: 9pt; color: var(--c-faint);
+  border-top: 0.5pt solid var(--c-line);
+  padding-top: 4mm;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BODY TYPOGRAPHY
+   ════════════════════════════════════════════════════════════════ */
+html, body {
+  margin: 0; padding: 0;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.body-content { padding: 0; }
+
+/* Hide the document title h1 — replaced by the cover */
+h1.doc-title { display: none !important; }
+
+/* Part title — each PARTIE starts on a new page */
+h1.part-title {
+  page-break-before: always;
+  break-before: page;
+  font-family: 'Playfair Display', serif;
+  font-size: 24pt;
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--c-accent);
+  margin: 0 0 6mm 0;
+  padding: 0 0 4mm 0;
+  border-bottom: 2pt solid var(--c-accent);
+  letter-spacing: -0.3pt;
+}
+
+h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--c-ink);
+  margin: 8mm 0 3mm 0;
+  padding-bottom: 1.5mm;
+  border-bottom: 0.5pt solid var(--c-line);
+  line-height: 1.3;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--c-accent);
+  margin: 5mm 0 2mm 0;
+  line-height: 1.3;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+h4 {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--c-ink-soft);
+  margin: 4mm 0 1.5mm 0;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+p { margin: 0 0 2.5mm 0; }
+strong { font-weight: 700; color: var(--c-ink); }
+em { font-style: italic; }
+
+a {
+  color: var(--c-accent-2);
+  text-decoration: none;
+  border-bottom: 0.3pt solid var(--c-accent-2);
+}
+
+ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+li { margin-bottom: 1mm; }
+li::marker { color: var(--c-accent-2); }
+
+hr {
+  border: none;
+  border-top: 0.5pt solid var(--c-line);
+  margin: 5mm 0;
+}
+
+/* Blockquote — used for the document intro & callouts */
+blockquote {
+  margin: 3mm 0;
+  padding: 3mm 5mm;
+  background: var(--c-accent-tint);
+  border-left: 3pt solid var(--c-accent);
+  color: var(--c-ink-soft);
+  font-size: 10pt;
+  line-height: 1.55;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+blockquote p { margin: 0; }
+
+/* ════════════════════════════════════════════════════════════════
+   TABLES
+   ════════════════════════════════════════════════════════════════ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 3mm 0 4mm 0;
+  font-size: 9pt;
+  line-height: 1.4;
+  page-break-inside: auto;
+  border: 0.5pt solid var(--c-line);
+  table-layout: auto;
+}
+thead { display: table-header-group; }       /* repeat header on each page */
+tr { page-break-inside: avoid; break-inside: avoid; }
+th {
+  background: var(--c-accent);
+  color: #ffffff;
+  font-weight: 600;
+  text-align: left;
+  padding: 2.2mm 3mm;
+  border: 0.5pt solid var(--c-accent);
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+  vertical-align: top;
+}
+td {
+  padding: 2mm 3mm;
+  border: 0.5pt solid var(--c-line);
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+tbody tr:nth-child(even) { background: #f8fafc; }
+tbody tr:hover { background: var(--c-accent-tint); }
+
+/* ════════════════════════════════════════════════════════════════
+   CODE BLOCKS
+   ════════════════════════════════════════════════════════════════ */
+pre {
+  background: var(--c-code-bg) !important;
+  color: var(--c-code-ink);
+  padding: 3.5mm 4mm;
+  border-radius: 4pt;
+  overflow-x: auto;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  margin: 3mm 0 4mm 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  border: 0.5pt solid #334155;
+}
+/* Pygments one-dark inline overrides — ensure readable on dark bg */
+pre code { background: transparent !important; }
+pre .codehilite { background: transparent !important; padding: 0 !important; }
+
+code {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 9pt;
+  background: var(--c-accent-tint);
+  color: var(--c-accent);
+  padding: 0.5pt 3pt;
+  border-radius: 2pt;
+}
+/* Code inside pre should NOT be tinted */
+pre code {
+  background: transparent;
+  color: var(--c-code-ink);
+  padding: 0;
+  font-size: 8.5pt;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MERMAID
+   ════════════════════════════════════════════════════════════════ */
+.mermaid {
+  text-align: center;
+  margin: 4mm 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.mermaid svg { max-width: 100% !important; height: auto !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   TABLE OF CONTENTS
+   ════════════════════════════════════════════════════════════════ */
+.toc-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22pt; font-weight: 900;
+  color: var(--c-accent);
+  margin: 0 0 6mm 0;
+  padding-bottom: 3mm;
+  border-bottom: 2pt solid var(--c-accent);
+}
+.toc { margin: 0 0 8mm 0; padding: 0; list-style: none; }
+.toc ul { margin: 1mm 0 2mm 0; padding-left: 6mm; list-style: none; }
+.toc li { margin-bottom: 1.2mm; font-size: 10.5pt; }
+.toc a { color: var(--c-ink-soft); border: none; font-weight: 500; }
+.toc a:hover { color: var(--c-accent); }
+.toc > li { font-weight: 600; font-size: 11pt; margin-top: 3mm; color: var(--c-accent); }
+.toc > li > a { color: var(--c-accent); }
+
+/* First TOC after cover — give it its own page */
+h2#table-des-matieres,
+h2.table-of-contents {
+  page-break-before: always;
+  break-before: page;
+}
+
+/* Prevent orphan headings at page bottom */
+h1, h2, h3, h4 { page-break-after: avoid; break-after: avoid; }
+img, svg, figure { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════
+     COVER PAGE  (Template 03 — Monolith, flow layout)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="cover">
+  <div class="cover-bar"></div>
+  <div class="cover-content">
+    <div class="cover-kicker">Document Fondateur · Investor Pitch &amp; Engineering Specs</div>
+    <div class="cover-title">CrowdShipping<br><span class="accent">Algérie</span></div>
+    <div class="cover-subtitle">Master Blueprint v1.0 — Plateforme P2P de transport de colis</div>
+    <div class="cover-summary">
+      Cahier des charges ultime pour la conception, le développement et le lancement d'une
+      marketplace bilatérale reliant la diaspora algérienne aux voyageurs réguliers.
+      Six parties exhaustives : Produit &amp; UX, Architecture Technique, Ingénierie Financière
+      (escrow multi-devises), Conformité Douanière, Go-To-Market, et Analyse des Risques.
+    </div>
+    <div class="cover-meta-block">
+      <div class="cover-meta-row">
+        <div class="cover-meta-label">Date</div>
+        <div class="cover-meta-value">6 août 2026</div>
+      </div>
+      <div class="cover-meta-row">
+        <div class="cover-meta-label">Version</div>
+        <div class="cover-meta-value">1.0 — Release Candidate</div>
+      </div>
+      <div class="cover-meta-row">
+        <div class="cover-meta-label">Marché</div>
+        <div class="cover-meta-value">Algérie (diaspora + domestique)</div>
+      </div>
+      <div class="cover-meta-row">
+        <div class="cover-meta-label">Auteurs</div>
+        <div class="cover-meta-value">Task Force pluridisciplinaire — Product, Droit Douanier, Fintech, Architecture</div>
+      </div>
+    </div>
+    <div class="cover-confidential">Confidentiel — Founders &amp; Dev Team Only</div>
+    <div class="cover-footer">
+      <span>CrowdShipping Algérie</span>
+      <span>Master Blueprint · v1.0</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     BODY
+     ════════════════════════════════════════════════════════════════ -->
+<main class="body-content">
+<h1 class="doc-title" id="doc-title">🚀 CrowdShipping Algérie — Master Blueprint v1.0</h1>
+<p><strong>Document fondateur | Investor Pitch &amp; Engineering Specs</strong>
+<strong>Date : 6 août 2026 | Classification : CONFIDENTIEL — Founders &amp; Dev Team Only</strong></p>
+<blockquote>
+<p>Ce document constitue le cahier des charges ultime pour la conception, le développement et le lancement de <strong>CrowdShipping</strong>, une plateforme P2P de transport de colis ciblant l'Algérie (diaspora + domestique). Il a été élaboré par une task force pluridisciplinaire : Product/Growth, Droit Douanier Algérien, Fintech/Payments, et Architecture Technique.</p>
+</blockquote>
+<hr />
+<h2 id="table-des-matieres">Table des Matières</h2>
+<ol>
+<li><a href="#partie-1--prd--uxui-avancée">PARTIE 1 : PRD &amp; UX/UI Avancée</a></li>
+<li><a href="#partie-2--architecture-technique--stack">PARTIE 2 : Architecture Technique &amp; Stack</a></li>
+<li><a href="#partie-3--ingénierie-financière--le-problème-du-square-fintech">PARTIE 3 : Ingénierie Financière</a></li>
+<li><a href="#partie-4--matrice-légale-douanière-et-conformité-le-mur">PARTIE 4 : Matrice Légale, Douanière &amp; Conformité</a></li>
+<li><a href="#partie-5--go-to-market-growth-hacking--saisonnalité">PARTIE 5 : Go-To-Market, Growth Hacking &amp; Saisonnalité</a></li>
+<li><a href="#partie-6--analyse-des-risques-pre-mortem">PARTIE 6 : Analyse des Risques (Pre-Mortem)</a></li>
+</ol>
+<hr />
+<h1 class="part-title" id="partie-1-prd-amp-uxui-avancee">PARTIE 1 : PRD &amp; UX/UI Avancée</h1>
+<h2 id="11-vision-produit">1.1 Vision Produit</h2>
+<p>CrowdShipping est une <strong>marketplace bilatérale</strong> (two-sided) qui connecte :</p>
+<table>
+<thead>
+<tr>
+<th>Rôle</th>
+<th>Profil Type</th>
+<th>Motivation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sender (Expéditeur)</strong></td>
+<td>Membre de la diaspora en France/Canada/Espagne, ou résidant algérien</td>
+<td>Besoin d'envoyer un colis rapidement, à moindre coût, et avec traçabilité</td>
+</tr>
+<tr>
+<td><strong>Traveler (Voyageur)</strong></td>
+<td>Voyageur régulier (vol, ferry, route), étudiant retournant au pays, chauffeur routier</td>
+<td>Monétiser l'espace vide dans ses bagages / véhicule</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Proposition de valeur</strong> : Remplacer le marché informel du "Cabas" par un système sécurisé, tracé, assuré et conforme — à 40-60% moins cher que DHL/Chronopost.</p>
+<h3>1.1.1 Fonctionnalités Core (MVP)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Priority</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F01</td>
+<td>Création d'annonce de colis</td>
+<td>P0</td>
+<td>Sender décrit colis (type, poids, dimensions, photo), origine, destination, urgence</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>Création de trajet voyageur</td>
+<td>P0</td>
+<td>Traveler publie son itinéraire (départ, arrivée, date, capacité restante en kg/volume)</td>
+</tr>
+<tr>
+<td>F03</td>
+<td>Matching algorithmique</td>
+<td>P0</td>
+<td>Système propose les meilleurs Travelers pour chaque colis (voir §1.4)</td>
+</tr>
+<tr>
+<td>F04</td>
+<td>Escrow (séquestre)</td>
+<td>P0</td>
+<td>L'argent est bloqué jusqu'à confirmation de livraison (voir Partie 3)</td>
+</tr>
+<tr>
+<td>F05</td>
+<td>Géolocalisation fallback</td>
+<td>P0</td>
+<td>Système d'adressage alternatif basé PIN/POI/live-location (voir §1.3)</td>
+</tr>
+<tr>
+<td>F06</td>
+<td>KYC vérifié</td>
+<td>P0</td>
+<td>Vérification d'identité pour tout utilisateur (CIN/Passport + selfie)</td>
+</tr>
+<tr>
+<td>F07</td>
+<td>Scoring de confiance</td>
+<td>P0</td>
+<td>Système de réputation multi-signaux (voir §1.5)</td>
+</tr>
+<tr>
+<td>F08</td>
+<td>Messagerie in-app</td>
+<td>P0</td>
+<td>Chat chiffré entre Sender et Traveler</td>
+</tr>
+<tr>
+<td>F09</td>
+<td>OTP/QR validation</td>
+<td>P0</td>
+<td>Code à 6 chiffres ou QR pour valider la remise (voir Partie 4)</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Assurance colis</td>
+<td>P1</td>
+<td>Couverture optionnelle jusqu'à 2,000 EUR par envoi</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Déclaration douanière intégrée</td>
+<td>P1</td>
+<td>Formulaire interactif respectant les limites de franchise voyageur (voir Partie 4)</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>Notifications push/SMS</td>
+<td>P0</td>
+<td>Statut de livraison, urgences, rappels</td>
+</tr>
+<tr>
+<td>F13</td>
+<td>Paiement multi-devises</td>
+<td>P0</td>
+<td>EUR → DZD, EUR cash, DZD cash, CB, virement (voir Partie 3)</td>
+</tr>
+<tr>
+<td>F14</td>
+<td>Code promo / parrainage</td>
+<td>P1</td>
+<td>Mécanisme d'acquisition virale</td>
+</tr>
+<tr>
+<td>F15</td>
+<td>Dashboard "Mes Envois" / "Mes Trajets"</td>
+<td>P0</td>
+<td>Historique complet, statut en temps réel</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-user-journeys-detailles-edge-cases">1.2 User Journeys Détaillés (Edge-Cases)</h2>
+<h3>🔴 Edge-Case #1 : L'étudiant à Paris → Alger (Urgence + Haute Valeur)</h3>
+<p><strong>Persona</strong> : Karim, 23 ans, étudiant en Master à Paris-La Défense.
+<strong>Besoin</strong> : Envoyer un ordinateur portable (Lenovo ThinkPad, ~2.3 kg, valeur 1,200 EUR) et deux ordonnances médicales (médicaments contre le diabète pour sa mère à Bab El Oued, Alger) pour le week-end prochain.</p>
+<p><strong>Parcours détaillé étape par étape :</strong></p>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>ÉTAPE 1 : ONBOARDING &amp; KYC
+├─ Karim ouvre l&#39;app → Crée un compte (email + téléphone algérien +06XX)
+├─ KYC requis (première utilisation) :
+│   ├─ Upload passeport français ou algérien
+│   ├─ Selfie vivante (liveness detection via Onfido SDK)
+│   └─ Vérification automatique (98% de taux d&#39;approbation en &lt; 2 min)
+├─ Score de confiance initial : 35/100 (nouveau compte, pas d&#39;historique)
+│
+ÉTAPE 2 : CRÉATION DE L&#39;ENVOI
+├─ Écran &quot;Nouvel Envoi&quot; :
+│   ├─ Type de colis : MULTIPLE (2 articles dans 1 colis)
+│   ├─ Article 1 : Ordinateur portable
+│   │   ├─ Catégorie : Électronique &gt; Ordinateurs
+│   │   ├─ Poids estimé : 2.3 kg
+│   │   ├─ Dimensions : 35 x 25 x 3 cm
+│   │   ├─ Valeur déclarée : 1,200 EUR
+│   │   ├─ Photo : Upload photo + facture d&#39;achat
+│   │   └─ ⚠️ ALERTE AUTOMATIQUE : &quot;Articles électroniques d&#39;une valeur &gt; 300 EUR
+│   │       sont soumis à déclaration douanière spéciale en Algérie.
+│   │       Voir Article 68 du Code des Douanes.&quot;
+│   │   └─ ✅ Bouton &quot;Voir les règles douanières&quot; → Modal explicatif
+│   ├─ Article 2 : Médicaments
+│   │   ├─ Catégorie : Médicaments &gt; Usage personnel
+│   │   ├─ Poids estimé : 0.4 kg
+│   │   ├─ Valeur : 45 EUR
+│   │   ├─ Upload photo de l&#39;ordonnance (+ traduction arabe/française)
+│   │   └─ ⚠️ ALERTE : &quot;Les médicaments doivent être accompagnés d&#39;une ordonnance.
+│   │       Quantité limitée à 3 mois de traitement personnel.&quot;
+│   │   └─ ✅ Validation automatique de l&#39;ordonnance (OCR par MINDETs code N°)
+│   ├─ Origine : Paris 15e, métro Vaugirard (POI sélectionné)
+│   ├─ Destination : Bab El Oued, Alger
+│   │   └─ ⚠️ Pas d&#39;adresse standardisée détectée
+│   │   └─ → Activation du système PIN (voir §1.3)
+│   │   └─ Karim génère un PIN de remise à 6 chiffres → l&#39;envoie par WhatsApp à sa mère
+│   ├─ Urgence : HAUTE (livraison souhaitée sous 72h)
+│   ├─ Assurance : OUI (coût : 3% de la valeur déclarée = 36 EUR)
+│   └─ Budget max pour le voyageur : 40 EUR (vs ~85 EUR pour Chronopost)
+│
+ÉTAPE 3 : MATCHING ALGORITHMIQUE
+├─ Algorithme scanne les Travelers actifs :
+│   ├─ Résultat #1 : Ahmed, vol Paris→Alger ORY-ALG, demain 14h30
+│   │   ├─ Score de matching : 94/100
+│   │   ├─ Profil vérifié (score : 82/100), 12 trajets complétés, 0 litige
+│   │   ├─ Capacité restante : 8 kg (suffisant)
+│   │   ├─ Départ dans 18h → respecte l&#39;urgence
+│   │   └─ Tarif demandé : 30 EUR
+│   ├─ Résultat #2 : Nadia, ferry Marseille→Alger, arrive dans 36h
+│   │   ├─ Score : 78/100 (délai un peu long pour l&#39;urgence)
+│   │   ├─ Profil : score 91/100, 45 trajets
+│   │   ├─ Tarif : 25 EUR
+│   │   └─ ⚠️ Attention : le ferry peut avoir des retards de 4-12h
+│   └─ Résultat #3 : Youcef, vol Orly→Alger, après-demain
+│       └─ Score : 52/100 (trop tard pour urgence 72h)
+├─ Karim sélectionne Ahmed → Notification envoyée à Ahmed
+│
+ÉTAPE 4 : NÉGOCIATION &amp; ACCEPTATION
+├─ Ahmed reçoit notification push : &quot;Nouveau colis compatible avec votre trajet&quot;
+├─ Ahmed voit le détail du colis + photos + valeur déclarée
+├─ ⚠️ SYSTÈME ANTI-FRAUDE (background) :
+│   ├─ Vérification que Karim n&#39;a pas créé 5 envois identiques (anti-money laundering)
+│   ├─ Cross-check de la facture (OCR détecte cohérence prix/marque)
+│   └─ Check du KYC : Ahmed vérifié, pas sur liste noire
+├─ Ahmed accepte → Contrat digital généré automatiquement (CGU signées par les deux)
+│
+ÉTAPE 5 : PAIEMENT &amp; ESCROW
+├─ Karim paie 30 EUR (tarif voyageur) + 36 EUR (assurance) + 3 EUR (fee plateforme) = 69 EUR
+├─ Paiement par carte bancaire française (Stripe)
+├─ Les 69 EUR sont bloqués dans l&#39;Escrow (LemonWay wallet)
+├─ Statut : &quot;PAIEMENT BLOQUÉ — En attente de remise&quot;
+│
+ÉTAPE 6 : REMISE PHYSIQUE (PARIS)
+├─ Karim et Ahmed coordonnent via chat in-app :
+│   ├─ RDV : Café Les Deux Magots, Paris 6e, demain 10h
+│   ├─ Ahmed scanne le QR code du colis → statut &quot;Colis pris en charge&quot;
+│   ├─ Karim reçoit notification : &quot;Votre colis a été récupéré&quot;
+│   └─ Photo obligatoire du colis emballé (prise par Ahmed, horodatée, géotaggée)
+│
+ÉTAPE 7 : TRAJET (VOL PARIS→ALGER)
+├─ Pendant le vol, Ahmed reçoit un rappel automatique :
+│   │   &quot;N&#39;oubliez pas : vous transportez un colis pour Karim B.
+│   │   Valeur déclarée : 1,245 EUR. Destination : Bab El Oued, Alger.
+│   │   Rappel : déclarez vos effets personnels à la douane si nécessaire.&quot;
+│   ├─ Checkpoint douanier à ALG (action du voyageur) :
+│   │   ├─ Ahmed coche dans l&#39;app : &quot;Passé la douane — Aucun problème&quot; OU
+│   │   ├─ Ahmed coche : &quot;Douane — Contrôle en cours&quot;
+│   │   └─ Si contrôle : notification Karim + démarrage timer d&#39;attente max 4h
+│
+ÉTAPE 8 : LIVRAISON (BAB EL OUED)
+├─ Ahmed arrive à Alger → activation de la live-location dans le chat
+├─ Ahmed entre en contact avec la mère de Karim (numéro fourni)
+├─ ⚠️ La mère ne sait pas utiliser l&#39;app → MODE &quot;RÉCEPTION TIERCE&quot;
+│   ├─ Ahmed lui demande le PIN de remise (6 chiffres communiqué par Karim via WhatsApp)
+│   ├─ Ahmed saisit le PIN dans l&#39;app → vérification → ✅ VALIDÉ
+│   ├─ Ahmed et la mère signent numériquement ( empreinte digitale si possible, sinon Ahmed coche &quot;Remis en main propre&quot;)
+│   └─ Photo du colis remis (optionnel mais recommandé, avec la permission de la mère)
+│
+ÉTAPE 9 : DÉBLOCAGE ESCROW
+├─ PIN validé → Escrow débloqué automatiquement :
+│   ├─ 27 EUR → Compte LemonWay d&#39;Ahmed ( après fee plateforme 10% = 3 EUR)
+│   ├─ 36 EUR → Assurance (conservée par le partenaire assureur, déclenchée si litige)
+│   ├─ 3 EUR → Fee plateforme CrowdShipping
+│   └─ 3 EUR → Taxe de traitement
+├─ Ahmed peut retirer via virement SEPA ou cash (Point de retrait partenaire à Alger)
+│
+ÉTAPE 10 : POST-LIVRAISON
+├─ Notification Karim : &quot;Colis livré avec succès ✅&quot;
+├─ Karim note Ahmed : 5 étoiles + commentaire &quot;Très professionnel et ponctuel&quot;
+├─ Score Ahmed passe de 82 → 85/100
+├─ Score Karim passe de 35 → 50/100 (premier envoi réussi)
+└─ Demande de review : &quot;Karim, votre avis nous intéresse !&quot;
+</code></pre></div>
+<hr />
+<h3>🔴 Edge-Case #2 : Le Voyageur Ferry (Last-Minute, 10kg)</h3>
+<p><strong>Persona</strong> : Mehdi, 41 ans, commerçant à Alger, fait le trajet Marseille-Alger en ferry SNCM avec sa voiture (3 fois par mois).</p>
+<p><strong>Parcours détaillé :</strong></p>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>ÉTAPE 1 : PUBLICATION DE TRAJET (MODE &quot;FERRY / VOITURE&quot;)
+├─ Mehdi ouvre l&#39;app → onglet &quot;Je suis Voyageur&quot;
+├─ Type de trajet : FERRY Marseille-Alger
+├─ Véhicule : OUI (voiture personnelle — Peugeot Partner)
+├─ Détails du véhicule :
+│   ├─ Immatriculation : non obligatoire (privacy), mais Type : Utilitaire
+│   ├─ Volume disponible : Coffre ≈ 0.8 m³ (environ 10-12 kg de colis)
+│   └─ Contraintes : Pas de produits inflammables, pas de taille &gt; 50cm
+├─ Dates :
+│   ├─ Départ : Marseille (Port), 15 août 2026, embarquement 18h
+│   ├─ Arrivée estimée : Alger (Port), 16 août, 10h (UTC+1)
+│   └─ ⚠️ ALERTE FERRY : &quot;Les traversées peuvent avoir 4-12h de retard.
+│       Cochez &#39;Flexibilité +12h&#39; pour augmenter vos chances de matching.&quot;
+├─ Tarif demandé :
+│   ├─ Tarif de base : 5 EUR/kg
+│   ├─ Tarif négociable : OUI (min 3 EUR/kg)
+│   ├─ Colis minimum accepté : 0.5 kg
+│   └─ Cash accepté en plus de l&#39;app : NON (règle anti-contournement)
+├─ Mode &quot;Last Minute&quot; : OUI
+│   └─ Notification push envoyée aux Senders avec des colis en attente
+│       sur l&#39;axe France → Alger dans les 48h
+│
+ÉTAPE 2 : MATCHING BULK (PLUSIEURS COLIS)
+├─ L&#39;algorithme propose 4 colis compatibles :
+│   ├─ Colis A : Vêtements pour bébé, 2 kg, Alger Centre → Score 96
+│   ├─ Colis B : Cosmétiques (chargeur, câbles), 1.5 kg, Hussein Dey → Score 88
+│   ├─ Colis C : Documents notariés, 0.3 kg, Bir Mourad Raïs → Score 91
+│   └─ Colis D : Échantillons médicaux, 3 kg, CHU Mustapha → Score 72
+│       ⚠️ ALERT : Échantillons médicaux nécessitent une chaîne du froid
+│       → Mehdi ne dispose pas de glacière → colis exclu du matching
+│
+├─ Mehdi accepte les colis A, B, C = 3.8 kg (reste 6.2 kg disponibles)
+│
+ÉTAPE 3 : LOGISTIQUE DE PRISE EN CHARGE (MULTI-SENDERS)
+├─ Mehdi reçoit les 3 adresses de collecte :
+│   ├─ Sender A : Lyon Part-Dieu (gare) — compatibilité trajet Marseille ⚠️
+│   │   └─ Détour : +120 km → ALGORITHME calcule : détour acceptable &lt; 200km ✅
+│   ├─ Sender B : Marseille, 3e arrondissement → pas de détour ✅
+│   └─ Sender C : Marseille, Vieux Port → pas de détour ✅
+│
+├─ Planning optimisé automatiquement :
+│   ├─ 13h00 : Stop Lyon Part-Dieu (Sender A)
+│   ├─ 15h30 : Stop Marseille 3e (Sender B)
+│   ├─ 16h00 : Stop Vieux Port (Sender C)
+│   └─ 18h00 : Embarquement ferry Marseille
+│
+├─ Mehdi valide le planning → notifications envoyées aux 3 Senders
+│
+ÉTAPE 4 : PRISE EN CHARGE MULTIPLE
+├─ À chaque stop, Mehdi scanne le QR code de chaque colis
+├─ L&#39;app empêche Mehdi de partir si un colis n&#39;est pas scanné
+│   (sauf si Sender a annulé dans les 30 dernières minutes)
+├─ Mehdi coche &quot;Tous les colis chargés&quot; → statut : &quot;En transit&quot;
+│
+ÉTAPE 5 : TRAVERSÉE FERRY + DÉDOUANEMENT
+├─ Pendant la traversée (~18h), Mehdi reçoit un message proactif :
+│   │   &quot;Rappel : vous transportez 3 colis pour le compte de [Sender A, B, C].
+│   │   Total poids : 3.8 kg. Valeur totale déclarée : 385 EUR.
+│   │   En cas de contrôle douanier à l&#39;arrivée, présentez les bordereaux
+│   │   de déclaration générés dans l&#39;app (onglet &#39;Mes Documents&#39;).&quot;
+│   ├─ Les bordereaux douaniers sont auto-générés :
+│       ├─ Franchise voyageur : &lt; 10,000 DZD par catégorie (voir Partie 4)
+│       └─ Déclaration : &quot;Effets personnels — cadeaux familiaux&quot;
+│
+├─ Arrivée au Port d&#39;Alger :
+│   ├─ File douanière normale → pas de problème dans 90% des cas
+│   └─ Si contrôle : Mehdi montre les bordereaux QR → douanier scanne → info affichée
+│
+ÉTAPE 6 : LIVRAISON MULTI-DESTINATIONS
+├─ L&#39;app optimise l&#39;ordre de livraison à Alger (TSP simplifié) :
+│   ├─ 11h30 : Hussein Dey (Colis B)
+│   ├─ 12h15 : Alger Centre (Colis A)
+│   └─ 13h00 : Bir Mourad Raïs (Colis C)
+│
+├─ Chaque livraison validée par OTP/PIN → déblocage progressif de l&#39;Escrow
+├─ Mehdi gagne : 3.8 kg × 5 EUR = 19 EUR (moins fee 10%) = 17.10 EUR net
+│
+ÉTAPE 7 : RÉTROACTION
+├─ Les 3 Senders notent Mehdi → score mis à jour
+├─ Mehdi est invité à noter les 3 Senders (emballage, ponctualité)
+└─ Badge &quot;Traveler Fiable&quot; débloqué après 10 trajets sans litige
+</code></pre></div>
+<hr />
+<h3>🔴 Edge-Case #3 : Envoi Domestique Tizi Ouzou → Tamanrasset</h3>
+<p><strong>Persona</strong> : Amina, pharmacienne à Tizi Ouzou, doit envoyer des médicaments rares à son oncle à Tamanrasset (2,000 km, zones blanches réseau).</p>
+<p><strong>Parcours détaillé :</strong></p>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>ÉTAPE 1 : CRÉATION D&#39;ENVOI DOMESTIQUE
+├─ Amina ouvre l&#39;app → mode &quot;Envoi Domestique&quot;
+├─ Colis : Médicaments (Insuline, nécessite conservation entre 2-8°C)
+├─ Poids : 1.2 kg (dont 0.8 kg de glacière réutilisable)
+├─ Valeur : 8,500 DZD (~55 EUR)
+├─ Origine : Tizi Ouzou Centre (marché At Abdelmadjid)
+│   └─ Système PIN activé + description textuelle :
+│       &quot;Magasin de téléphone à côté de la mosquée principale, face à la boulangerie&quot;
+├─ Destination : Tamanrasset, Quartier El Mokrani
+│   └─ ⚠️ ALERTE ZONE BLANCHE :
+│       &quot;La destination est dans une zone à couverture réseau limitée.
+│        Le voyageur devra se coordonner par téléphone au +213 XX XX XX XX
+│        (pré-configuré dans les contacts du voyageur).&quot;
+│   └─ Point de livraison alternatif proposé : &quot;Gare routière de Tamanrasset&quot;
+│       ou &quot;Bureau de poste&quot;
+│   └─ Amina choisit : &quot;Livraison à la gare routière + appel téléphonique&quot;
+├─ Urgence : MOYENNE (7 jours acceptable)
+├─ Mode de paiement : DZD cash à la livraison par l&#39;oncle
+│   └─ ⚠️ Mode Cash-on-Delivery activé (voir Partie 3, Scénario B)
+│
+ÉTAPE 2 : MATCHING DOMESTIQUE
+├─ Algorithme recherche Travelers faisant le trajet Nord → Sud :
+│   ├─ Option A : Chauffeur de bus nocturne (Entreprise ETUV)
+│       ├─ Départ Tizi Ouzou → Alger (gare) → Tamanrasset
+│       ├─ Durée : ~36h de route
+│       ├─ Score : 85 (bonne couverture, trajet régulier)
+│       └─ Tarif : 2,000 DZD
+│   ├─ Option B : Voyageur en camionnette (transport de marchandises)
+│       ├─ Plus lent mais fiable, 2-3 jours
+│       ├─ Score : 72
+│       └─ Tarif : 1,500 DZD
+│   └─ Option C : Militaire / fonctionnaire en mutation (régulier)
+│       ├─ Score : 68 (historique limité)
+│       └─ Tarif : 1,800 DZD
+│
+├─ Amina choisit le chauffeur de bus (Option A)
+│
+ÉTAPE 3 : PARTICULARITÉS DOMESTIQUES
+├─ ⚠️ CHAÎNE DU FROID :
+│   ├─ L&#39;app impose une condition : &quot;Ce colis nécessite un maintien à 2-8°C.
+│       Seuls les Travelers ayant coché &#39;Glacière disponible&#39; peuvent accepter.&quot;
+│   ├─ Le chauffeur confirme avoir une glacière (coché dans son profil)
+│   └─ Capteur de température NFC optionnel (si disponible) :
+│       Glacière équipée d&#39;un tag NFC → le voyageur scanne toutes les 4h
+│       → Température enregistrée dans la blockchain du colis
+│
+├─ MODE OFFLINE :
+│   ├─ L&#39;app pré-charge le trajet complet en mode hors-ligne
+│   ├─ Codes OTP générés à l&#39;avance (pas besoin de réseau pour valider)
+│   └─ En cas de coupure réseau, l&#39;app permet la validation via SMS USSD
+│       (partenariat avec Mobilis/Djezzy)
+│
+ÉTAPE 4 : LIVRAISON EN ZONE BLANCHE
+├─ Le chauffeur arrive à la gare routière de Tamanrasset (36h plus tard)
+├─ Appel téléphonique à l&#39;oncle : &quot;Votre colis est à la gare&quot;
+├─ L&#39;oncle arrive → il n&#39;a PAS l&#39;app (pas de smartphone)
+│   └─ MODE &quot;RÉCEPTION SANS APP&quot; :
+│       ├─ L&#39;oncle donne un code secret communiqué par téléphone par Amina
+│       ├─ Le chauffeur saisit le code → validation
+│       ├─ Le chauffeur saisit &quot;2000 DZD reçus en cash&quot; → confirmation
+│       └─ Statut : &quot;Livré + Paiement Cash Confirmé&quot;
+│
+ÉTAPE 5 : DÉBLOCAGE PAIEMENT
+├─ L&#39;argent cash est conservé par le chauffeur (physique)
+├─ L&#39;app enregistre la transaction COD comme &quot;Complétée&quot;
+├─ Le chauffeur doit remettre les 2,000 DZD à un agent CrowdShipping
+│   (Point relais à Alger ou à Tamanrasset) sous 48h
+│   └─ Agent vérifie l&#39;OTP de remise
+├─ Fee plateforme (10%) : 200 DZD déduits
+├─ 1,800 DZD crédités au wallet CrowdShipping du chauffeur
+│   (retirable via CCP ou agent)
+</code></pre></div>
+<hr />
+<h2 id="13-systeme-dadressage-fallback-algerie">1.3 Système d'Adressage "Fallback" (Algérie)</h2>
+<h3>1.3.1 Le Problème</h3>
+<p>L'Algérie ne dispose pas d'un système d'adressage standardisé comparable à la France ou aux USA. Les réalités terrain :</p>
+<table>
+<thead>
+<tr>
+<th>Problème</th>
+<th>Exemple</th>
+<th>Fréquence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pas de numéros de rue</strong></td>
+<td>"Rue à côté de la mosquée"</td>
+<td>~70% des adresses rurales</td>
+</tr>
+<tr>
+<td><strong>Tos noms non officiels</strong></td>
+<td>"Cité 1000 Logements, Bâtiment 4, Escalier B"</td>
+<td>~40% en zone urbaine</td>
+</tr>
+<tr>
+<td><strong>Zones non cartographiées</strong></td>
+<td>Villages kabyles, ksour sahariens</td>
+<td>~30% du territoire</td>
+</tr>
+<tr>
+<td><strong>Changement de noms de rues</strong></td>
+<td>"Ex-Rue Didouche Mourad" vs "Rue Larbi Ben M'hidi"</td>
+<td>~25% (post-1962)</td>
+</tr>
+<tr>
+<td><strong>Absence de code postal fiable</strong></td>
+<td>Plusieurs quartiers partagent le même code postal</td>
+<td>~35%</td>
+</tr>
+</tbody>
+</table>
+<h3>1.3.2 Architecture du Système d'Adressage CrowdShipping</h3>
+<p>Le système est structuré en <strong>4 niveaux de fallback</strong> (du plus précis au moins précis) :</p>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>┌─────────────────────────────────────────────────────────────────┐
+│                CROWDSHIPPING ADDRESSING SYSTEM                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  LEVEL 1 : GEOCODER OFFICIEL (priorité)                         │
+│  ├─ Utilise Google Maps Geocoding API + OpenStreetMap           │
+│  ├─ Algérie Post code lookup (API Poste Algérienne si dispo)    │
+│  └─ Résultat : lat/lng exact + adresse formatée                 │
+│                                                                 │
+│  LEVEL 2 : PIN LOCATION SYSTEM (si Level 1 échoue)               │
+│  ├─ Sender clique sur une carte interactive (Mapbox)            │
+│  ├─ Un PIN ( marqueur ) est placé à l&#39;endroit exact              │
+│  ├─ Rayon de confiance : 50m                                   │
+│  ├─ + Description textuelle libre (&quot;à côté du marché&quot;, etc.)   │
+│  └─ + Photo du point de repère (optionnel mais recommandé)     │
+│                                                                 │
+│  LEVEL 3 : POI-BASED (Points of Interest)                        │
+│  ├─ Base de données POI propriétaire, enrichie communautaire : │
+│  │   ├─ Mosquées (1300+ références en Algérie)                  │
+│  │   ├─ Stations-service (Sonatrach, Naftal)                    │
+│  │   ├─ Écoles, lycées, universités                             │
+│  │   ├─ Marchés, souks                                          │
+│  │   ├─ Gares routières, aéroports, ports                      │
+│  │   ├─ Pharmacies                                             │
+│  │   ├─ Bureaux de poste                                       │
+│  │   └─ Points relais partenaires                               │
+│  ├─ Format : &quot;À 200m de la Mosquée Ibn Badis, vers le nord&quot;     │
+│  └─ Auto-complétion basée sur la localisation actuelle          │
+│                                                                 │
+│  LEVEL 4 : LIVE-LOCATION SHARING                                │
+│  ├─ Quand le Traveler est à &lt; 5 km de la destination :         │
+│  ├─ Activation du mode &quot;Live Location&quot; dans le chat             │
+│  ├─ Partage de position en temps réel pendant 30 min            │
+│  ├─ Le Receiver peut guider le Traveler par appel vocal         │
+│  └─ Le Sender reçoit : &quot;Votre colis est à 2.3 km de la livr.&quot;   │
+│                                                                 │
+│  LEVEL 5 : HUMAN RELAY (ultime fallback)                        │
+│  ├─ Point relais physique (kiosque, bureau de poste, épicier)  │
+│  ├─ Le Receiver vient chercher le colis au point relais         │
+│  ├─ Validé par OTP communiqué par téléphone                     │
+│  └─ Réseau initial : 200 points relais dans 15 wilayas          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3>1.3.3 Format d'Adresse CrowdShipping (JSON Schema)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code><span style="color: #ABB2BF">{</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;$schema&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;object&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;title&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;CrowdShippingAddress&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;properties&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;addressId&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;format&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;uuid&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;level&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;integer&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;enum&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">2</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">3</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">4</span><span style="color: #ABB2BF">, </span><span style="color: #D19A66">5</span><span style="color: #ABB2BF">],</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Fallback level used (1=official, 5=human relay)&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;country&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;const&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;DZ&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;wilaya&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Code wilaya (ex: &#39;16&#39; pour Alger)&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;commune&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Nom de la commune (ex: &#39;Sidi M&#39;Hamed&#39;)&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;geocode&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;object&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;properties&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;lat&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;number&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;lng&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;number&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;accuracyMeters&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;number&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;source&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;enum&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&quot;google&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;osm&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;pin_drop&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;poi&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;estimated&quot;</span><span style="color: #ABB2BF">] }</span>
+<span style="color: #ABB2BF">      }</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;streetDescription&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Description libre en français/arabe (ex: &#39;3ème rue après la mosquée, bleu&#39;)&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;nearestPOI&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;object&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;properties&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;enum&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&quot;mosque&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;gas_station&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;school&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;market&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;pharmacy&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;post_office&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;relay_point&quot;</span><span style="color: #ABB2BF">] },</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;name&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;distanceMeters&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;number&quot;</span><span style="color: #ABB2BF"> },</span>
+<span style="color: #ABB2BF">        </span><span style="color: #E06C75">&quot;direction&quot;</span><span style="color: #ABB2BF">: { </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #E06C75">&quot;enum&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&quot;north&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;south&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;east&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;west&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;northeast&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;northwest&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;southeast&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;southwest&quot;</span><span style="color: #ABB2BF">] }</span>
+<span style="color: #ABB2BF">      }</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;landmarkPhoto&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;format&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;uri&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Photo du point de repère uploadée par le Sender&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;relayPointId&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;null&quot;</span><span style="color: #ABB2BF">],</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;ID du point relais si Level 5 utilisé&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;recipientPhone&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;pattern&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;^\\+213[5-7][0-9]{8}$&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Numéro de téléphone du destinataire (format algérien)&quot;</span>
+<span style="color: #ABB2BF">    },</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;deliveryInstructions&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;string&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;maxLength&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">500</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">      </span><span style="color: #E06C75">&quot;description&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Instructions spéciales (ex: &#39;Sonner 2 fois, demander Mohammed&#39;)&quot;</span>
+<span style="color: #ABB2BF">    }</span>
+<span style="color: #ABB2BF">  },</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;required&quot;</span><span style="color: #ABB2BF">: [</span><span style="color: #98C379">&quot;addressId&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;level&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;country&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;wilaya&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;commune&quot;</span><span style="color: #ABB2BF">, </span><span style="color: #98C379">&quot;geocode&quot;</span><span style="color: #ABB2BF">]</span>
+<span style="color: #ABB2BF">}</span>
+</code></pre></div>
+<hr />
+<h2 id="14-algorithme-de-matching">1.4 Algorithme de Matching</h2>
+<h3>1.4.1 Formulation Mathématique</h3>
+<p>Le score de matching entre un colis <code>p</code> (parcel) et un voyageur <code>t</code> (traveler) est calculé comme suit :</p>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>Score(p, t) = w₁·S_route(t, p)  +  w₂·S_capacity(t, p)  +  w₃·S_trust(t, p)
+             +  w₄·S_urgency(t, p) +  w₅·S_compatibility(t, p) +  w₆·S_price(t, p)
+             +  w₇·S_history(t, p) +  w₈·S_risk(t, p)
+</code></pre></div>
+<p>Où chaque sous-score est normalisé dans [0, 1] :</p>
+<table>
+<thead>
+<tr>
+<th>Pondération</th>
+<th>Sous-Score</th>
+<th>Formule</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w₁ = 0.20</td>
+<td><code>S_route</code></td>
+<td><code>1 - (detour_km / max_acceptable_detour_km)</code></td>
+<td>Détour kilométrique accepté par le voyageur</td>
+</tr>
+<tr>
+<td>w₂ = 0.15</td>
+<td><code>S_capacity</code></td>
+<td><code>(capacity_remaining - parcel_weight) / capacity_remaining</code></td>
+<td>Capacité restante après ajout du colis</td>
+</tr>
+<tr>
+<td>w₃ = 0.20</td>
+<td><code>S_trust</code></td>
+<td><code>(trust_score_traveler / 100)</code></td>
+<td>Score de confiance global du voyageur</td>
+</tr>
+<tr>
+<td>w₄ = 0.10</td>
+<td><code>S_urgency</code></td>
+<td><code>1 if (arrival_time &lt; urgency_deadline) else 0</code></td>
+<td>Le voyageur arrive-t-il dans les délais ?</td>
+</tr>
+<tr>
+<td>w₅ = 0.08</td>
+<td><code>S_compatibility</code></td>
+<td>Fonction de compatibilité catégorie colis ↔ expérience voyageur</td>
+<td>Le voyageur a-t-il déjà transporté ce type de colis ?</td>
+</tr>
+<tr>
+<td>w₆ = 0.12</td>
+<td><code>S_price</code></td>
+<td><code>1 - abs(traveler_price - sender_budget) / sender_budget</code></td>
+<td>Adéquation prix demandé / budget</td>
+</tr>
+<tr>
+<td>w₇ = 0.10</td>
+<td><code>S_history</code></td>
+<td><code>successful_past_deliveries / total_past_deliveries</code></td>
+<td>Taux de réussite historique</td>
+</tr>
+<tr>
+<td>w₈ = 0.05</td>
+<td><code>S_risk</code></td>
+<td><code>1 - fraud_risk_score</code></td>
+<td>Score anti-fraude (0 = risque max, 1 = pas de risque)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note</strong> : Les poids (w₁...w₈) sont ajustables via un système A/B testing et un modèle de régression logistique entraîné sur les transactions réussies/échouées.</p>
+<h3>1.4.2 Pseudo-Code de l'Algorithme</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code><span style="color: #C678DD">def</span> <span style="color: #61AFEF; font-weight: bold">compute_matching_score</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #ABB2BF">:</span> <span style="color: #E06C75">Parcel</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">traveler</span><span style="color: #ABB2BF">:</span> <span style="color: #E06C75">Traveler</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">-&gt;</span> <span style="color: #E5C07B">float</span><span style="color: #ABB2BF">:</span>
+<span style="color: #ABB2BF">    </span><span style="color: #98C379">&quot;&quot;&quot;</span>
+<span style="color: #98C379">    Calcule le score de matching entre un colis et un voyageur.</span>
+<span style="color: #98C379">    Retourne un score entre 0 (incompatible) et 100 (parfait).</span>
+<span style="color: #98C379">    Un score &lt; 30 est considéré comme &quot;non recommandé&quot;.</span>
+<span style="color: #98C379">    &quot;&quot;&quot;</span>
+
+    <span style="color: #7F848E"># --- FILTERS (Hard Constraints — élimination directe) ---</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">status</span> <span style="color: #56B6C2">!=</span> <span style="color: #98C379">&quot;VERIFIED&quot;</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #C678DD">return</span> <span style="color: #D19A66">0.0</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">capacity_remaining_kg</span> <span style="color: #56B6C2">&lt;</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">weight_kg</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #C678DD">return</span> <span style="color: #D19A66">0.0</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">departure_time</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">urgency_deadline</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #C678DD">return</span> <span style="color: #D19A66">0.0</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">blocked_categories</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #C678DD">return</span> <span style="color: #D19A66">0.0</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">is_route_compatible</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">route</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">origin</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">destination</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">==</span> <span style="color: #E5C07B">False</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #C678DD">return</span> <span style="color: #D19A66">0.0</span>
+
+    <span style="color: #7F848E"># --- SOFT SCORING ---</span>
+
+    <span style="color: #7F848E"># S_route : Détour kilométrique</span>
+    <span style="color: #E06C75">base_route_km</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">compute_route_distance</span><span style="color: #ABB2BF">(</span>
+        <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">origin</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">destination</span>
+    <span style="color: #ABB2BF">)</span>
+    <span style="color: #E06C75">detour_km</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">compute_route_distance</span><span style="color: #ABB2BF">(</span>
+        <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">origin</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">pickup_location</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">destination</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">delivery_location</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #E06C75">mode</span><span style="color: #56B6C2">=</span><span style="color: #98C379">&quot;via_waypoints&quot;</span>
+    <span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">-</span> <span style="color: #E06C75">base_route_km</span>
+
+    <span style="color: #E06C75">max_detour</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">max_acceptable_detour_km</span>  <span style="color: #7F848E"># configurable par le voyageur</span>
+    <span style="color: #E06C75">S_route</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">max</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span> <span style="color: #D19A66">1</span> <span style="color: #56B6C2">-</span> <span style="color: #ABB2BF">(</span><span style="color: #E06C75">detour_km</span> <span style="color: #56B6C2">/</span> <span style="color: #E06C75">max_detour</span><span style="color: #ABB2BF">))</span> <span style="color: #C678DD">if</span> <span style="color: #E06C75">max_detour</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #D19A66">0</span> <span style="color: #C678DD">else</span> <span style="color: #D19A66">0</span>
+
+    <span style="color: #7F848E"># S_capacity : Capacité restante</span>
+    <span style="color: #E06C75">S_capacity</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">(</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">capacity_remaining_kg</span> <span style="color: #56B6C2">-</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">weight_kg</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">/</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">capacity_remaining_kg</span>
+
+    <span style="color: #7F848E"># S_trust : Score de confiance composite</span>
+    <span style="color: #E06C75">S_trust</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">(</span>
+        <span style="color: #D19A66">0.4</span> <span style="color: #56B6C2">*</span> <span style="color: #ABB2BF">(</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">kyc_level</span> <span style="color: #56B6C2">/</span> <span style="color: #D19A66">3</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">+</span>          <span style="color: #7F848E"># Niveau KYC (1=basic, 2=enhanced, 3=full)</span>
+        <span style="color: #D19A66">0.3</span> <span style="color: #56B6C2">*</span> <span style="color: #ABB2BF">(</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">reputation_score</span> <span style="color: #56B6C2">/</span> <span style="color: #D19A66">100</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">+</span>   <span style="color: #7F848E"># Score de réputation</span>
+        <span style="color: #D19A66">0.2</span> <span style="color: #56B6C2">*</span> <span style="color: #E5C07B">min</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">completed_trips</span> <span style="color: #56B6C2">/</span> <span style="color: #D19A66">20</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">+</span> <span style="color: #7F848E"># Bonus d&#39;expérience (plafonné à 20 trajets)</span>
+        <span style="color: #D19A66">0.1</span> <span style="color: #56B6C2">*</span> <span style="color: #ABB2BF">(</span><span style="color: #D19A66">1</span> <span style="color: #C678DD">if</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">has_active_insurance</span> <span style="color: #C678DD">else</span> <span style="color: #D19A66">0</span><span style="color: #ABB2BF">)</span>  <span style="color: #7F848E"># Assurance active</span>
+    <span style="color: #ABB2BF">)</span>
+
+    <span style="color: #7F848E"># S_urgence : Respect du délai</span>
+    <span style="color: #E06C75">estimated_arrival</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">departure_time</span> <span style="color: #56B6C2">+</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">estimated_travel_duration</span>
+    <span style="color: #E06C75">buffer_hours</span> <span style="color: #56B6C2">=</span> <span style="color: #D19A66">6</span>  <span style="color: #7F848E"># Marge de sécurité de 6h</span>
+    <span style="color: #E06C75">S_urgency</span> <span style="color: #56B6C2">=</span> <span style="color: #D19A66">1.0</span> <span style="color: #C678DD">if</span> <span style="color: #E06C75">estimated_arrival</span> <span style="color: #56B6C2">&lt;=</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">urgency_deadline</span> <span style="color: #56B6C2">-</span> <span style="color: #E06C75">timedelta</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">hours</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">buffer_hours</span><span style="color: #ABB2BF">)</span> <span style="color: #C678DD">else</span> <span style="color: #ABB2BF">(</span>
+        <span style="color: #D19A66">0.5</span> <span style="color: #C678DD">if</span> <span style="color: #E06C75">estimated_arrival</span> <span style="color: #56B6C2">&lt;=</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">urgency_deadline</span> <span style="color: #C678DD">else</span> <span style="color: #D19A66">0.0</span>
+    <span style="color: #ABB2BF">)</span>
+
+    <span style="color: #7F848E"># S_compatibility : Expérience avec ce type de colis</span>
+    <span style="color: #E06C75">past_similar</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">get_deliveries_by_category</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span><span style="color: #ABB2BF">)</span>
+    <span style="color: #E06C75">total_deliveries</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">total_completed_deliveries</span>
+    <span style="color: #E06C75">S_compatibility</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">min</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">1.0</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">past_similar</span> <span style="color: #56B6C2">/</span> <span style="color: #E5C07B">max</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">1</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">total_deliveries</span><span style="color: #ABB2BF">))</span> <span style="color: #56B6C2">*</span> <span style="color: #D19A66">0.5</span> <span style="color: #56B6C2">+</span> <span style="color: #D19A66">0.5</span>  <span style="color: #7F848E"># min 0.5</span>
+
+    <span style="color: #7F848E"># S_price : Adéquation prix</span>
+    <span style="color: #E06C75">price_diff</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">abs</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">asked_price_eur</span> <span style="color: #56B6C2">-</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">sender_budget_eur</span><span style="color: #ABB2BF">)</span>
+    <span style="color: #E06C75">S_price</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">max</span><span style="color: #ABB2BF">(</span><span style="color: #D19A66">0</span><span style="color: #ABB2BF">,</span> <span style="color: #D19A66">1</span> <span style="color: #56B6C2">-</span> <span style="color: #ABB2BF">(</span><span style="color: #E06C75">price_diff</span> <span style="color: #56B6C2">/</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">sender_budget_eur</span><span style="color: #ABB2BF">))</span> <span style="color: #C678DD">if</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">sender_budget_eur</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #D19A66">0</span> <span style="color: #C678DD">else</span> <span style="color: #D19A66">0.5</span>
+
+    <span style="color: #7F848E"># S_history : Taux de réussite</span>
+    <span style="color: #E06C75">S_history</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">success_rate</span> <span style="color: #C678DD">if</span> <span style="color: #E06C75">total_deliveries</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #D19A66">0</span> <span style="color: #C678DD">else</span> <span style="color: #D19A66">0.5</span>  <span style="color: #7F848E"># Neutral pour nouveaux</span>
+
+    <span style="color: #7F848E"># S_risk : Score anti-fraude (0-1, 1=sûr)</span>
+    <span style="color: #E06C75">risk_signals</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">compute_fraud_risk</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">traveler</span><span style="color: #ABB2BF">)</span>
+    <span style="color: #E06C75">S_risk</span> <span style="color: #56B6C2">=</span> <span style="color: #D19A66">1.0</span> <span style="color: #56B6C2">-</span> <span style="color: #E06C75">risk_signals</span>
+
+    <span style="color: #7F848E"># --- WEIGHTED COMBINATION ---</span>
+    <span style="color: #E06C75">score</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">(</span>
+        <span style="color: #D19A66">0.20</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_route</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.15</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_capacity</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.20</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_trust</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.10</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_urgency</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.08</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_compatibility</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.12</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_price</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.10</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_history</span> <span style="color: #56B6C2">+</span>
+        <span style="color: #D19A66">0.05</span> <span style="color: #56B6C2">*</span> <span style="color: #E06C75">S_risk</span>
+    <span style="color: #ABB2BF">)</span>
+
+    <span style="color: #C678DD">return</span> <span style="color: #E5C07B">round</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">score</span> <span style="color: #56B6C2">*</span> <span style="color: #D19A66">100</span><span style="color: #ABB2BF">,</span> <span style="color: #D19A66">1</span><span style="color: #ABB2BF">)</span>  <span style="color: #7F848E"># Score final entre 0 et 100</span>
+
+
+<span style="color: #C678DD">def</span> <span style="color: #61AFEF; font-weight: bold">get_top_matches</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #ABB2BF">:</span> <span style="color: #E06C75">Parcel</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">limit</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">int</span> <span style="color: #56B6C2">=</span> <span style="color: #D19A66">5</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">-&gt;</span> <span style="color: #E5C07B">list</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">MatchResult</span><span style="color: #ABB2BF">]:</span>
+<span style="color: #ABB2BF">    </span><span style="color: #98C379">&quot;&quot;&quot;</span>
+<span style="color: #98C379">    Récupère les meilleurs matchs pour un colis donné.</span>
+<span style="color: #98C379">    Utilise un index géospatial (PostGIS / Redis GEO) pour filtrer</span>
+<span style="color: #98C379">    rapidement les voyageurs dans un rayon pertinent.</span>
+<span style="color: #98C379">    &quot;&quot;&quot;</span>
+    <span style="color: #7F848E"># Étape 1 : Filtrage géographique préliminaire</span>
+    <span style="color: #E06C75">candidate_travelers</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">geo_query_nearby_travelers</span><span style="color: #ABB2BF">(</span>
+        <span style="color: #E06C75">origin</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">pickup_location</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #E06C75">destination</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">delivery_location</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #E06C75">time_window</span><span style="color: #56B6C2">=</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">created_at</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">urgency_deadline</span><span style="color: #ABB2BF">),</span>
+        <span style="color: #E06C75">max_results</span><span style="color: #56B6C2">=</span><span style="color: #D19A66">200</span>
+    <span style="color: #ABB2BF">)</span>
+
+    <span style="color: #7F848E"># Étape 2 : Scoring complet</span>
+    <span style="color: #E06C75">scored</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">[]</span>
+    <span style="color: #C678DD">for</span> <span style="color: #E06C75">traveler</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">candidate_travelers</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #E06C75">score</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">compute_matching_score</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">traveler</span><span style="color: #ABB2BF">)</span>
+        <span style="color: #C678DD">if</span> <span style="color: #E06C75">score</span> <span style="color: #56B6C2">&gt;=</span> <span style="color: #D19A66">30.0</span><span style="color: #ABB2BF">:</span>  <span style="color: #7F848E"># Seuil minimum</span>
+            <span style="color: #E06C75">scored</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">MatchResult</span><span style="color: #ABB2BF">(</span>
+                <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">traveler</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">score</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">score</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">estimated_price</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">asked_price_eur</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">estimated_arrival</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">departure_time</span> <span style="color: #56B6C2">+</span> <span style="color: #E06C75">traveler</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">estimated_travel_duration</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">detour_km</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">compute_detour</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">traveler</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #ABB2BF">)</span>
+            <span style="color: #ABB2BF">))</span>
+
+    <span style="color: #7F848E"># Étape 3 : Tri par score décroissant</span>
+    <span style="color: #E06C75">scored</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">sort</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">key</span><span style="color: #56B6C2">=</span><span style="color: #C678DD">lambda</span> <span style="color: #E06C75">x</span><span style="color: #ABB2BF">:</span> <span style="color: #E06C75">x</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">score</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">reverse</span><span style="color: #56B6C2">=</span><span style="color: #E5C07B">True</span><span style="color: #ABB2BF">)</span>
+
+    <span style="color: #C678DD">return</span> <span style="color: #E06C75">scored</span><span style="color: #ABB2BF">[:</span><span style="color: #E06C75">limit</span><span style="color: #ABB2BF">]</span>
+</code></pre></div>
+<hr />
+<h2 id="15-systeme-de-scoring-de-confiance">1.5 Système de Scoring de Confiance</h2>
+<h3>1.5.1 Facteurs de Score</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Poids</th>
+<th>Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Niveau KYC</td>
+<td>20%</td>
+<td>Onfido/Sumsub</td>
+<td>Vérification identité (basic/enhanced/full)</td>
+</tr>
+<tr>
+<td>Nombre de trajets complétés</td>
+<td>15%</td>
+<td>Base de données</td>
+<td>Plus de trajets = plus de confiance</td>
+</tr>
+<tr>
+<td>Taux de réussite</td>
+<td>20%</td>
+<td>Base de données</td>
+<td>(livrés sans litige) / (total acceptés)</td>
+</tr>
+<tr>
+<td>Notes moyennes</td>
+<td>15%</td>
+<td>Avis utilisateurs</td>
+<td>Moyenne des étoiles reçues</td>
+</tr>
+<tr>
+<td>Ancienneté du compte</td>
+<td>5%</td>
+<td>Base de données</td>
+<td>Compte de &gt; 6 mois = bonus</td>
+</tr>
+<tr>
+<td>Vérification téléphone</td>
+<td>5%</td>
+<td>Twilio/Verify</td>
+<td>Numéro vérifié par SMS</td>
+</tr>
+<tr>
+<td>Presence assurance</td>
+<td>10%</td>
+<td>Partenaire assureur</td>
+<td>A souscrit une assurance trajet</td>
+</tr>
+<tr>
+<td>Badge vérifié (idéal)</td>
+<td>5%</td>
+<td>Admin</td>
+<td>Vérification manuelle par l'équipe</td>
+</tr>
+<tr>
+<td>Sanctions</td>
+<td>-100</td>
+<td>Admin</td>
+<td>Tout litige non résolu = pénalité</td>
+</tr>
+</tbody>
+</table>
+<h3>1.5.2 Niveaux de Confiance</h3>
+<table>
+<thead>
+<tr>
+<th>Niveau</th>
+<th>Score</th>
+<th>Badge</th>
+<th>Avantages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bronze</strong></td>
+<td>0-39</td>
+<td>🥉 Aucun</td>
+<td>Matching limité, garanties réduites</td>
+</tr>
+<tr>
+<td><strong>Argent</strong></td>
+<td>40-69</td>
+<td>🥈 Vérifié</td>
+<td>Matching prioritaire, accès COD domestique</td>
+</tr>
+<tr>
+<td><strong>Or</strong></td>
+<td>70-89</td>
+<td>🥇 Fiable</td>
+<td>Priorité maximale, badge visible, assurance préférentielle</td>
+</tr>
+<tr>
+<td><strong>Platine</strong></td>
+<td>90-100</td>
+<td>💎 Ambassadeur</td>
+<td>Fee réduite (7% au lieu de 10%), support dédié, programme de parrainage premium</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 class="part-title" id="partie-2-architecture-technique-amp-stack">PARTIE 2 : Architecture Technique &amp; Stack</h1>
+<h2 id="21-architecture-systeme-globale">2.1 Architecture Système Globale</h2>
+<div class="mermaid">graph TB
+    subgraph &quot;CLIENTS&quot;
+        MOBILE_IOS[iOS App&lt;br/&gt;React Native]
+        MOBILE_ANDROID[Android App&lt;br/&gt;React Native]
+        WEB_ADMIN[Admin Dashboard&lt;br/&gt;Next.js]
+    end
+
+    subgraph &quot;API GATEWAY&quot;
+        KONG[Kong Gateway&lt;br/&gt;Rate Limiting, Auth, Routing]
+    end
+
+    subgraph &quot;MICROSERVICES&quot;
+        AUTH[Auth Service&lt;br/&gt;JWT + OAuth2.0]
+        USER[User Service&lt;br/&gt;KYC, Profiles, Scoring]
+        MATCHING[Matching Service&lt;br/&gt;GeoQuery, Scoring Algo]
+        TRIP[Trip Service&lt;br/&gt;CRUD Trips, Tracking]
+        PARCEL[Parcel Service&lt;br/&gt;CRUD Parcels, Photos]
+        ESCROW[Escrow Service&lt;br/&gt;Payment Orchestration]
+        CHAT[Chat Service&lt;br/&gt;WebSocket, Encryption]
+        NOTIF[Notification Service&lt;br/&gt;Push, SMS, Email]
+        DOUANE[Customs Service&lt;br/&gt;Declaration, Compliance]
+        DISPUTE[Dispute Service&lt;br/&gt;Mediation, Resolution]
+        ANALYTICS[Analytics Service&lt;br/&gt;Metrics, BI]
+    end
+
+    subgraph &quot;EVENT BUS&quot;
+        KAFKA[Apache Kafka&lt;br/&gt;Event Streaming]
+    end
+
+    subgraph &quot;DATA LAYER&quot;
+        POSTGRES[(PostgreSQL 16&lt;br/&gt;Primary DB + PostGIS)]
+        REDIS[(Redis 7&lt;br/&gt;Cache + Geo Queries)]
+        MONGO[(MongoDB&lt;br/&gt;Chat Messages + Logs)]
+        S3[Amazon S3&lt;br/&gt;Photos + Documents]
+        ELASTIC[Elasticsearch&lt;br/&gt;Search + Analytics)]
+    end
+
+    subgraph &quot;EXTERNAL SERVICES&quot;
+        KYC_PROVIDER[Onfido / Sumsub&lt;br/&gt;KYC]
+        PAYMENT_STRIPE[Stripe&lt;br/&gt;EUR Payments]
+        PAYMENT_LEMON[LemonWay&lt;br/&gt;Escrow Wallets]
+        SMS_TWILIO[Twilio / SMSLocal&lt;br/&gt;SMS Gateway]
+        MAPS_MAPBOX[Mapbox / Google Maps&lt;br/&gt;Geocoding]
+        PUSH_FCM[FCM / APNS&lt;br/&gt;Push Notifications]
+        INSURANCE[AXA / AssurTech&lt;br/&gt;Insurance API]
+    end
+
+    MOBILE_IOS --&gt; KONG
+    MOBILE_ANDROID --&gt; KONG
+    WEB_ADMIN --&gt; KONG
+
+    KONG --&gt; AUTH
+    KONG --&gt; USER
+    KONG --&gt; MATCHING
+    KONG --&gt; TRIP
+    KONG --&gt; PARCEL
+    KONG --&gt; ESCROW
+    KONG --&gt; CHAT
+    KONG --&gt; NOTIF
+    KONG --&gt; DOUANE
+    KONG --&gt; DISPUTE
+    KONG --&gt; ANALYTICS
+
+    AUTH --&gt; KAFKA
+    USER --&gt; KAFKA
+    MATCHING --&gt; KAFKA
+    TRIP --&gt; KAFKA
+    PARCEL --&gt; KAFKA
+    ESCROW --&gt; KAFKA
+    CHAT --&gt; KAFKA
+    NOTIF --&gt; KAFKA
+
+    AUTH --&gt; POSTGRES
+    AUTH --&gt; REDIS
+    USER --&gt; POSTGRES
+    USER --&gt; MONGO
+    MATCHING --&gt; POSTGIS_SOLVED[PostGIS&lt;br/&gt;Geo Extensions]
+    MATCHING --&gt; REDIS
+    TRIP --&gt; POSTGRES
+    TRIP --&gt; REDIS
+    PARCEL --&gt; POSTGRES
+    PARCEL --&gt; S3
+    CHAT --&gt; MONGO
+    CHAT --&gt; REDIS
+    NOTIF --&gt; REDIS
+    DOUANE --&gt; POSTGRES
+    DISPUTE --&gt; POSTGRES
+    ANALYTICS --&gt; ELASTIC
+
+    USER --&gt; KYC_PROVIDER
+    ESCROW --&gt; PAYMENT_STRIPE
+    ESCROW --&gt; PAYMENT_LEMON
+    NOTIF --&gt; SMS_TWILIO
+    NOTIF --&gt; PUSH_FCM
+    MATCHING --&gt; MAPS_MAPBOX
+    ESCROW --&gt; INSURANCE</div>
+<h2 id="22-schema-de-base-de-donnees-prisma">2.2 Schéma de Base de Données (Prisma)</h2>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>// ============== ENUMS ==============
+
+enum UserRole {
+  SENDER
+  TRAVELER
+  BOTH
+  ADMIN
+  AGENT
+}
+
+enum KYCLevel {
+  NONE
+  BASIC       // Phone + Email verified
+  ENHANCED    // ID document + Selfie
+  FULL        // Enhanced + Proof of address + Video call
+}
+
+enum TripMode {
+  FLIGHT
+  FERRY
+  BUS
+  CAR
+  TRUCK
+  TRAIN
+}
+
+enum TripStatus {
+  DRAFT
+  PUBLISHED
+  MATCHING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ParcelStatus {
+  DRAFT
+  PENDING_MATCH
+  MATCHED
+  AWAITING_PICKUP
+  IN_TRANSIT
+  CUSTOMS_CHECK
+  AWAITING_DELIVERY
+  DELIVERED
+  DISPUTED
+  CANCELLED
+  SEIZED
+}
+
+enum EscrowStatus {
+  FUNDED
+  LOCKED
+  PARTIAL_RELEASE
+  RELEASED
+  REFUNDED_SENDER
+  REFUNDED_INSURANCE
+}
+
+enum DisputeStatus {
+  OPENED
+  MEDIATING
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum DisputeReason {
+  PARCEL_NOT_DELIVERED
+  PARCEL_DAMAGED
+  PARCEL_STOLEN
+  CUSTOMS_SEIZURE
+  TRAVELER_NO_SHOW
+  SENDER_NO_SHOW
+  FRAUD_ATTEMPT
+  OTHER
+}
+
+enum Currency {
+  EUR
+  DZD
+  USD
+  CAD
+  GBP
+}
+
+enum PaymentMethod {
+  CREDIT_CARD_STRIPE
+  LEMONWAY_WALLET
+  CASH_ON_DELIVERY
+  BANK_TRANSFER
+  CCP_TRANSFER
+  BARIDI_MOB
+}
+
+enum AddressLevel {
+  OFFICIAL_GEOCODE
+  PIN_DROP
+  POI_BASED
+  LIVE_LOCATION
+  HUMAN_RELAY
+}
+
+// ============== MODELS ==============
+
+model User {
+  id              String     @id @default(uuid())
+  email           String     @unique
+  phone           String     @unique // Format: +213XXXXXXXXX ou +33XXXXXXXXX
+  passwordHash    String     @db.VarChar(255)
+  firstName       String     @db.VarChar(100)
+  lastName        String     @db.VarChar(100)
+  displayName     String?    @db.VarChar(100)
+  avatarUrl       String?    // S3 URL
+  role            UserRole   @default(BOTH)
+  kycLevel        KYCLevel   @default(NONE)
+  kycVerifiedAt   DateTime?
+  kycDocumentUrl  String?    // S3 URL
+
+  // Trust Scoring
+  trustScore      Int        @default(0)     // 0-100
+  completedTrips  Int        @default(0)
+  completedDeliveries Int    @default(0)
+  successRate     Float      @default(0)      // 0.0 - 1.0
+  averageRating   Float      @default(0)      // 0.0 - 5.0
+  trustBadge      String?    // &quot;BRONZE&quot;, &quot;SILVER&quot;, &quot;GOLD&quot;, &quot;PLATINUM&quot;
+  isBanned        Boolean    @default(false)
+  bannedAt        DateTime?
+  bannedReason    String?
+
+  // Preferences
+  blockedCategories String[] // [&quot;Drones&quot;, &quot;Weapons&quot;, ...]
+  maxDetourKm      Int?     // Acceptable detour for matching
+  preferredCurrency Currency @default(EUR)
+
+  // Meta
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  lastLoginAt     DateTime?
+  deviceTokens    String[]   // FCM/APNS tokens
+
+  // Relations
+  sentParcels     Parcel[]   @relation(&quot;Sender&quot;)
+  travelerTrips   Trip[]     @relation(&quot;Traveler&quot;)
+  ratingsGiven    Rating[]
+  ratingsReceived Rating[]
+  disputes        Dispute[]
+  escrowAccounts  EscrowLedger[]
+  notifications   Notification[]
+}
+
+model Trip {
+  id              String       @id @default(uuid())
+  travelerId      String
+  traveler        User         @relation(&quot;Traveler&quot;, fields: [travelerId], references: [id])
+
+  // Route
+  origin          Json         // CrowdShippingAddress format
+  destination     Json         // CrowdShippingAddress format
+  routePolyline   String?      // Encoded polyline for map display
+  totalDistanceKm  Float
+  estimatedDurationHours Float?
+
+  // Schedule
+  departureTime   DateTime
+  estimatedArrival DateTime?
+  actualArrival   DateTime?
+  mode            TripMode
+  isFlexPlus12h   Boolean      @default(false) // Ferry flexibility
+
+  // Capacity
+  vehicleType     String?      // &quot;Voiture&quot;, &quot;Utilitaire&quot;, &quot;Camion&quot;, &quot;À pied&quot;
+  maxWeightKg     Float
+  maxVolumeM3     Float?
+  currentWeightKg Float        @default(0) // Updated as parcels are assigned
+  maxDetourKm     Int          @default(50)
+
+  // Pricing
+  pricePerKg      Float?       // EUR or DZD
+  priceCurrency   Currency     @default(EUR)
+  isNegotiable    Boolean      @default(true)
+  minPricePerKg   Float?       // Minimum acceptable price
+
+  // Status
+  status          TripStatus   @default(DRAFT)
+  publishedAt     DateTime?
+
+  // Metadata
+  notes           String?      @db.Text
+  hasCooler       Boolean      @default(false) // For cold chain parcels
+  acceptsFragile  Boolean      @default(false)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  parcels         Parcel[]     @relation(&quot;Trip&quot;)
+  checkpoints     TripCheckpoint[]
+}
+
+model TripCheckpoint {
+  id              String    @id @default(uuid())
+  tripId          String
+  trip            Trip      @relation(fields: [tripId], references: [id])
+  type            String    @enum(&quot;PICKUP&quot;, &quot;DEPARTURE&quot;, &quot;TRANSIT&quot;, &quot;CUSTOMS&quot;, &quot;ARRIVAL&quot;, &quot;DELIVERY&quot;)
+  location        Json      // {lat, lng, address, timestamp}
+  notes           String?
+  photoUrl        String?   // S3
+  temperatureC    Float?    // For cold chain
+  createdAt       DateTime  @default(now())
+}
+
+model Parcel {
+  id              String       @id @default(uuid())
+  senderId        String
+  sender          User         @relation(&quot;Sender&quot;, fields: [senderId], references: [id])
+
+  // Content
+  description     String       @db.Text
+  category        String       // &quot;Electronics&quot;, &quot;Clothing&quot;, &quot;Medicine&quot;, &quot;Documents&quot;, &quot;Food&quot;, &quot;Cosmetics&quot;, &quot;Other&quot;
+  subCategory     String?
+  weightKg        Float
+  dimensionsCm    Json         // {length, width, height}
+  estimatedValue  Decimal      @db.Decimal(12,2)
+  valueCurrency   Currency     @default(EUR)
+  photoUrls       String[]     // S3 URLs (max 5)
+  invoiceUrl      String?      // S3 URL (optional proof of purchase)
+
+  // Route
+  pickupAddress   Json         // CrowdShippingAddress
+  deliveryAddress Json         // CrowdShippingAddress
+  pickupNotes     String?      @db.Text
+  deliveryNotes   String?      @db.Text
+  deliveryPin     String?      @db.VarChar(6) // 6-digit PIN for delivery validation
+
+  // Urgency
+  urgencyLevel    String       @enum(&quot;LOW&quot;, &quot;MEDIUM&quot;, &quot;HIGH&quot;, &quot;CRITICAL&quot;)
+  urgencyDeadline DateTime?
+
+  // Insurance
+  hasInsurance    Boolean      @default(false)
+  insurancePremium Decimal?    @db.Decimal(10,2)
+  coverageAmount  Decimal?     @db.Decimal(12,2)
+
+  // Pricing
+  offeredPrice    Decimal?     @db.Decimal(10,2) // Price sender is willing to pay
+  priceCurrency   Currency     @default(EUR)
+
+  // Status
+  status          ParcelStatus @default(DRAFT)
+  matchedTripId   String?      // FK to Trip (nullable until matched)
+  matchedAt       DateTime?
+
+  // Customs
+  customsCategory String?      // Douane category code
+  requiresDeclaration Boolean   @default(false)
+  customsDeclarationId String?
+
+  // Recipient (if not the sender)
+  recipientName   String?
+  recipientPhone  String?      // Format: +213XXXXXXXXX
+  recipientHasApp Boolean      @default(false)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  trip            Trip?        @relation(&quot;Trip&quot;, fields: [matchedTripId], references: [id])
+  escrow          EscrowLedger?
+  dispute         Dispute?
+  ratings         Rating[]
+  customsLog      CustomsClearanceLog?
+}
+
+model EscrowLedger {
+  id              String       @id @default(uuid())
+  parcelId        String       @unique
+  parcel          Parcel       @relation(fields: [parcelId], references: [id])
+  senderId        String
+  travelerId      String
+  status          EscrowStatus
+
+  // Amounts
+  totalAmount     Decimal      @db.Decimal(12,2)
+  currency        Currency
+  platformFee     Decimal      @db.Decimal(10,2)  // 10% default
+  insuranceFee    Decimal?     @db.Decimal(10,2)
+  travelerPayout  Decimal      @db.Decimal(10,2)  // Amount traveler receives
+
+  // Payment flow
+  fundingMethod   PaymentMethod
+  payoutMethod    PaymentMethod?
+
+  // Timestamps
+  fundedAt        DateTime?
+  lockedAt        DateTime?
+  releasedAt      DateTime?
+  refundedAt      DateTime?
+
+  // External references
+  stripePaymentIntentId String?
+  lemonwayWalletId     String?
+  lemonwayTransactionId String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Dispute {
+  id              String        @id @default(uuid())
+  parcelId        String        @unique
+  parcel          Parcel        @relation(fields: [parcelId], references: [id])
+  openedBy        String        // userId who opened the dispute
+  openedById      User          @relation(fields: [openedById], references: [id])
+  reason          DisputeReason
+  description     String        @db.Text
+
+  // Evidence
+  evidenceUrls    String[]      // S3 URLs (photos, videos, screenshots)
+  chatTranscript  String?       @db.Text // In-app chat export
+
+  // Resolution
+  status          DisputeStatus @default(OPENED)
+  resolution      String?       @db.Text
+  resolvedBy      String?       // Admin userId
+  resolvedAt      DateTime?
+  refundAmount    Decimal?      @db.Decimal(10,2)
+  insuranceClaim  Boolean       @default(false)
+
+  // SLA
+  mustResolveBy   DateTime      // 72h from opening
+  escalatedAt     DateTime?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model CustomsClearanceLog {
+  id              String    @id @default(uuid())
+  parcelId        String    @unique
+  parcel          Parcel    @relation(fields: [parcelId], references: [id])
+  checkpoint      String    @enum(&quot;DEPARTURE_COUNTRY&quot;, &quot;ALGERIAN_BORDER&quot;, &quot;SEIZED&quot;, &quot;CLEARED&quot;, &quot;FINE_PAID&quot;)
+
+  // Declaration details
+  declaredCategory String
+  declaredValue    Decimal   @db.Decimal(12,2)
+  declaredCurrency Currency
+  franchiseApplied Boolean    @default(false)
+
+  // If seized
+  seizedBy         String?   // &quot;Douanes Algériennes - Aéroport Houari Boumédiène&quot;
+  seizureReason    String?   @db.Text
+  seizureDate      DateTime?
+  fineAmount       Decimal?  @db.Decimal(10,2)
+
+  // Traveler notes
+  travelerNotes    String?   @db.Text
+
+  createdAt        DateTime  @default(now())
+}
+
+model Rating {
+  id              String    @id @default(uuid())
+  parcelId        String
+  parcel          Parcel    @relation(fields: [parcelId], references: [id])
+  fromUserId      String
+  toUserId        String
+  score           Int       // 1-5
+  comment         String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  @@unique([fromUserId, toUserId, parcelId])
+}
+
+model Notification {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  type            String    // &quot;MATCH_FOUND&quot;, &quot;PARCEL_PICKED_UP&quot;, &quot;IN_TRANSIT&quot;, etc.
+  title           String
+  body            String    @db.Text
+  data            Json?     // Additional payload
+  isRead          Boolean   @default(false)
+  sentVia         String[]  // [&quot;push&quot;, &quot;sms&quot;, &quot;email&quot;, &quot;in_app&quot;]
+  createdAt       DateTime  @default(now())
+}
+
+// ============== INDEXES ==============
+
+// Geo queries for matching
+model GeoIndex {
+  id          String    @id @default(uuid())
+  entityType  String    @enum(&quot;trip_origin&quot;, &quot;trip_destination&quot;, &quot;parcel_pickup&quot;, &quot;parcel_delivery&quot;)
+  entityId    String
+  location    Json      // {lat, lng}
+  updatedAt   DateTime  @updatedAt
+  @@index([entityType, location], name: &quot;geo_spatial_idx&quot;)
+}
+</code></pre></div>
+<h2 id="23-stack-technologique-recommandee">2.3 Stack Technologique Recommandée</h2>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Technologie</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mobile Frontend</strong></td>
+<td>React Native + Expo (SDK 52+)</td>
+<td>Un codebase iOS + Android, large communauté, over-the-air updates</td>
+</tr>
+<tr>
+<td><strong>Web Admin</strong></td>
+<td>Next.js 15 (App Router)</td>
+<td>SSR, API routes intégrées, excellent DX</td>
+</tr>
+<tr>
+<td><strong>UI Library (Mobile)</strong></td>
+<td>NativeWind v4 (Tailwind pour RN)</td>
+<td>Consistance visuelle, rapidité de dev</td>
+</tr>
+<tr>
+<td><strong>UI Library (Admin)</strong></td>
+<td>shadcn/ui + Radix</td>
+<td>Accessibilité native, composants non-opinionnés</td>
+</tr>
+<tr>
+<td><strong>API Gateway</strong></td>
+<td>Kong (open-source)</td>
+<td>Rate limiting, auth JWT, plugins</td>
+</tr>
+<tr>
+<td><strong>Backend - Core</strong></td>
+<td>Node.js (TypeScript) + Fastify</td>
+<td>Performance, typage fort, écosystème riche</td>
+</tr>
+<tr>
+<td><strong>Backend - Matching</strong></td>
+<td>Rust (Actix-web) ou Go</td>
+<td>Calcul géospatial critique, latence &lt; 50ms</td>
+</tr>
+<tr>
+<td><strong>Backend - Chat</strong></td>
+<td>Node.js + Socket.IO</td>
+<td>WebSocket temps réel</td>
+</tr>
+<tr>
+<td><strong>Event Bus</strong></td>
+<td>Apache Kafka (Confluent Cloud)</td>
+<td>Event sourcing, replay, scalabilité</td>
+</tr>
+<tr>
+<td><strong>Primary Database</strong></td>
+<td>PostgreSQL 16 + PostGIS</td>
+<td>ACID, extensions géospatiales natives</td>
+</tr>
+<tr>
+<td><strong>Cache / Geo</strong></td>
+<td>Redis 7 (Redis Stack)</td>
+<td>Cache, géo-requêtes (GEOADD/GEORADIUS), pub/sub</td>
+</tr>
+<tr>
+<td><strong>Chat Storage</strong></td>
+<td>MongoDB Atlas</td>
+<td>Flexibilité schéma messages, sharding natif</td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td>Elasticsearch 8</td>
+<td>Recherche full-text, analytics, aggregations</td>
+</tr>
+<tr>
+<td><strong>Object Storage</strong></td>
+<td>AWS S3 (ou Wasabi pour le coût)</td>
+<td>Photos, documents, factures</td>
+</tr>
+<tr>
+<td><strong>CDN</strong></td>
+<td>CloudFront</td>
+<td>Distribution images/carte mondiale</td>
+</tr>
+<tr>
+<td><strong>KYC</strong></td>
+<td>Sumsub (préféré) ou Onfido</td>
+<td>Support CNI/Passport algérien, OCR arabe/français</td>
+</tr>
+<tr>
+<td><strong>Maps / Geocoding</strong></td>
+<td>Mapbox GL JS + Geocoding API</td>
+<td>Offline maps support, coût inférieur à Google, couverture Algérie correcte</td>
+</tr>
+<tr>
+<td><strong>SMS Gateway</strong></td>
+<td>Twilio (international) + Mobilis SMS API (local)</td>
+<td>International = Twilio, local = API opérateur algérien</td>
+</tr>
+<tr>
+<td><strong>Payment (EUR)</strong></td>
+<td>Stripe (carte) + LemonWay (wallet/escrow)</td>
+<td>Stripe = UX CB, LemonWay = conformité PSD2, KYC bancaire</td>
+</tr>
+<tr>
+<td><strong>Payment (DZD)</strong></td>
+<td>BaridiMob (Algérie Post) + SATIM/CIB (si possible)</td>
+<td>CCP/Baridimob = 90% des comptes algériens</td>
+</tr>
+<tr>
+<td><strong>Push Notifications</strong></td>
+<td>Firebase Cloud Messaging (FCM)</td>
+<td>Gratuit, fiable, multi-plateforme</td>
+</tr>
+<tr>
+<td><strong>Email</strong></td>
+<td>AWS SES</td>
+<td>Transactionnel, coût bas</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions + EAS (Expo) + Docker</td>
+<td>Pipeline automatisé, déploiement continu</td>
+</tr>
+<tr>
+<td><strong>Monitoring</strong></td>
+<td>Datadog (ou Grafana + Prometheus)</td>
+<td>APM, logs, métriques temps réel</td>
+</tr>
+<tr>
+<td><strong>Error Tracking</strong></td>
+<td>Sentry</td>
+<td>Stack traces, breadcrumbs, alertes</td>
+</tr>
+<tr>
+<td><strong>Infrastructure</strong></td>
+<td>AWS (eu-west-3 Paris) + OVHcloud (Algérie CDN)</td>
+<td>Paris = faible latence Europe, OVH = POP Algérie</td>
+</tr>
+</tbody>
+</table>
+<h2 id="24-securite-amp-anti-fraude">2.4 Sécurité &amp; Anti-Fraude</h2>
+<h3>2.4.1 Vecteurs d'Attaque et Contre-Mesures</h3>
+<table>
+<thead>
+<tr>
+<th>Attaque</th>
+<th>Description</th>
+<th>Contre-Mesure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Vol de colis</strong></td>
+<td>Traveler disparaît avec le colis</td>
+<td>Escrow bloqué, KYC complet obligatoire, garantie dépôt (200 EUR min pour Travelers actifs), suivi GPS in-app</td>
+</tr>
+<tr>
+<td><strong>Fausses annonces</strong></td>
+<td>Sender crée des envois fictifs pour blanchir de l'argent</td>
+<td>Limite mensuelle de valeur par sender, verification factures, pattern detection ML (plusieurs envois identiques)</td>
+</tr>
+<tr>
+<td><strong>Blanchiment d'argent</strong></td>
+<td>Utilisation de l'escrow pour mouvements d'argent illégaux</td>
+<td>KYC renforcé (Sumsub), monitoring transactions &gt; 1,000 EUR, reporting TRACFIN si seuil dépassé, limite de transactions par utilisateur</td>
+</tr>
+<tr>
+<td><strong>Ghost travelers</strong></td>
+<td>Travelers fantômes qui acceptent mais ne se présentent pas</td>
+<td>Système de dépôt/garantie, pénalités pour no-show (suspension progressive), confirmation GPS au point de pickup</td>
+</tr>
+<tr>
+<td><strong>Identity theft</strong></td>
+<td>Utilisation de faux documents KYC</td>
+<td>Liveness detection (video selfie), cross-check bases de données, détection deepfake</td>
+</tr>
+<tr>
+<td><strong>Man-in-the-middle</strong></td>
+<td>Interception de l'OTP/PIN</td>
+<td>OTP à usage unique, TTL de 5 minutes, generation server-side uniquement, pas de transmission par canal non-sécurisé</td>
+</tr>
+<tr>
+<td><strong>Colis interdits</strong></td>
+<td>Envoi de produits prohibés (drogues, armes, drones)</td>
+<td>AI classification des images de colis, base de données produits interdits (douane algérienne), blocage programmatique par catégorie</td>
+</tr>
+</tbody>
+</table>
+<h3>2.4.2 Architecture de Sécurité</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>┌─────────────────────────────────────────────────────────────────┐
+│                    SECURITY LAYERS                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  LAYER 1 : TRANSPORT SECURITY                                  │
+│  ├─ TLS 1.3 sur toutes les communications                      │
+│  ├─ Certificate pinning sur l&#39;app mobile                      │
+│  ├─ VPN interne pour les services backend (mTLS)                │
+│  └─ Rate limiting : 100 req/min par IP, 30 req/min par user    │
+│                                                                 │
+│  LAYER 2 : AUTHENTICATION &amp; AUTHORIZATION                      │
+│  ├─ JWT (access 15 min + refresh 7 days)                      │
+│  ├─ OAuth2.0 + PKCE pour le login mobile                        │
+│  ├─ MFA optionnel (TOTP via Google Authenticator)               │
+│  ├─ RBAC strict : SENDER, TRAVELER, ADMIN, AGENT                │
+│  └─ Device fingerprinting pour détecter les comptes multiples   │
+│                                                                 │
+│  LAYER 3 : DATA PROTECTION                                      │
+│  ├─ Chiffrement AES-256 au repos (PostgreSQL pgcrypto)          │
+│  ├─ Chiffrement E2E des messages chat (Signal Protocol)         │
+│  ├─ PII masking dans les logs (GDPR/loi algérienne 18-05)       │
+│  ├─ Rétention : données effaçables après 3 ans (sauf legal)    │
+│  └- Backup chiffré cross-region (Paris + Frankfurt)            │
+│                                                                 │
+│  LAYER 4 : ANTI-FRAUD ENGINE                                    │
+│  ├─ Modèle ML (XGBoost) pour scoring de risque en temps réel     │
+│  ├─ Signaux : device fingerprint, IP géoloc, comportement chat  │
+│  ├─ Règles statiques : max 5 envois/jour, max 3,000 EUR/mois   │
+│  ├─ Liste noire partagée (consortium fraud)                     │
+│  └─ Alertes automatiques au compliance team                     │
+│                                                                 │
+│  LAYER 5 : PHYSICAL SECURITY                                    │
+│  ├- OTP à usage unique (6 chiffres, TTL 5 min)                 │
+│  ├- QR code signé (HMAC-SHA256) pour validation remise          │
+│  ├- Photo obligatoire à pickup + delivery (horodatée, geo)    │
+│  └- Enregistrement vidéo optionnel de la remise                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3>2.4.3 Anti-Fraud ML Model Features</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code><span style="color: #7F848E"># Features utilisées par le modèle de scoring anti-fraude</span>
+
+<span style="color: #E06C75">FRAUD_FEATURES</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">{</span>
+    <span style="color: #7F848E"># Comportementaux</span>
+    <span style="color: #98C379">&quot;sender_parcels_last_7d&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Nombre d&#39;envois créés par le sender dans les 7 derniers jours&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;sender_total_value_last_30d&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Valeur cumulée des envois (EUR) sur 30 jours&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;sender_avg_parcel_value&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Valeur moyenne par envoi&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;sender_identical_parcels&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Nombre d&#39;envois avec description/poids identiques&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;sender_cancelled_rate&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Taux d&#39;annulation du sender&quot;</span><span style="color: #ABB2BF">,</span>
+
+    <span style="color: #7F848E"># Voyageur</span>
+    <span style="color: #98C379">&quot;traveler_no_show_rate&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Taux de no-show du voyageur&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;traveler_dispute_rate&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Taux de litiges du voyageur&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;traveler_new_account_flag&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Compte créé &lt; 7 jours&quot;</span><span style="color: #ABB2BF">,</span>
+
+    <span style="color: #7F848E"># Interaction</span>
+    <span style="color: #98C379">&quot;chat_messages_count&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Nombre de messages échangés avant acceptation&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;time_to_accept_hours&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Temps entre notification et acceptation (trop rapide = suspect)&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;off_platform_contact&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Détection de numéros de téléphone dans le chat (hélas...)&quot;</span><span style="color: #ABB2BF">,</span>
+
+    <span style="color: #7F848E"># Paiement</span>
+    <span style="color: #98C379">&quot;payment_method_mismatch&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Devise du paiement ≠ devise du voyageur&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;multiple_cards_same_sender&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Plusieurs cartes utilisées par le même sender&quot;</span><span style="color: #ABB2BF">,</span>
+
+    <span style="color: #7F848E"># Colis</span>
+    <span style="color: #98C379">&quot;category_risk_score&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Score de risque par catégorie (électronique=0.7, docs=0.1)&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;value_to_weight_ratio&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Ratio valeur/poids (anomalie si &gt; 500 EUR/kg)&quot;</span><span style="color: #ABB2BF">,</span>
+    <span style="color: #98C379">&quot;declared_vs_category_value&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Écart entre valeur déclarée et valeur typique de la catégorie&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">}</span>
+
+<span style="color: #7F848E"># Output : score entre 0 (sûr) et 1 (fraude probable)</span>
+<span style="color: #7F848E"># Seuil d&#39;alerte : &gt; 0.7 → blockage + review manuel</span>
+<span style="color: #7F848E"># Seuil de warning : &gt; 0.5 → vérification supplémentaire demandée</span>
+</code></pre></div>
+<hr />
+<h1 class="part-title" id="partie-3-ingenierie-financiere-amp-le-probleme-du-square-fintech">PARTIE 3 : Ingénierie Financière &amp; Le "Problème du Square" (Fintech)</h1>
+<h2 id="31-le-probleme-fondamental-le-change-algerien">3.1 Le Problème Fondamental : Le Change Algérien</h2>
+<p>Le dinar algérien (DZD) est <strong>inconvertible</strong> sur le marché international. Le taux officiel (banque d'Algérie) est artificiellement maintenu, tandis que le <strong>marché parallèle</strong> offre le taux réel. Conséquence :</p>
+<table>
+<thead>
+<tr>
+<th>Indicateur</th>
+<th>Valeur (estimation Août 2026)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Taux officiel</td>
+<td>1 EUR ≈ 134 DZD</td>
+</tr>
+<tr>
+<td>Taux parallèle</td>
+<td>1 EUR ≈ 255-265 DZD</td>
+</tr>
+<tr>
+<td>Écart</td>
+<td>~90-95% (quasi double)</td>
+</tr>
+</tbody>
+</table>
+<p>Ce différentiel est le <strong>cœur du problème</strong> : si un voyageur algérien accepte d'être payé en DZD au taux officiel via un virement bancaire, il perd ~50% de la valeur réelle. L'app doit naviguer cette réalité sans devenir un outil de change illégal.</p>
+<h2 id="32-architecture-de-paiement-hybride">3.2 Architecture de Paiement Hybride</h2>
+<div class="mermaid">graph TD
+    subgraph &quot;SCÉNARIO A : Sender paie en EUR, Traveler veut EUR (cash Paris)&quot;
+        S1[Sender : carte CB française&lt;br/&gt;Stripe PaymentIntent] --&gt; E1[Escrow EUR&lt;br/&gt;LemonWay Wallet]
+        E1 --&gt;|&quot;Colis livré ✅&quot;| T1[Traveler : retrait cash EUR&lt;br/&gt;Point de retrait Paris&lt;br/&gt;ou virement SEPA]
+    end
+
+    subgraph &quot;SCÉNARIO B : Sender paie en EUR, Traveler veut DZD (compte Algérie)&quot;
+        S2[Sender : carte CB française&lt;br/&gt;Stripe PaymentIntent] --&gt; E2[Escrow EUR&lt;br/&gt;LemonWay Wallet]
+        E2 --&gt;|&quot;Colis livré ✅&quot;| C[Conversion interne&lt;br/&gt;au taux CrowdShipping&lt;br/&gt;1 EUR = 230 DZD&lt;br/&gt;pas le taux officiel, pas le taux noir&lt;br/&gt;taux &quot;juste&quot; intermédiaire]
+        C --&gt; T2[Traveler : DZD via BaridiMob&lt;br/&gt;ou virement CCP&lt;br/&gt;ou cash via agent]
+    end
+
+    subgraph &quot;SCÉNARIO C : Paiement en DZD domestique (COD)&quot;
+        S3[Sender : DZD via BaridiMob&lt;br/&gt;ou cash via agent] --&gt; E3[Escrow DZD&lt;br/&gt;Wallet BaridiMob]
+        E3 --&gt;|&quot;Colis livré ✅&quot;| T3[Traveler : DZD&lt;br/&gt;via BaridiMob ou cash]
+    end</div>
+<h2 id="33-flux-dargent-escrow-etape-par-etape">3.3 Flux d'Argent Escrow — Étape par Étape</h2>
+<h3>Scénario A : EUR → EUR (cash Paris)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>1. SENDER PAIE
+   ├─ Karim (Paris) entre sa carte CB (Visa/Mastercard française)
+   ├─ Stripe crée un PaymentIntent : montant = tarif voyageur + assurance + fee
+   ├─ 3D Secure activé (obligatoire PSD2)
+   ├─ Paiement validé → fonds sur le compte Stripe Connect de CrowdShipping
+   └─ Événement : escrow.status = FUNDED
+
+2. ESCROW BLOQUÉ
+   ├─ Appel LemonWay API : création d&#39;un wallet &quot;séquestre&quot; lié au colis
+   ├─ Fonds transférés de Stripe → LemonWay wallet
+   ├─ Statut : escrow.status = LOCKED
+   ├─ Aucun retrait possible tant que parcel.status ≠ DELIVERED
+   └─ Si annulation avant pickup → remboursement automatique au sender
+
+3. COLIS LIVRÉ
+   ├─ Traveler valide la remise via OTP/PIN
+   ├─ parcel.status = DELIVERED
+   └─ Déclencheur : escrow.status → RELEASED
+
+4. DÉBLOCAGE
+   ├─ LemonWay API : release funds du wallet séquestre
+   ├─ Calcul automatique :
+   │   ├─ Fee plateforme (10%) : déduite
+   │   ├─ Assurance (si active) : déduite
+   │   └─ Net au traveler : montant - fee - assurance
+   ├─ Traveler peut choisir :
+   │   ├─ Retrait cash EUR : via un point de retrait partenaire à Paris
+   │   │   (ex: Bureau de Poste, Western Agent, bureau CrowdShipping)
+   │   ├─ Virement SEPA : vers le compte bancaire du traveler
+   │   │   (J+1 ou J+2 selon banque)
+   │   └- Conservation dans le wallet LemonWay pour futurs envois
+   └─ Événement : escrow.status = RELEASED
+</code></pre></div>
+<h3>Scénario B : EUR → DZD (compte Algérie)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>1. SENDER PAIE (même que Scénario A)
+   ├─ Karim paie 30 EUR par CB → Stripe → Escrow LemonWay
+   └─ escrow.status = LOCKED
+
+2. COLIS LIVRÉ
+   ├─ OTP validé → parcel.status = DELIVERED
+   └─ Déclencheur : conversion EUR → DZD
+
+3. CONVERSION INTERNE
+   ├─ Taux CrowdShipping affiché au Traveler lors de l&#39;acceptation :
+   │   &quot;1 EUR = 230 DZD&quot; (taux personnalisé, mis à jour quotidiennement)
+   │   ├─ Ce taux est un compromis entre officiel (134) et parallèle (260)
+   │   ├─ Il est financièrement viable car CrowdShipping opère un spread
+   │   └─ **CRITICAL COMPLIANCE NOTE** : Ce spread N&#39;EST PAS une opération
+   │       de change. C&#39;est une commission de service perçue par CrowdShipping
+   │       pour la prestation de livraison. La facturation affiche :
+   │       &quot;Service de livraison : 30 EUR&quot; (facturé au sender)
+   │       &quot;Rémunération livraison : 6,900 DZD&quot; (versé au traveler)
+   │       Le spread est absorbé dans la fee plateforme augmentée (15% au lieu de 10%)
+   │       pour les conversions cross-devises.
+   │
+   ├─ Conversion exécutée côté LemonWay (wallet multi-devises)
+   ├─ 30 EUR → 6,900 DZD (30 × 230)
+   ├─ Fee plateforme (15% cross-devise) : 1,035 DZD
+   ├─ Net au traveler : 5,865 DZD
+   │
+   └─ REMISE AU VOYAGEUR
+       ├─ Option 1 : BaridiMob (Algérie Post mobile money)
+       │   ├─ API BaridiMob : transfert vers compte CCP du traveler
+       │   ├─ Délai : quasi instantané (si le réseau fonctionne)
+       │   └─ Coût API : ~50 DZD par transaction
+       ├─ Option 2 : Virement CCP (Centre Postal Algérien)
+       │   ├─ Fichier d&#39;ordre de virement envoyé à Algérie Post
+       │   ├─ Délai : 24-48h
+       │   └─ Coût : ~200 DZD par virement (déduit du net)
+       └─ Option 3 : Cash via Agent CrowdShipping
+           ├─ Le traveler se présente à un point relais agréé
+           ├─ L&#39;agent vérifie l&#39;OTP de retrait
+           ├─ L&#39;agent remet le cash en DZD
+           └─ L&#39;agent est remboursé par CrowdShipping en EUR (via LemonWay)
+</code></pre></div>
+<h3>Scénario C : Domestique DZD → DZD (Cash-on-Delivery)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>1. SENDER CRÉE L&#39;ENVOI EN DZD
+   ├─ Amina (Tizi Ouzou) déclare un prix de 2,000 DZD
+   ├─ Mode de paiement : COD (Cash on Delivery)
+   ├─ Amina dépose 2,000 DZD en cash à un agent CrowdShipping
+   │   (ou via BaridiMob / CCP virement)
+   ├─ Agent confirme réception → escrow.status = LOCKED
+   └─ L&#39;argent est physiquement conservé par l&#39;agent (ou en wallet BaridiMob)
+
+2. COLIS LIVRÉ + PAIEMENT CASH PAR DESTINATAIRE
+   ├─ Le traveler livre le colis au destinataire
+   ├─ Le destinataire paie 2,000 DZD en cash au traveler
+   ├─ Le traveler saisit &quot;Cash reçu : 2,000 DZD&quot; dans l&#39;app + photo des billets
+   └─ OTP validé → parcel.status = DELIVERED
+
+3. RÉCONCILIATION CASH
+   ├─ Le traveler doit remettre les 2,000 DZD à un agent CrowdShipping
+   │   sous 48h (sinon alerte + pénalité sur score de confiance)
+   ├─ Agent vérifie OTP de remise → escrow.status = RELEASED
+   ├─ Fee plateforme (10%) : 200 DZD déduite
+   └─ 1,800 DZD crédités au wallet du traveler (ou cash)
+
+4. SI LE DESTINATAIRE NE PAIE PAS
+   ├─ Problème : le traveler est là avec le colis, le destinataire n&#39;a pas l&#39;argent
+   ├─ Protocol : traveler coche &quot;Destinataire absent / pas de paiement&quot;
+   ├─ Système propose : a) Reporter la livraison, b) Ramener le colis
+   ├─ Si ramené : annulation, remboursement du sender
+   └─ Si reporté : relance automatique au destinataire + timer 24h
+</code></pre></div>
+<h2 id="34-modele-economique-amp-revenue">3.4 Modèle Économique &amp; Revenue</h2>
+<table>
+<thead>
+<tr>
+<th>Source de Revenue</th>
+<th>Montant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Commission plateforme</strong></td>
+<td>10% du tarif voyageur</td>
+<td>Sur chaque livraison réussie</td>
+</tr>
+<tr>
+<td><strong>Commission cross-devise</strong></td>
+<td>15% (au lieu de 10%)</td>
+<td>Spread absorbé pour EUR→DZD</td>
+</tr>
+<tr>
+<td><strong>Assurance</strong></td>
+<td>3% de la valeur déclarée</td>
+<td>Payé par le sender, reversé à l'assureur</td>
+</tr>
+<tr>
+<td><strong>Prime (visa express)</strong></td>
+<td>2 EUR par envoi</td>
+<td>Matching prioritaire + badge boosté</td>
+</tr>
+<tr>
+<td><strong>Frais d'annulation tardive</strong></td>
+<td>5 EUR</td>
+<td>Si annulation &lt; 24h avant le trajet</td>
+</tr>
+<tr>
+<td><strong>Publicité (futur)</strong></td>
+<td>N/A</td>
+<td>Bannières in-app pour les commerçants partenaires</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Unit Economics (MVP)</strong> :</p>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>Transaction type : Paris → Alger, colis moyen (3 kg, 25 EUR tarif)
+├─ Commission (10%) : 2.50 EUR
+├─ Revenue net par transaction : 2.50 EUR
+│
+Transaction type : Paris → Alger, colis moyen, conversion EUR→DZD
+├─ Commission cross-devise (15%) : 3.75 EUR
+├─ Revenue net par transaction : 3.75 EUR
+│
+Cible : 1,000 transactions/mois à 6 mois
+├─ Revenue mensuel estimé : 2,500 - 3,750 EUR
+├─ Burn rate mensuel (équipe 5 personnes) : ~15,000 EUR
+├─ Runway nécessaire : 18 mois = 270,000 EUR minimum seed
+</code></pre></div>
+<hr />
+<h1 class="part-title" id="partie-4-matrice-legale-douaniere-et-conformite-le-mur">PARTIE 4 : Matrice Légale, Douanière et Conformité (Le Mur)</h1>
+<h2 id="41-reglementation-douaniere-algerienne-regles-integrees-dans-lapp">4.1 Réglementation Douanière Algérienne — Règles Intégrées dans l'App</h2>
+<h3>4.1.1 La "Franchise Voyageur" (Articles 68-73 du Code des Douanes)</h3>
+<p>La franchise voyageur en Algérie permet à tout voyageur d'importer, pour ses besoins personnels, des effets et objets neufs dans les limites suivantes :</p>
+<table>
+<thead>
+<tr>
+<th>Catégorie</th>
+<th>Franchise</th>
+<th>Détails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Effets personnels</strong></td>
+<td>Exempté</td>
+<td>Vêtements, articles de toilette, bijoux personnels (quantité raisonnable)</td>
+</tr>
+<tr>
+<td><strong>Appareils électroniques</strong></td>
+<td><strong>1 appareil par type</strong></td>
+<td>Ex: 1 téléphone, 1 ordinateur portable, 1 tablette (pas de stock)</td>
+</tr>
+<tr>
+<td><strong>Cosmétiques &amp; parfums</strong></td>
+<td>5 produits max</td>
+<td>Quantités "personnelles" (pas de revente)</td>
+</tr>
+<tr>
+<td><strong>Médicaments</strong></td>
+<td>3 mois de traitement</td>
+<td><strong>Obligatoirement</strong> avec ordonnance traduite</td>
+</tr>
+<tr>
+<td><strong>Alimentation</strong></td>
+<td>5 kg max</td>
+<td>Produits du terroir, non périssables</td>
+</tr>
+<tr>
+<td><strong>Cadeaux</strong></td>
+<td>Valeur totale &lt; 10,000 DZD</td>
+<td>(~40 EUR au taux officiel, ~17 EUR au taux parallèle)</td>
+</tr>
+<tr>
+<td><strong>Total voyageur</strong></td>
+<td>Valeur totale &lt; 30,000 DZD</td>
+<td>(~120 EUR officiel, ~58 EUR parallèle) — seuil à ne <strong>pas</strong> dépasser sans déclaration</td>
+</tr>
+</tbody>
+</table>
+<h3>4.1.2 Produits Interdits (Liste Noire — Bloquage Programmatique)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>BLOCAGE AUTOMATIQUE PAR L&#39;APP (catégorie douanière) :
+
+❌ Drones (tous types, y compris jouets)
+❌ Armes et munitions (même airsoft)
+❌ Stupéfiants et substances psychotropes
+❌ Publications &quot;contraires à la morale islamique&quot; (interprétation large)
+❌ Alcool (sauf allowance officielle très limitée, non applicable via l&#39;app)
+❌ Produits israéliens (loi algérienne de boycott)
+❌ Matériel de communication non homologué (walkie-talkies non agréés)
+❌ Satellite phones et GPS hors-ligne de haute précision
+❌ Jeux de hasard et loteries
+❌ Contrefaçons (automatiquement détecté par AI image classification)
+❌ Animaux vivants (sans certificat vétérinaire — à bloquer sauf cas spécial)
+
+⚠️ WARNING (déclaration requise, pas de blocage) :
+⚠️ Appareils électroniques de valeur &gt; 300 EUR (déclaration spéciale)
+⚠️ Quantités de médicaments &gt; 3 mois de traitement
+⚠️ Matériel professionnel (outils, équipements)
+⚠️ Cosmétiques en grande quantité (&gt; 5 produits)
+⚠️ Pièces automobile
+</code></pre></div>
+<h3>4.1.3 Mécanisme de Blocage Programmatique</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code><span style="color: #7F848E"># Customs Compliance Engine — intégré dans Parcel Service</span>
+
+<span style="color: #E06C75">PROHIBITED_CATEGORIES</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">{</span>
+    <span style="color: #98C379">&quot;drones&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span><span style="color: #98C379">&quot;block&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">True</span><span style="color: #ABB2BF">,</span> <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Les drones sont interdits à l&#39;importation en Algérie (Arrêté ministériel 2015).&quot;</span><span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;weapons&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span><span style="color: #98C379">&quot;block&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">True</span><span style="color: #ABB2BF">,</span> <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Les armes et munitions sont strictement interdites.&quot;</span><span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;alcohol&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span><span style="color: #98C379">&quot;block&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">True</span><span style="color: #ABB2BF">,</span> <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;L&#39;alcool ne peut pas être transporté via CrowdShipping.&quot;</span><span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;narcotics&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span><span style="color: #98C379">&quot;block&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">True</span><span style="color: #ABB2BF">,</span> <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Les stupéfiants sont strictement interdits. Signalement automatique.&quot;</span><span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;counterfeit&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span><span style="color: #98C379">&quot;block&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">True</span><span style="color: #ABB2BF">,</span> <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Les contrefaçons sont interdites par le droit algérien et international.&quot;</span><span style="color: #ABB2BF">},</span>
+<span style="color: #ABB2BF">}</span>
+
+<span style="color: #E06C75">DECLARATION_REQUIRED</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">{</span>
+    <span style="color: #98C379">&quot;electronics&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span>
+        <span style="color: #98C379">&quot;threshold_value_eur&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #D19A66">300</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #98C379">&quot;max_quantity&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #D19A66">1</span><span style="color: #ABB2BF">,</span>  <span style="color: #7F848E"># Per device type</span>
+        <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Les appareils électroniques &gt; 300 EUR nécessitent une déclaration douanière spéciale.&quot;</span>
+    <span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;medicine&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span>
+        <span style="color: #98C379">&quot;max_months_treatment&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #D19A66">3</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #98C379">&quot;requires_prescription&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #E5C07B">True</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Les médicaments nécessitent une ordonnance (max 3 mois de traitement).&quot;</span>
+    <span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;cosmetics&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span>
+        <span style="color: #98C379">&quot;max_items&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #D19A66">5</span><span style="color: #ABB2BF">,</span>
+        <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Maximum 5 produits cosmétiques sous franchise voyageur.&quot;</span>
+    <span style="color: #ABB2BF">},</span>
+    <span style="color: #98C379">&quot;electronics_multiple&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #ABB2BF">{</span>
+        <span style="color: #98C379">&quot;max_total_electronics&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #D19A66">2</span><span style="color: #ABB2BF">,</span>  <span style="color: #7F848E"># Max 2 electronic devices total</span>
+        <span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">:</span> <span style="color: #98C379">&quot;Maximum 2 appareils électroniques par voyageur sous franchise.&quot;</span>
+    <span style="color: #ABB2BF">}</span>
+<span style="color: #ABB2BF">}</span>
+
+<span style="color: #C678DD">def</span> <span style="color: #61AFEF; font-weight: bold">validate_parcel_customs</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #ABB2BF">:</span> <span style="color: #E06C75">Parcel</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">-&gt;</span> <span style="color: #E06C75">CustomsValidationResult</span><span style="color: #ABB2BF">:</span>
+<span style="color: #ABB2BF">    </span><span style="color: #98C379">&quot;&quot;&quot;</span>
+<span style="color: #98C379">    Valide un colis contre les règles douanières algériennes.</span>
+<span style="color: #98C379">    Appelé à la création du colis ET au matching.</span>
+<span style="color: #98C379">    &quot;&quot;&quot;</span>
+    <span style="color: #E06C75">errors</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">[]</span>
+    <span style="color: #E06C75">warnings</span> <span style="color: #56B6C2">=</span> <span style="color: #ABB2BF">[]</span>
+
+    <span style="color: #7F848E"># 1. Check prohibited categories</span>
+    <span style="color: #C678DD">for</span> <span style="color: #E06C75">category</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">rule</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">PROHIBITED_CATEGORIES</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">items</span><span style="color: #ABB2BF">():</span>
+        <span style="color: #C678DD">if</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">lower</span><span style="color: #ABB2BF">()</span> <span style="color: #56B6C2">==</span> <span style="color: #E06C75">category</span> <span style="color: #56B6C2">or</span> <span style="color: #E06C75">category</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">subCategory</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">lower</span><span style="color: #ABB2BF">():</span>
+            <span style="color: #E06C75">errors</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">rule</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">])</span>
+            <span style="color: #7F848E"># ALERT : log pour investigation anti-fraude</span>
+            <span style="color: #E06C75">log_security_event</span><span style="color: #ABB2BF">(</span>
+                <span style="color: #E06C75">event_type</span><span style="color: #56B6C2">=</span><span style="color: #98C379">&quot;PROHIBITED_ITEM_ATTEMPT&quot;</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">user_id</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">senderId</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">parcel_id</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">id</span><span style="color: #ABB2BF">,</span>
+                <span style="color: #E06C75">category</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">category</span>
+            <span style="color: #ABB2BF">)</span>
+
+    <span style="color: #7F848E"># 2. Check declaration-required categories</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">DECLARATION_REQUIRED</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #E06C75">rule</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">DECLARATION_REQUIRED</span><span style="color: #ABB2BF">[</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span><span style="color: #ABB2BF">]</span>
+
+        <span style="color: #C678DD">if</span> <span style="color: #98C379">&quot;threshold_value_eur&quot;</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">rule</span><span style="color: #ABB2BF">:</span>
+            <span style="color: #C678DD">if</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">estimatedValue</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #E06C75">rule</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;threshold_value_eur&quot;</span><span style="color: #ABB2BF">]:</span>
+                <span style="color: #E06C75">warnings</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">rule</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;message&quot;</span><span style="color: #ABB2BF">])</span>
+                <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">requiresDeclaration</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">True</span>
+
+        <span style="color: #C678DD">if</span> <span style="color: #98C379">&quot;max_quantity&quot;</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">rule</span><span style="color: #ABB2BF">:</span>
+            <span style="color: #7F848E"># Check if traveler already has similar items</span>
+            <span style="color: #E06C75">existing</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">count_parcels_by_category_for_traveler</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">matchedTripId</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span><span style="color: #ABB2BF">)</span>
+            <span style="color: #C678DD">if</span> <span style="color: #E06C75">existing</span> <span style="color: #56B6C2">&gt;=</span> <span style="color: #E06C75">rule</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;max_quantity&quot;</span><span style="color: #ABB2BF">]:</span>
+                <span style="color: #E06C75">errors</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">f&quot;Limite atteinte : {</span><span style="color: #E06C75">rule</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&#39;max_quantity&#39;</span><span style="color: #ABB2BF">]</span><span style="color: #98C379">} {</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span><span style="color: #98C379">} par voyageur.&quot;</span><span style="color: #ABB2BF">)</span>
+
+        <span style="color: #C678DD">if</span> <span style="color: #98C379">&quot;requires_prescription&quot;</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">rule</span> <span style="color: #56B6C2">and</span> <span style="color: #E06C75">rule</span><span style="color: #ABB2BF">[</span><span style="color: #98C379">&quot;requires_prescription&quot;</span><span style="color: #ABB2BF">]:</span>
+            <span style="color: #C678DD">if</span> <span style="color: #56B6C2">not</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">prescriptionUrl</span><span style="color: #ABB2BF">:</span>
+                <span style="color: #E06C75">errors</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">&quot;Une ordonnance médicale est obligatoire pour les médicaments.&quot;</span><span style="color: #ABB2BF">)</span>
+                <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">requiresDeclaration</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">True</span>
+
+    <span style="color: #7F848E"># 3. Check total franchise value</span>
+    <span style="color: #C678DD">if</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">estimatedValue</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #D19A66">120</span><span style="color: #ABB2BF">:</span>  <span style="color: #7F848E"># ~30,000 DZD au taux officiel</span>
+        <span style="color: #E06C75">warnings</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span>
+            <span style="color: #98C379">f&quot;La valeur déclarée ({</span><span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">estimatedValue</span><span style="color: #98C379">} EUR) dépasse la franchise voyageur. &quot;</span>
+            <span style="color: #98C379">f&quot;Des droits de douane peuvent s&#39;appliquer (jusqu&#39;à 30% de la valeur). &quot;</span>
+            <span style="color: #98C379">f&quot;Le voyageur devra déclarer ces biens.&quot;</span>
+        <span style="color: #ABB2BF">)</span>
+        <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">requiresDeclaration</span> <span style="color: #56B6C2">=</span> <span style="color: #E5C07B">True</span>
+
+    <span style="color: #7F848E"># 4. AI Image Classification (async)</span>
+    <span style="color: #C678DD">for</span> <span style="color: #E06C75">photo_url</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">photoUrls</span><span style="color: #ABB2BF">:</span>
+        <span style="color: #E06C75">result</span> <span style="color: #56B6C2">=</span> <span style="color: #E06C75">classify_image</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">photo_url</span><span style="color: #ABB2BF">)</span>
+        <span style="color: #C678DD">if</span> <span style="color: #E06C75">result</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span> <span style="color: #56B6C2">in</span> <span style="color: #E06C75">PROHIBITED_CATEGORIES</span><span style="color: #ABB2BF">:</span>
+            <span style="color: #E06C75">errors</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">append</span><span style="color: #ABB2BF">(</span><span style="color: #98C379">f&quot;AI a détecté un produit potentiellement interdit : {</span><span style="color: #E06C75">result</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">category</span><span style="color: #98C379">}&quot;</span><span style="color: #ABB2BF">)</span>
+            <span style="color: #C678DD">if</span> <span style="color: #E06C75">result</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">confidence</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #D19A66">0.85</span><span style="color: #ABB2BF">:</span>
+                <span style="color: #7F848E"># High confidence — auto-block</span>
+                <span style="color: #E06C75">parcel</span><span style="color: #56B6C2">.</span><span style="color: #E06C75">status</span> <span style="color: #56B6C2">=</span> <span style="color: #98C379">&quot;BLOCKED_CUSTOMS&quot;</span>
+                <span style="color: #C678DD">return</span> <span style="color: #E06C75">CustomsValidationResult</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">errors</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">errors</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">warnings</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">warnings</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">blocked</span><span style="color: #56B6C2">=</span><span style="color: #E5C07B">True</span><span style="color: #ABB2BF">)</span>
+
+    <span style="color: #C678DD">return</span> <span style="color: #E06C75">CustomsValidationResult</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">errors</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">errors</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">warnings</span><span style="color: #56B6C2">=</span><span style="color: #E06C75">warnings</span><span style="color: #ABB2BF">,</span> <span style="color: #E06C75">blocked</span><span style="color: #56B6C2">=</span><span style="color: #E5C07B">len</span><span style="color: #ABB2BF">(</span><span style="color: #E06C75">errors</span><span style="color: #ABB2BF">)</span> <span style="color: #56B6C2">&gt;</span> <span style="color: #D19A66">0</span><span style="color: #ABB2BF">)</span>
+</code></pre></div>
+<h2 id="42-clauses-de-responsabilite-tos-termes-de-service">4.2 Clauses de Responsabilité (ToS — Termes de Service)</h2>
+<h3>4.2.1 Responsabilité en Cas de Saisie Douanière</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>EXTRAIT DES CGU — CLAUSE DE SAISIE DOUANIÈRE (Rédaction préliminaire — à valider par avocat)
+
+────────────────────────────────────────────────────────────
+ARTICLE 14 : RESPONSABILITÉ EN CAS DE SAISIE DOUANIÈRE
+────────────────────────────────────────────────────────────
+
+14.1 PRINCIPE GÉNÉRAL
+En cas de saisie du colis par les autorités douanières algériennes
+(Aéroport Houari Boumédiène, Port d&#39;Alger, ou tout point d&#39;entrée),
+la responsabilité est répartie comme suit :
+
+14.1.1 CAS 1 : LE COLIS RESPECTAIT LES RÈGLES DE FRANCHISE VOYAGEUR
+Si le colis a été déclaré conformément aux règles de la franchise voyageur
+(CrowdShipping a validé la conformité via son moteur de conformité)
+ET que le voyageur a présenté les bordereaux générés par l&#39;application :
+
+  → L&#39;assurance CrowdShipping couvre 100% de la valeur déclarée.
+  → Le Sender est remboursé intégralement via l&#39;Escrow.
+  → Le Traveler n&#39;est pas tenu responsable.
+
+14.1.2 CAS 2 : LE SENDER A FOURNI DES FAUSSES INFORMATIONS
+Si le colis contient des articles non déclarés ou des informations
+inexactes (poids, valeur, nature des articles) par rapport à la déclaration :
+
+  → L&#39;assurance ne couvre PAS la saisie.
+  → L&#39;Escrow est remboursé au Sender (moins les frais de dossier : 10 EUR).
+  → Le Sender est responsable vis-à-vis du Traveler pour le
+    temps perdu et les éventuelles amendes douanières.
+  → Le compte du Sender est suspendu pour enquête.
+
+14.1.3 CAS 3 : LE VOYAGEUR N&#39;A PAS DÉCLARÉ LE COLIS
+Si le voyageur a omis de déclarer le colis à la douane alors que
+les bordereaux étaient disponibles dans l&#39;application :
+
+  → Le voyageur est tenu responsable de la saisie.
+  → Le Sender est remboursé intégralement via l&#39;assurance.
+  → CrowdShipping se retourne contre le voyageur pour récupérer
+    les frais (déduction du wallet, poursuite si nécessaire).
+  → Le compte du voyageur est suspendu.
+
+14.2 PROCÉDURE EN CAS DE SAISIE
+a) Le voyageur informe immédiatement via l&#39;application (bouton &quot;Saisie douanière&quot;)
+b) Le voyageur télécharge le procès-verbal de saisie (photo) dans l&#39;app
+c) CrowdShipping ouvre un ticket de dispute dans les 2h
+d) L&#39;assurance est notifiée sous 24h
+e) Le Sender est notifié et informé des options :
+   - Remboursement via assurance (si éligible)
+   - Contestation de la saisie (CrowdShipping fournit un modèle de lettre)
+f) Délai de résolution : 14 jours ouvrés maximum
+────────────────────────────────────────────────────────────
+</code></pre></div>
+<h2 id="43-gestion-des-litiges-protocole-de-remise">4.3 Gestion des Litiges — Protocole de Remise</h2>
+<h3>4.3.1 Processus de Validation de Livraison</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>┌──────────────────────────────────────────────────────────────────┐
+│              PROTOCOLE DE REMISE EN MAIN PROPRE                   │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ÉTAPE 1 : ARRIVÉE DU VOYAGEUR                                  │
+│  ├─ Le traveler arrive à l&#39;adresse de livraison                  │
+│  ├─ Live location activée automatiquement (si &lt; 5 km)           │
+│  └─ Notification au destinataire + sender                         │
+│                                                                  │
+│  ÉTAPE 2 : VALIDATION D&#39;IDENTITÉ                                │
+│  ├─ Le destinataire fournit :                                   │
+│  │   ├─ OPTION A : OTP à 6 chiffres (envoyé par l&#39;app au sender│
+│  │   │   qui le transmet au destinataire)                        │
+│  │   ├─ OPTION B : QR code (scanné par le traveler)              │
+│  │   ├─ OPTION C : Nom + dernier 4 chiffres du téléphone        │
+│  │   └─ OPTION D : Pièce d&#39;identité (si colis de haute valeur)  │
+│  └─ Le traveler saisit le code dans l&#39;app                        │
+│                                                                  │
+│  ÉTAPE 3 : INSPECTION DU COLIS (optionnel mais recommandé)       │
+│  ├─ Le destinataire peut ouvrir le colis devant le traveler      │
+│  ├─ Vérification : état, contenu, conformité                     │
+│  ├─ Si conforme → le destinataire coche &quot;Accepté&quot; dans l&#39;app    │
+│  ├─ Si non conforme → le destinataire coche &quot;Litige&quot;            │
+│  │   └─ Déclenche immédiatement le processus de dispute         │
+│  └─ Temps maximum pour accepter/rejeter : 30 minutes            │
+│                                                                  │
+│  ÉTAPE 4 : PREUVE DE REMISE                                      │
+│  ├─ Photo obligatoire : le traveler prend une photo du colis     │
+│  │   remis (avec accord du destinataire)                         │
+│  ├─ Photo horodatée + géotaggée automatiquement                  │
+│  ├─ QR code de remise : généré par l&#39;app, signé cryptographiquement│
+│  │   (contient : parcelId, travelerId, timestamp, location)     │
+│  └─ Empreinte digitale du destinataire (si l&#39;app est installée) │
+│                                                                  │
+│  ÉTAPE 5 : DÉBLOCAGE ESCROW                                     │
+│  ├─ Si toutes les conditions sont remplies :                     │
+│  │   ├─ OTP/PIN correct ✅                                       │
+│  │   ├─ Photo prise ✅                                           │
+│  │   ├─ Pas de litige déclaré ✅                                 │
+│  │   └─ Timeout non dépassé ✅                                   │
+│  ├─ → Escrow débloqué AUTOMATIQUEMENT                            │
+│  ├─ → Paiement versé au traveler                                 │
+│  ├─ → Notification : &quot;Livraison confirmée ! Paiement envoyé.&quot;    │
+│  └─ → Si litige : Escrow maintenu bloqué → médiation (Partie 4.4)│
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3>4.3.2 QR Code de Remise (Format)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code><span style="color: #ABB2BF">{</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;version&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;CS-QR-001&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;type&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;PARCEL_DELIVERY&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;parcelId&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;550e8400-e29b-41d4-a716-446655440000&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;travelerId&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;7c9e6679-7425-40de-944b-e07fc1f90ae7&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;senderId&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;1f8e6679-7425-40de-944b-e07fc1f90ae8&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;timestamp&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;2026-08-06T14:30:00+01:00&quot;</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;location&quot;</span><span style="color: #ABB2BF">: {</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;lat&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">36.7538</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;lng&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">3.0588</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;accuracy&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #D19A66">15</span><span style="color: #ABB2BF">,</span>
+<span style="color: #ABB2BF">    </span><span style="color: #E06C75">&quot;address&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;Bab El Oued, Alger&quot;</span>
+<span style="color: #ABB2BF">  },</span>
+<span style="color: #ABB2BF">  </span><span style="color: #E06C75">&quot;signature&quot;</span><span style="color: #ABB2BF">: </span><span style="color: #98C379">&quot;HMAC-SHA256:a3f2b7c8d9e1f0... (32 bytes hex)&quot;</span>
+<span style="color: #ABB2BF">}</span>
+</code></pre></div>
+<hr />
+<h1 class="part-title" id="partie-5-go-to-market-growth-hacking-amp-saisonnalite">PARTIE 5 : Go-To-Market, Growth Hacking &amp; Saisonnalité</h1>
+<h2 id="51-strategie-lœuf-et-la-poule-acquerir-les-1000-premiers-travelers">5.1 Stratégie "L'Œuf et la Poule" — Acquérir les 1,000 Premiers Travelers</h2>
+<h3>5.1.1 Le Problème de la Marketplace Bilatérale</h3>
+<p>CrowdShipping ne fonctionne que s'il y a <strong>simultanément</strong> des Travelers (offre de transport) et des Senders (demande d'envoi). Comment amorcer ?</p>
+<h3>5.1.2 Phase 1 : Acquérir les Travelers (Mois 1-3)</h3>
+<table>
+<thead>
+<tr>
+<th>Stratégie</th>
+<th>Canal</th>
+<th>Cible</th>
+<th>KPI</th>
+<th>Budget</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recrutement communautaire</strong></td>
+<td>Groupes Facebook diaspora ("BlaBlaCar Algérie", "Voyage Marseille-Alger")</td>
+<td>Voyageurs réguliers</td>
+<td>100 inscrits/mois</td>
+<td>0 EUR (gratuit)</td>
+</tr>
+<tr>
+<td><strong>Programme "Travelers Founders"</strong></td>
+<td>Landing page dédiée + formulaire Google Form</td>
+<td>Voyageurs réguliers (5+ trajets/an)</td>
+<td>50 VIP inscrits</td>
+<td>500 EUR (adhésions offertes + goodies)</td>
+</tr>
+<tr>
+<td><strong>Partenariat agences de voyage</strong></td>
+<td>Agences spécialisées Algérie (Paris 10e, 18e, Marseille)</td>
+<td>Clients avec billets achetés</td>
+<td>30 inscrits/mois</td>
+<td>Commission 5% par referral</td>
+</tr>
+<tr>
+<td><strong>Ambassadeurs campus</strong></td>
+<td>Étudiants algériens à Paris, Lyon, Marseille, Toulouse</td>
+<td>Retour au pays pendant vacances</td>
+<td>200 inscrits/saison estivale</td>
+<td>1,000 EUR (goodies + events)</td>
+</tr>
+<tr>
+<td><strong>Presence aux ports/aéroports</strong></td>
+<td>Flyers + QR codes (légal si sur terrain public)</td>
+<td>Voyageurs en attente d'embarquement</td>
+<td>50 inscrits/événement</td>
+<td>300 EUR/printing</td>
+</tr>
+<tr>
+<td><strong>SEO "transport colis Algerie"</strong></td>
+<td>Blog + landing pages optimisées</td>
+<td>Recherche intent : "envoyer colis Algerie pas cher"</td>
+<td>500 visits/mois</td>
+<td>200 EUR (content)</td>
+</tr>
+</tbody>
+</table>
+<h3>5.1.3 Phase 2 : Générer la Demande (Mois 2-4)</h3>
+<p>Une fois 200+ Travelers actifs sur la plateforme :</p>
+<table>
+<thead>
+<tr>
+<th>Stratégie</th>
+<th>Canal</th>
+<th>Cible</th>
+<th>KPI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Offre lancement</strong> : 1er envoi gratuit (fee plateforme = 0%)</td>
+<td>Push aux Senders potentiels</td>
+<td>Diaspora France</td>
+<td>500 premiers envois</td>
+</tr>
+<tr>
+<td><strong>Témoignages vidéo</strong></td>
+<td>TikTok + Instagram Reels</td>
+<td>18-35 ans diaspora</td>
+<td>50K vues/campagne</td>
+</tr>
+<tr>
+<td><strong>Partenariats épiceries algériennes</strong></td>
+<td>Épiceries "produits du terroir" en France</td>
+<td>Expatriés qui veulent des produits locaux</td>
+<td>100 referrals/mois</td>
+</tr>
+<tr>
+<td><strong>Referral program</strong> : "Invite un ami, envoi à -50%"</td>
+<td>In-app + WhatsApp</td>
+<td>Viralité organique</td>
+<td>30% growth rate</td>
+</tr>
+</tbody>
+</table>
+<h2 id="52-marketing-communautaire-plan-daction">5.2 Marketing Communautaire — Plan d'Action</h2>
+<h3>5.2.1 Groupes Facebook Ciblés</h3>
+<table>
+<thead>
+<tr>
+<th>Nom du groupe (type)</th>
+<th>Taille estimée</th>
+<th>Stratégie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"BlaBlaCar Algérie France"</td>
+<td>50K+ membres</td>
+<td>Posts sponsorisés + témoignages</td>
+</tr>
+<tr>
+<td>"Diaspora Algérienne France"</td>
+<td>200K+ membres</td>
+<td>Post naturel (story) + AMA</td>
+</tr>
+<tr>
+<td>"Étudiants algériens en France"</td>
+<td>30K+ membres</td>
+<td>Offre étudiante (-20%)</td>
+</tr>
+<tr>
+<td>"Voyage Marseille Alger Ferry"</td>
+<td>10K+ membres</td>
+<td>Focus voyageurs ferry</td>
+</tr>
+<tr>
+<td>"Chibani France" (aînés de la diaspora)</td>
+<td>20K+ membres</td>
+<td>Messages simples, assistance téléphonique</td>
+</tr>
+<tr>
+<td>"Achats en ligne Algérie"</td>
+<td>15K+ membres</td>
+<td>Positionnement "alternative aux transitaire"</td>
+</tr>
+</tbody>
+</table>
+<h3>5.2.2 TikTok / Instagram Strategy</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>CONTENTS PILIERS (3x/semaine) :
+
+POST TYPE 1 : TÉMOIGNAGES (40%)
+├─ &quot;Comment Fatima a envoyé un colis à sa mère à Oran pour 15 EUR&quot;
+├─ Format : Interview face caméra + captures d&#39;écran de l&#39;app
+├─ Durée : 45-90 secondes
+└─ CTA : &quot;Link in bio — 1er envoi offert&quot;
+
+POST TYPE 2 : ÉDUCATIF (30%)
+├─ &quot;Les 5 erreurs à éviter quand on envoie un colis en Algérie&quot;
+├─ &quot;Franchise voyageur : ce que vous avez le droit d&#39;envoyer&quot;
+├─ &quot;Comment être payé en EUR quand vous voyagez vers Alger&quot;
+├─ Format : Carousel Instagram + vidéo TikTok
+├─ Durée : 60 secondes
+└─ CTA : &quot;Abonnez-vous pour plus d&#39;astuces&quot;
+
+POST TYPE 3 : SOCIAL PROOF (30%)
+├─ &quot;Regardez comment Ahmed a gagné 150 EUR en rentabilisant son trajet&quot;
+├─ Screenshot du dashboard gains du traveler (anonymisé)
+├─ Format : Before/After + compte à rebours
+└─ CTA : &quot;Deviens Traveler → lien bio&quot;
+</code></pre></div>
+<h2 id="53-gestion-des-pics-saisonniers">5.3 Gestion des Pics Saisonniers</h2>
+<h3>5.3.1 Calendrier des Saisons Fortes en Algérie</h3>
+<table>
+<thead>
+<tr>
+<th>Période</th>
+<th>Événement</th>
+<th>Impact</th>
+<th>Plan Opérationnel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Juin - Septembre</strong></td>
+<td>Saison estivale + traversées maritimes (boost)</td>
+<td>+300% de trafic ferry, +150% de demandes</td>
+<td>Scaling serveurs, recrutement agents temporaires, campagne marketing agressive</td>
+</tr>
+<tr>
+<td><strong>Ramadan (variable)</strong></td>
+<td>Envois de cadeaux, dattes, vêtements</td>
+<td>+200% de demandes (hautement saisonnier)</td>
+<td>Pré-positionnement de Travelers, offres "Ramadan Express"</td>
+</tr>
+<tr>
+<td><strong>Septembre - Octobre</strong></td>
+<td>Rentrée universitaire (retour étudiants)</td>
+<td>+250% de voyages étudiants</td>
+<td>Campagne campus, tarif étudiant, packages "retour"</td>
+</tr>
+<tr>
+<td><strong>Décembre - Janvier</strong></td>
+<td>Fêtes de fin d'année</td>
+<td>+100% de cadeaux</td>
+<td>Packaging cadeaux, assurance offerte</td>
+</tr>
+<tr>
+<td><strong>Mars - Avril</strong></td>
+<td>Printemps (retour vacanciers)</td>
+<td>+80%</td>
+<td>Campagne "Ramène du terroir"</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3.2 Plan Opérationnel — Saison Estivale (Juin-Septembre)</h3>
+<div class="codehilite" style="background: #282C34"><pre style="line-height: 125%;"><span></span><code>T-30 JOURS (Mai) :
+├─ Scaling infrastructure : server auto-scaling configuré
+│   ├─ Kubernetes HPA : min 3 pods → max 15 pods par service
+│   ├─ Redis cluster : bascule en mode cluster (6 nodes)
+│   └─ CDN Cache : augmentation TTL à 24h pour les assets statiques
+├─ Recrutement agents :
+│   ├─ 5 agents supplémentaires à Alger (points relais)
+│   ├─ 2 agents à Oran, 1 à Constantine
+│   └─ Formation sur le process de haute saison
+├─ Marketing pré-saison :
+│   ├─ Campagnes Facebook Ads (budget : 3,000 EUR)
+│   ├─ Emails aux Senders inactifs depuis &gt; 30 jours
+│   └─ Notifications push : &quot;La saison des traversées approche !&quot;
+│
+T-7 JOURS (Fin Mai) :
+├─ Stress test de l&#39;infrastructure (simulation 10K req/sec)
+├─ Vérification des partenariats avec les compagnies ferry (SNCM, CNAN)
+├─ Pool de Travelers vérifiés : minimum 500 actifs
+├─ Support client : équipe élargie (8h → 16h couverture, 7j/7)
+│
+SAISON ACTIVE (Juin-Septembre) :
+├─ Dashboard temps réel : nombre de trajets, colis en transit, litiges
+├─ Alertes automatiques si SLA dépassé (&gt; 2h pour matching)
+├─ Reporting quotidien au team operations
+├─ Flex pricing : les tarifs voyageurs augmentent de 15% pendant les pics
+│
+POST-SAISON (Octobre) :
+├─ Analyse des métriques de la saison
+├─ Retention campaigns pour les Travelers acquis
+├─ Net Promoter Score survey aux Senders
+└─ Préparation de la saison Ramadan (si applicable)
+</code></pre></div>
+<hr />
+<h1 class="part-title" id="partie-6-analyse-des-risques-pre-mortem">PARTIE 6 : Analyse des Risques (Pre-Mortem)</h1>
+<h2 id="61-les-5-raisons-de-faillite-potentielles-dans-les-18-premiers-mois">6.1 Les 5 Raisons de Faillite Potentielles dans les 18 Premiers Mois</h2>
+<h3>🔴 RISQUE #1 : Saisies Douanières en Cascade (Fatalité 30%)</h3>
+<p><strong>Scénario</strong> : Les douanes algériennes durcissent les contrôles (contexte politique, pression sur les importations). 20% des colis sont saisis pendant un mois. Les Senders paniquent, les Travelers refusent de transporter, l'assurance ne couvre pas le volume.</p>
+<p><strong>Impact</strong> : Destruction de la confiance. Churn massif. News négatives sur les réseaux sociaux.</p>
+<p><strong>Plan de Contingence</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Responsable</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. Souscrire une assurance dédiée "risque douanier Algérie" (si un assureur accepte le risque)</td>
+<td>CEO + Legal</td>
+<td>Mois 1-2</td>
+</tr>
+<tr>
+<td>B. Implémenter un système de "scoring douanier" par point d'entrée (aéroport vs ferry vs route)</td>
+<td>CTO</td>
+<td>Mois 3</td>
+</tr>
+<tr>
+<td>C. Afficher clairement les risques douaniers AVANT chaque envoi (transparence totale)</td>
+<td>Product</td>
+<td>Mois 1</td>
+</tr>
+<tr>
+<td>D. Partenariat avec un transitaire agréé à Alger pour les colis à risque (fallback professionnel)</td>
+<td>BD</td>
+<td>Mois 4-6</td>
+</tr>
+<tr>
+<td>E. Limiter les catégories à haut risque (électronique &gt; 500 EUR) en phase MVP</td>
+<td>Product</td>
+<td>Mois 1</td>
+</tr>
+</tbody>
+</table>
+<h3>🔴 RISQUE #2 : Adoption Lente du Côté Voyageurs (Fatalité 25%)</h3>
+<p><strong>Scénario</strong> : Les voyageurs n'ont pas envie de s'embêter avec des colis pour gagner 15-30 EUR. La friction est trop élevée (KYC, rendez-vous, responsabilité). Le marché du "cabas informel" continue en dehors de l'app.</p>
+<p><strong>Plan de Contingence</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Responsable</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. UX ultra-simplifiée pour le voyageur ("2 taps pour accepter un colis")</td>
+<td>Product + Design</td>
+<td>Mois 1-2</td>
+</tr>
+<tr>
+<td>B. Garantie minimum de 25 EUR par trajet (subventionnée par CrowdShipping au début)</td>
+<td>Finance</td>
+<td>Mois 1-3</td>
+</tr>
+<tr>
+<td>C. Programme d'ambassadeurs : top 50 travelers = statut VIP + bonus</td>
+<td>Growth</td>
+<td>Mois 2</td>
+</tr>
+<tr>
+<td>D. Partenariat avec les compagnies aériennes/ferry : integration dans leur app (white label)</td>
+<td>BD + CTO</td>
+<td>Mois 6-9</td>
+</tr>
+<tr>
+<td>E. Si adoption &lt; 100 travelers actifs à mois 3 : pivot vers modèle "agence de voyage" avec coursiers dédiés</td>
+<td>CEO</td>
+<td>Mois 3 (decision gate)</td>
+</tr>
+</tbody>
+</table>
+<h3>🔴 RISQUE #3 : Risque Réglementaire / Légal (Fatalité 20%)</h3>
+<p><strong>Scénario</strong> : Le gouvernement algérien interdit les plateformes de crowd-shipping, ou impose une licence impossible à obtenir. L'app est bloquée au niveau DNS (comme cela a été fait pour d'autres apps). Ou la Banque d'Algérie bloque les flux de paiement.</p>
+<p><strong>Plan de Contingence</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Responsable</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. Enregistrement d'une entité juridique en Algérie (SARL avec capital 100K DZD)</td>
+<td>CEO + Legal</td>
+<td>Mois 1</td>
+</tr>
+<tr>
+<td>B. Consultation avec un avocat spécialisé en droit commercial algérien</td>
+<td>Legal</td>
+<td>Mois 1</td>
+</tr>
+<tr>
+<td>C. Relation proactive avec la Chambre de Commerce Algérie (services aux diasporas)</td>
+<td>CEO</td>
+<td>Mois 2-3</td>
+</tr>
+<tr>
+<td>D. Conformité AML/KYC renforcée (montrer que l'app n'est PAS un outil de change)</td>
+<td>Compliance</td>
+<td>Mois 1-2</td>
+</tr>
+<tr>
+<td>E. Plan de repli : limiter les opérations aux trajets internationaux (pas domestique) si le marché local est bloqué</td>
+<td>CEO</td>
+<td>Mois 6 (decision gate)</td>
+</tr>
+<tr>
+<td>F. Architecture multi-juridiction : siège en France (EU) + filiale Algérie</td>
+<td>CEO + Legal</td>
+<td>Mois 1-2</td>
+</tr>
+</tbody>
+</table>
+<h3>🔴 RISQUE #4 : Problème de Paiement / Compliance Fintech (Fatalité 15%)</h3>
+<p><strong>Scénario</strong> : Stripe ou LemonWay suspend le compte CrowdShipping pour activité "high risk" (liée à l'Algérie, réputation marché parallèle). Les fonds sont gelés. Les utilisateurs ne peuvent plus être payés.</p>
+<p><strong>Plan de Contingence</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Responsable</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. Diversification des PSP : Stripe + LemonWay + MangoPay + Wise (multi-vitrine)</td>
+<td>CTO + Finance</td>
+<td>Mois 1-3</td>
+</tr>
+<tr>
+<td>B. Transparence totale avec les PSP : sharing économique complet, KYC renforcé</td>
+<td>Compliance</td>
+<td>Mois 1</td>
+</tr>
+<tr>
+<td>C. Modèle de paiement "hors app" en fallback : travellers sont payés directement par les senders en cash, CrowdShipping prend sa commission via un abonnement/membership</td>
+<td>Product + Finance</td>
+<td>Mois 4 (si besoin)</td>
+</tr>
+<tr>
+<td>D. Réserve de liquidité : 50K EUR en réserve pour 30 jours de remboursements</td>
+<td>Finance</td>
+<td>Mois 1</td>
+</tr>
+<tr>
+<td>E. Audit externe AML/KYC (Big 4) pour crédibiliser le modèle</td>
+<td>Compliance</td>
+<td>Mois 6</td>
+</tr>
+</tbody>
+</table>
+<h3>🔴 RISQUE #5 : Conflit avec le Marché Informel / Réseau de "Cabassiers" (Fatalité 10%)</h3>
+<p><strong>Scénario</strong> : Le réseau informel des "cabassiers" (personnes qui font du transport de colis informel depuis des décennies) se sent menacé. Campagnes de dénigrement, pression sur les voyageurs pour ne pas utiliser l'app, voire menaces physiques dans certains cas.</p>
+<p><strong>Plan de Contingence</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Responsable</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. Ne PAS se positionner comme "destructeur" du cabas, mais comme "modernisation"</td>
+<td>Marketing</td>
+<td>Mois 1</td>
+</tr>
+<tr>
+<td>B. Recruter certains cabassiers comme Travelers premium (ils sont les meilleurs)</td>
+<td>Growth</td>
+<td>Mois 2-3</td>
+</tr>
+<tr>
+<td>C. Communication : "l'application protège aussi le voyageur" (assurance, traçabilité)</td>
+<td>Marketing</td>
+<td>Continu</td>
+</tr>
+<tr>
+<td>D. Si menaces : signalement aux autorités (consulats, ambassades)</td>
+<td>CEO + Legal</td>
+<td>Immédiat</td>
+</tr>
+<tr>
+<td>E. Fonctionnalité anonymat partiel pour les travelers (pseudo affiché, pas le vrai nom)</td>
+<td>Product</td>
+<td>Mois 3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="62-matrice-des-risques-vue-synthetique">6.2 Matrice des Risques (Vue Synthétique)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Risque</th>
+<th>Probabilité</th>
+<th>Impact</th>
+<th>Score (P×I)</th>
+<th>Plan B Activé si</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Saisies douanières en cascade</td>
+<td>Moyenne (40%)</td>
+<td>Critique</td>
+<td><strong>16/25</strong></td>
+<td>&gt; 15% de saisies sur 30 jours</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Adoption lente voyageurs</td>
+<td>Moyenne (50%)</td>
+<td>Critique</td>
+<td><strong>20/25</strong></td>
+<td>&lt; 100 travelers actifs à M3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Risque réglementaire Algérie</td>
+<td>Faible-Moyenne (30%)</td>
+<td>Critique</td>
+<td><strong>15/25</strong></td>
+<td>Aucune indication officielle, mais veille continue</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Suspension compte PSP</td>
+<td>Faible (20%)</td>
+<td>Critique</td>
+<td><strong>12/25</strong></td>
+<td>Si un PSP suspend le compte</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Conflit réseau informel</td>
+<td>Faible (15%)</td>
+<td>Élevé</td>
+<td><strong>9/25</strong></td>
+<td>Si campagnes de dénigrement coordonnées</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="annexes">ANNEXES</h1>
+<h2 id="annexe-a-glossaire-algerie-specifique">Annexe A : Glossaire Algérie-Spécifique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Définition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cabas</strong></td>
+<td>Marché informel de transport de colis entre la diaspora et l'Algérie</td>
+</tr>
+<tr>
+<td><strong>Cabassier</strong></td>
+<td>Personne qui pratique le transport informel de colis</td>
+</tr>
+<tr>
+<td><strong>Wilaya</strong></td>
+<td>Division administrative algérienne (équivalent département), 58 wilayas</td>
+</tr>
+<tr>
+<td><strong>Commune</strong></td>
+<td>Subdivision de wilaya, 1,541 communes</td>
+</tr>
+<tr>
+<td><strong>CCP</strong></td>
+<td>Centre Postal de Chèques Postaux (compte postal algérien)</td>
+</tr>
+<tr>
+<td><strong>BaridiMob</strong></td>
+<td>Application mobile d'Algérie Post pour paiements/transferts</td>
+</tr>
+<tr>
+<td><strong>Franchise voyageur</strong></td>
+<td>Droit d'importer des effets personnels sans droits de douane</td>
+</tr>
+<tr>
+<td><strong>DZD</strong></td>
+<td>Dinar algérien (monnaie non convertible)</td>
+</tr>
+<tr>
+<td><strong>Chibani</strong></td>
+<td>Personne âgée de la diaspora (terme affectueux, littéralement "barbe grise")</td>
+</tr>
+<tr>
+<td><strong>Ksar/Ksour</strong></td>
+<td>Village fortifié au Sahara</td>
+</tr>
+<tr>
+<td><strong>Zone blanche</strong></td>
+<td>Zone sans couverture réseau mobile</td>
+</tr>
+</tbody>
+</table>
+<h2 id="annexe-b-api-tierces-contact-amp-pricing">Annexe B : API Tierces — Contact &amp; Pricing</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Usage</th>
+<th>Pricing (estimé)</th>
+<th>Contact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sumsub</td>
+<td>KYC/AML</td>
+<td>1.50 EUR/verification</td>
+<td>enterprise@sumsub.com</td>
+</tr>
+<tr>
+<td>Mapbox</td>
+<td>Geocoding + Maps</td>
+<td>5 USD/1000 geocoding calls</td>
+<td>mapbox.com</td>
+</tr>
+<tr>
+<td>Stripe</td>
+<td>EUR payments</td>
+<td>1.4% + 0.25 EUR (EU cards)</td>
+<td>stripe.com</td>
+</tr>
+<tr>
+<td>LemonWay</td>
+<td>Escrow wallets</td>
+<td>0.50 EUR/transaction + setup</td>
+<td>lemonway.fr</td>
+</tr>
+<tr>
+<td>Twilio</td>
+<td>SMS international</td>
+<td>0.05-0.10 EUR/SMS</td>
+<td>twilio.com</td>
+</tr>
+<tr>
+<td>Firebase</td>
+<td>Push notifications</td>
+<td>Gratuit (jusqu'à 1M)</td>
+<td>firebase.google.com</td>
+</tr>
+<tr>
+<td>Sentry</td>
+<td>Error tracking</td>
+<td>26 USD/mois (Team)</td>
+<td>sentry.io</td>
+</tr>
+<tr>
+<td>Datadog</td>
+<td>Monitoring</td>
+<td>23 USD/host/mois</td>
+<td>datadoghq.com</td>
+</tr>
+</tbody>
+</table>
+<h2 id="annexe-c-timeline-de-developpement-18-mois">Annexe C : Timeline de Développement (18 mois)</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Mois</th>
+<th>Livrables</th>
+<th>Équipe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 0 : Validation</strong></td>
+<td>M1-M2</td>
+<td>Landing page, 100 pré-inscriptions, entités juridiques</td>
+<td>CEO + 1 dev</td>
+</tr>
+<tr>
+<td><strong>Phase 1 : MVP</strong></td>
+<td>M3-M6</td>
+<td>App mobile (iOS+Android), backend core, KYC, Escrow EUR, 5 wilayas pilotes</td>
+<td>2 devs + 1 designer + 1 PM</td>
+</tr>
+<tr>
+<td><strong>Phase 2 : Launch</strong></td>
+<td>M7-M9</td>
+<td>Lancement public France→Alger, 500 users, itérations UX</td>
+<td>Équipe complète (7 personnes)</td>
+</tr>
+<tr>
+<td><strong>Phase 3 : Scale</strong></td>
+<td>M10-M12</td>
+<td>Expansion domestique (10 wilayas), paiement DZD, assurance</td>
+<td>+ 2 devs + 1 ops</td>
+</tr>
+<tr>
+<td><strong>Phase 4 : Growth</strong></td>
+<td>M13-M18</td>
+<td>Expansion Europe (Canada, Espagne, Belgique), 10K users, B2B pilotes</td>
+<td>+ 2 devs + 2 growth marketers</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p><strong>Document généré le 6 août 2026. Version 1.0. Prochain update : après validation des parties prenantes.</strong></p>
+<p><em>Ce document est CONFIDENTIEL et destiné exclusivement aux fondateurs, investisseurs et membres de l'équipe de développement de CrowdShipping.</em></p>
+</blockquote>
+</main>
+
+<script>
+  // Initialize Mermaid before Playwright captures the page.
+  // html2pdf-next.js waits for .mermaid elements to contain an <svg>.
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      themeVariables: {
+        primaryColor: '#1e3a5f',
+        primaryTextColor: '#ffffff',
+        primaryBorderColor: '#1e3a5f',
+        lineColor: '#2d5f8a',
+        secondaryColor: '#eef2f7',
+        tertiaryColor: '#f8fafc',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '13px',
+      },
+      flowchart: { curve: 'basis', useMaxWidth: true },
+      securityLevel: 'loose',
+    });
+  }
+</script>
+</body>
+</html>

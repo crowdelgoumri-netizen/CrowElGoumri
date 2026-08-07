@@ -1,0 +1,24 @@
+{
+  "name": "crowdshipping",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CrowdShipping Algérie — P2P parcel transport platform (diaspora + domestic)",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @crowdshipping/api dev",
+    "build": "pnpm -r --filter=./packages/* --filter=./apps/* build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @crowdshipping/db generate",
+    "db:migrate": "pnpm --filter @crowdshipping/db migrate",
+    "db:studio": "pnpm --filter @crowdshipping/db studio",
+    "db:push": "pnpm --filter @crowdshipping/db push"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}

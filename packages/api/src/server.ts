@@ -10,7 +10,10 @@ import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { env } from "./env.js";
+import { authPlugin } from "./plugins/auth.js";
 import { healthRoutes } from "./routes/health.js";
+import { authRoutes } from "./routes/auth.js";
+import { meRoutes } from "./routes/me.js";
 
 async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -39,11 +42,15 @@ async function buildServer(): Promise<FastifyInstance> {
   });
   await app.register(swaggerUi, { routePrefix: "/docs" });
 
+  // ── Plugins (auth must register before routes that use it) ───────
+  await app.register(authPlugin);
+
   // ── Routes ───────────────────────────────────────────────────────
   await app.register(healthRoutes, { prefix: "/health" });
+  await app.register(authRoutes, { prefix: "/auth" });
+  await app.register(meRoutes, { prefix: "/me" });
 
   // Route groups to be registered as phases progress:
-  //   /auth        — Phase 1
   //   /parcels     — Phase 2
   //   /trips       — Phase 2
   //   /matching    — Phase 3

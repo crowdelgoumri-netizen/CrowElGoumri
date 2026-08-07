@@ -20,6 +20,9 @@ importers:
       '@crowdshipping/db':
         specifier: workspace:*
         version: link:../db
+      '@crowdshipping/matching':
+        specifier: workspace:*
+        version: link:../matching
       '@fastify/cors':
         specifier: ^10.0.1
         version: 10.1.0
@@ -82,6 +85,22 @@ importers:
       prisma:
         specifier: ^6.4.1
         version: 6.19.3(typescript@5.9.3)
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
+  packages/matching:
+    dependencies:
+      '@crowdshipping/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^22.9.0
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.9
       typescript:
         specifier: ^5.6.3
         version: 5.9.3

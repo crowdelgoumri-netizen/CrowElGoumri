@@ -39,9 +39,15 @@ const envSchema = z.object({
   S3_ENDPOINT: z.string().optional(),
   S3_BUCKET: z.string().optional(),
   TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(), // Phase 7: enables real SMS (Verify uses SID above)
   TWILIO_VERIFY_SERVICE_SID: z.string().optional(),
   MAPBOX_TOKEN: z.string().optional(),
   KYC_PROVIDER: z.enum(["sumsub", "manual"]).default("manual"),
+
+  // Notifications (Phase 7) — all optional, stubbed when absent.
+  EXPO_ACCESS_TOKEN: z.string().optional(), // production Expo push needs it; dev doesn't
+  SES_FROM_ADDRESS: z.string().email().optional(), // presence enables email
+  SMS_FROM_NUMBER: z.string().optional(), // presence enables outbound SMS (Twilio)
 });
 
 const parsed = envSchema.safeParse(process.env);

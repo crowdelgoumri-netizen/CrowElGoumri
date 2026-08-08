@@ -20,6 +20,7 @@ import { tripRoutes } from "./routes/trips.js";
 import { matchingRoutes } from "./routes/matching.js";
 import { escrowRoutes } from "./routes/escrow.js";
 import { chatRoutes } from "./routes/chat.js";
+import { notificationRoutes } from "./routes/notifications.js";
 import { realtimePlugin } from "./plugins/realtime.js";
 
 async function buildServer(): Promise<FastifyInstance> {
@@ -76,6 +77,7 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(matchingRoutes, { prefix: "/matching" });
   await app.register(escrowRoutes, { prefix: "/escrow" });
   await app.register(chatRoutes, { prefix: "/chat" });
+  await app.register(notificationRoutes, { prefix: "/notifications" });
 
   return app;
 }

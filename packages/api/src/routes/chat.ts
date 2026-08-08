@@ -24,6 +24,7 @@ import {
   assertParcelParticipant,
   HttpError,
 } from "../lib/chat-access.js";
+import { notify } from "../lib/notifications.js";
 
 // ── Validation ───────────────────────────────────────────────────────
 const historyQuerySchema = z.object({
@@ -190,8 +191,9 @@ export const chatRoutes: FastifyPluginAsync = async (app) => {
         return reply.code(400).send({ error: parsed.error.flatten() });
       }
 
+      let participant;
       try {
-        await assertParcelParticipant(parcelId, req.user.sub);
+        participant = await assertParcelParticipant(parcelId, req.user.sub);
       } catch (err) {
         return sendHttpError(reply, err);
       }
@@ -219,6 +221,21 @@ export const chatRoutes: FastifyPluginAsync = async (app) => {
       // emit send path funnel through here for persistence, so the room
       // always sees a consistent event shape.
       app.broadcastToParcel(parcelId, "chat:message", payload);
+
+      // Push-notify the counterparty — this is what makes chat feel real
+      // when their socket is disconnected. The caller never gets blocked:
+      // notify() swallows provider errors and the in-app row is fast.
+      const counterpartyId =
+        participant.role === "SENDER" ? participant.travelerId! : participant.senderId;
+      const sender = await prisma.user.findUnique({
+        where: { id: req.user.sub },
+        select: { firstName: true },
+      });
+      notify(counterpartyId, "CHAT_MESSAGE", {
+        parcelId,
+        senderName: sender?.firstName,
+        chatPreview: message.body.slice(0, 120),
+      }).catch(() => { /* provider errors logged inside notify() */ });
 
       return reply.code(201).send({ message: { ...payload, readAt: null } });
     },

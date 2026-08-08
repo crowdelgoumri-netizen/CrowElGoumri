@@ -19,6 +19,7 @@ import {
   AttemptTracker,
 } from "../lib/delivery-pin.js";
 import { releaseEscrowForParcel } from "../lib/escrow-service.js";
+import { notify, type NotificationType } from "../lib/notifications.js";
 
 // One in-memory attempt tracker per process. Single-process v1; a Redis-
 // backed tracker ships with the multi-instance / notifications phase.
@@ -349,6 +350,7 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
       where: { id: parcelId },
       select: {
         id: true,
+        senderId: true,
         status: true,
         matchedTrip: { select: { travelerId: true, status: true } },
       },
@@ -383,6 +385,7 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
         where: { id },
         data: { status: "AWAITING_PICKUP", pickedUpAt: new Date() },
       });
+      await notify(parcel.senderId, "PARCEL_PICKED_UP" as NotificationType, { parcelId: id });
       return { parcel: updated };
     },
   );
@@ -406,6 +409,7 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
         where: { id },
         data: { status: "IN_TRANSIT" },
       });
+      await notify(parcel.senderId, "IN_TRANSIT" as NotificationType, { parcelId: id });
       return { parcel: updated };
     },
   );
@@ -428,6 +432,7 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
         where: { id },
         data: { status: "AWAITING_DELIVERY" },
       });
+      await notify(parcel.senderId, "AWAITING_DELIVERY" as NotificationType, { parcelId: id });
       return { parcel: updated };
     },
   );
@@ -519,6 +524,11 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
         where: { id },
         data: { status: "DELIVERED", deliveredAt: new Date() },
       });
+
+      // Notify the sender their parcel landed — the most valuable
+      // notification in the product. Best-effort; never blocks the response.
+      notify(parcel.senderId, "DELIVERED" as NotificationType, { parcelId: id })
+        .catch(() => { /* provider errors logged inside notify() */ });
 
       // 2) Fire escrow release. A soft-fail (traveler not yet onboarded for
       //    payouts, or Stripe hiccup) does NOT roll back delivery; we

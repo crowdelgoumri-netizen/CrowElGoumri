@@ -33,6 +33,7 @@ import {
   computePayoutBreakdown,
 } from "../lib/stripe.js";
 import { releaseEscrowForParcel } from "../lib/escrow-service.js";
+import { notify } from "../lib/notifications.js";
 
 // ── Escrow state machine ─────────────────────────────────────────────
 type EscrowStatus =
@@ -270,6 +271,20 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
           where: { parcelId, status: "FUNDED" },
           data: { status: "LOCKED", lockedAt: new Date() },
         });
+        // Notify the sender their payment is secured. Best-effort — the
+        // webhook must return 200 fast regardless of notification outcome.
+        // notify() swallows provider errors internally, so this won't throw.
+        const escrow = await prisma.escrowLedger.findUnique({
+          where: { parcelId },
+          select: { senderId: true, totalAmount: true, currency: true },
+        });
+        if (escrow) {
+          notify(escrow.senderId, "ESCROW_FUNDED", {
+            parcelId,
+            amount: Number(escrow.totalAmount),
+            currency: escrow.currency,
+          }).catch((e) => req.log.warn({ err: String(e) }, "ESCROW_FUNDED notify failed"));
+        }
         break;
       }
       case "charge.refunded": {
@@ -472,6 +487,14 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
         where: { parcelId },
         data: { status: "REFUNDED_SENDER", refundedAt: new Date() },
       });
+
+      // Sender initiated this refund; let them know it landed.
+      await notify(escrow.senderId, "ESCROW_REFUNDED", {
+        parcelId,
+        amount: Number(updated.totalAmount),
+        currency: updated.currency,
+      });
+
       return { escrow: updated };
     },
   );

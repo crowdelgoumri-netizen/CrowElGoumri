@@ -24,6 +24,7 @@
 import type { EscrowLedger } from "@crowdshipping/db";
 import { prisma } from "@crowdshipping/db";
 import { getStripe, toCents } from "./stripe.js";
+import { notify } from "./notifications.js";
 
 type EscrowStatus = EscrowLedger["status"];
 
@@ -110,6 +111,16 @@ export async function releaseEscrowForParcel(
       stripeTransferId: transferId,
       payoutMethod: "LEMONWAY_WALLET", // placeholder until a CONNECT payout enum value exists
     },
+  });
+
+  // Tell the traveler their payout landed. Best-effort — a push failure
+  // never un-releases the escrow.
+  notify(travelerId, "PAYOUT_SENT", {
+    parcelId,
+    amount: Number(updated.travelerPayout),
+    currency: updated.currency,
+  }).catch(() => {
+    /* swallowed: provider errors are logged inside notify() */
   });
 
   return { kind: "released", escrow: updated, transferId };

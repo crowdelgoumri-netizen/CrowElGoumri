@@ -23,6 +23,7 @@ import {
   type MatchableTrip,
   type LatLng,
 } from "@crowdshipping/matching";
+import { notify } from "../lib/notifications.js";
 
 // ── Helpers: extract LatLng from a CrowdShippingAddress JSON ─────────
 function addrToLatLng(addr: unknown): LatLng | null {
@@ -252,7 +253,14 @@ export const matchingRoutes: FastifyPluginAsync = async (app) => {
 
       const parcel = await prisma.parcel.findUnique({
         where: { id: parcelId },
-        select: { id: true, weightKg: true, status: true, matchedTripId: true },
+        select: {
+          id: true,
+          weightKg: true,
+          status: true,
+          matchedTripId: true,
+          senderId: true,
+          sender: { select: { firstName: true } },
+        },
       });
       if (!parcel) return reply.code(404).send({ error: "Parcel not found" });
       if (parcel.status !== "PENDING_MATCH") {
@@ -279,6 +287,24 @@ export const matchingRoutes: FastifyPluginAsync = async (app) => {
             currentWeightKg: { increment: parcel.weightKg },
             status: "MATCHING",
           },
+        }),
+      ]);
+
+      // Notify both parties. Fire-and-forget semantics inside notify();
+      // a push outage never rolls back the match. The sender learns their
+      // parcel was accepted; the traveler gets a receipt of what they took.
+      const traveler = await prisma.user.findUnique({
+        where: { id: req.user.sub },
+        select: { firstName: true },
+      });
+      await Promise.all([
+        notify(parcel.senderId, "MATCH_FOUND", {
+          parcelId,
+          travelerName: traveler?.firstName,
+        }),
+        notify(req.user.sub, "MATCH_FOUND", {
+          parcelId,
+          senderName: parcel.sender.firstName,
         }),
       ]);
 

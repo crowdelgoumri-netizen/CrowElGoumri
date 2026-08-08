@@ -19,6 +19,8 @@ import { parcelRoutes } from "./routes/parcels.js";
 import { tripRoutes } from "./routes/trips.js";
 import { matchingRoutes } from "./routes/matching.js";
 import { escrowRoutes } from "./routes/escrow.js";
+import { chatRoutes } from "./routes/chat.js";
+import { realtimePlugin } from "./plugins/realtime.js";
 
 async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -50,6 +52,10 @@ async function buildServer(): Promise<FastifyInstance> {
   // ── Plugins (auth must register before routes that use it) ───────
   await app.register(authPlugin);
 
+  // Socket.IO, attached to the same HTTP server. Registered after auth so
+  // the socket handshake can verify JWTs with the shared @fastify/jwt.
+  await app.register(realtimePlugin);
+
   // Raw body capture, scoped to the Stripe webhook route only — every
   // other route pays nothing. Stripe's constructEvent needs the verbatim
   // request buffer to verify the signature.
@@ -69,9 +75,7 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(tripRoutes, { prefix: "/trips" });
   await app.register(matchingRoutes, { prefix: "/matching" });
   await app.register(escrowRoutes, { prefix: "/escrow" });
-
-  // Route groups to be registered as phases progress:
-  //   /chat        — Phase 5
+  await app.register(chatRoutes, { prefix: "/chat" });
 
   return app;
 }

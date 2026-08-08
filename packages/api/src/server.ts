@@ -7,6 +7,7 @@
  */
 import Fastify, { type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
+import rawBody from "fastify-raw-body";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { env } from "./env.js";
@@ -17,6 +18,7 @@ import { meRoutes } from "./routes/me.js";
 import { parcelRoutes } from "./routes/parcels.js";
 import { tripRoutes } from "./routes/trips.js";
 import { matchingRoutes } from "./routes/matching.js";
+import { escrowRoutes } from "./routes/escrow.js";
 
 async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -48,6 +50,17 @@ async function buildServer(): Promise<FastifyInstance> {
   // ── Plugins (auth must register before routes that use it) ───────
   await app.register(authPlugin);
 
+  // Raw body capture, scoped to the Stripe webhook route only — every
+  // other route pays nothing. Stripe's constructEvent needs the verbatim
+  // request buffer to verify the signature.
+  await app.register(rawBody, {
+    field: "rawBody",
+    global: false,
+    encoding: null,
+    runFirst: true,
+    routes: ["/escrow/webhook", "/escrow/webhook/*"],
+  });
+
   // ── Routes ───────────────────────────────────────────────────────
   await app.register(healthRoutes, { prefix: "/health" });
   await app.register(authRoutes, { prefix: "/auth" });
@@ -55,9 +68,9 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(parcelRoutes, { prefix: "/parcels" });
   await app.register(tripRoutes, { prefix: "/trips" });
   await app.register(matchingRoutes, { prefix: "/matching" });
+  await app.register(escrowRoutes, { prefix: "/escrow" });
 
   // Route groups to be registered as phases progress:
-  //   /escrow      — Phase 4
   //   /chat        — Phase 5
 
   return app;

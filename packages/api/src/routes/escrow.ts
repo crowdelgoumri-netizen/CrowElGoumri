@@ -32,6 +32,7 @@ import {
   toCents,
   computePayoutBreakdown,
 } from "../lib/stripe.js";
+import { releaseEscrowForParcel } from "../lib/escrow-service.js";
 
 // ── Escrow state machine ─────────────────────────────────────────────
 type EscrowStatus =
@@ -368,72 +369,57 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
   );
 
   // ── POST /escrow/:parcelId/release — pay out the traveler ──────────
-  // Called when the parcel reaches DELIVERED. v1 exposes it as an explicit
-  // endpoint; the delivery-tracking phase will call it automatically.
+  // Manual release (admin/traveler). Automatic release on DELIVERED is
+  // driven by the delivery route, which calls releaseEscrowForParcel
+  // directly — this endpoint is the manual override + retry path.
   app.post(
     "/:parcelId/release",
     { preHandler: [app.authenticate] },
     async (req, reply) => {
       const { parcelId } = req.params as { parcelId: string };
+
+      // Authorization check first: only the matched traveler or an admin
+      // may trigger a release. The helper below is auth-agnostic so it can
+      // be reused by the delivery flow.
       const escrow = await prisma.escrowLedger.findUnique({
         where: { parcelId },
         include: {
-          parcel: {
-            select: { status: true, matchedTrip: { select: { travelerId: true } } },
-          },
+          parcel: { select: { matchedTrip: { select: { travelerId: true } } } },
         },
       });
       if (!escrow) return reply.code(404).send({ error: "No escrow for this parcel" });
-
-      // v1: only the traveler who owns the parcel, or an admin, triggers
-      // release. (Auto-release wires in later.)
       const travelerId = escrow.parcel.matchedTrip?.travelerId;
-      const isParty = req.user.sub === travelerId || req.user.role === "ADMIN";
-      if (!isParty) return reply.code(403).send({ error: "Not authorized to release" });
-      if (escrow.parcel.status !== "DELIVERED") {
-        return reply.code(409).send({
-          error: `Parcel must be DELIVERED to release (is ${escrow.parcel.status})`,
-        });
-      }
-      const from = escrow.status as EscrowStatus;
-      if (!assertTransition(from, "RELEASED")) {
-        return reply.code(409).send({ error: `Escrow ${from} cannot transition to RELEASED` });
+      if (req.user.sub !== travelerId && req.user.role !== "ADMIN") {
+        return reply.code(403).send({ error: "Not authorized to release" });
       }
 
-      const traveler = await prisma.user.findUnique({
-        where: { id: travelerId! },
-        select: { stripeAccountId: true, stripePayoutsEnabled: true },
-      });
-      if (!traveler?.stripeAccountId) {
-        return reply.code(409).send({ error: "Traveler has not started Stripe Connect onboarding" });
+      const result = await releaseEscrowForParcel(parcelId);
+      switch (result.kind) {
+        case "released":
+          return { escrow: result.escrow };
+        case "no-escrow":
+          return reply.code(404).send({ error: "No escrow for this parcel" });
+        case "not-delivered":
+          return reply.code(409).send({
+            error: `Parcel must be DELIVERED to release (is ${result.parcelStatus})`,
+          });
+        case "bad-state":
+          return reply.code(409).send({
+            error: `Escrow ${result.escrowStatus} cannot transition to RELEASED`,
+          });
+        case "not-ready":
+          return reply.code(409).send({ error: result.reason });
+        case "transfer-failed":
+          // The Stripe transfer failed, but the parcel is delivered. Surface
+          // a retryable error rather than masking it as success.
+          req.log.error(
+            { parcelId, err: result.error },
+            "escrow release: Stripe transfer failed",
+          );
+          return reply.code(502).send({
+            error: "Payout transfer failed; parcel is delivered, retry release",
+          });
       }
-      if (!traveler.stripePayoutsEnabled) {
-        return reply.code(409).send({ error: "Traveler Connect account payouts not enabled" });
-      }
-
-      const stripe = getStripe();
-      const transfer = await stripe.transfers.create({
-        amount: toCents(escrow.travelerPayout),
-        currency: "eur",
-        destination: traveler.stripeAccountId,
-        // transfer_data takes the fee implicitly: we charged the sender the
-        // full total, then transfer only the net to the traveler; the fee
-        // remains on the platform balance. (Stripe's "separate charges &
-        // transfers" flow.)
-        metadata: { parcelId, escrowId: escrow.id },
-      });
-
-      const updated = await prisma.escrowLedger.update({
-        where: { parcelId },
-        data: {
-          status: "RELEASED",
-          releasedAt: new Date(),
-          stripeTransferId: transfer.id,
-          payoutMethod: "LEMONWAY_WALLET", // placeholder until Connect-payout is its own enum value
-        },
-      });
-
-      return { escrow: updated };
     },
   );
 

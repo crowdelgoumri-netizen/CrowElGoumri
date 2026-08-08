@@ -286,6 +286,11 @@ model Parcel {
   matchedTrip     Trip?        @relation("TripParcels", fields: [matchedTripId], references: [id])
   matchedAt       DateTime?
 
+  // Delivery lifecycle timestamps (single source of truth for revenue/trust
+  // timing — checkpoints hold the rich audit trail, these hold the moments).
+  pickedUpAt      DateTime?    // traveler confirmed physical pickup
+  deliveredAt     DateTime?    // PIN-verified delivery confirmation
+
   // Customs (manual in v1 — disclaimer in ToS, no automated engine)
   customsCategory String?
   requiresDeclaration Boolean   @default(false)

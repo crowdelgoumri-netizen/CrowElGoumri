@@ -11,6 +11,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { prisma, Prisma } from "@crowdshipping/db";
+import { assertTripTransition } from "../lib/lifecycle.js";
 
 const asJson = (addr: unknown) => addr as Prisma.InputJsonValue;
 
@@ -304,6 +305,131 @@ export const tripRoutes: FastifyPluginAsync = async (app) => {
       });
 
       return { trip };
+    },
+  );
+
+  // ═══════════════════════════════════════════════════════════════════
+  // TRIP CHECKPOINTS — Phase 6
+  // An audit trail of the trip's physical progress: departure, customs,
+  // arrival, etc. Some checkpoint types also drive the trip state machine.
+  // ═══════════════════════════════════════════════════════════════════
+
+  const checkpointSchema = z.object({
+    type: z.enum([
+      "DEPARTURE", "PICKUP", "TRANSIT", "CUSTOMS",
+      "ARRIVAL", "DELIVERY",
+    ]),
+    location: z.object({
+      lat: z.number().optional(),
+      lng: z.number().optional(),
+      address: z.string().optional(),
+      timestamp: z.string().datetime().optional(),
+    }).passthrough(),
+    notes: z.string().max(2000).optional(),
+    photoUrl: z.string().url().optional(),
+    temperatureC: z.number().optional(), // cold-chain tracking
+  });
+
+  // POST /trips/:id/checkpoint — traveler records a checkpoint.
+  app.post(
+    "/:id/checkpoint",
+    { preHandler: [app.authenticate] },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+      const parsed = checkpointSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.code(400).send({ error: parsed.error.flatten() });
+      }
+      const input = parsed.data;
+
+      const trip = await prisma.trip.findUnique({
+        where: { id },
+        select: {
+          travelerId: true, status: true,
+          parcels: { select: { id: true, status: true } },
+        },
+      });
+      if (!trip) return reply.code(404).send({ error: "Trip not found" });
+      if (trip.travelerId !== req.user.sub) {
+        return reply.code(403).send({ error: "Not your trip" });
+      }
+
+      // DEPARTURE advances the trip into IN_PROGRESS; ARRIVAL may complete
+      // it (only if every parcel is delivered). Other types are pure audit.
+      let newTripStatus = trip.status;
+      let actualArrival: Date | undefined;
+      if (input.type === "DEPARTURE") {
+        if (!assertTripTransition(trip.status, "IN_PROGRESS")) {
+          return reply.code(409).send({
+            error: `Trip cannot go ${trip.status} → IN_PROGRESS`,
+          });
+        }
+        newTripStatus = "IN_PROGRESS";
+      } else if (input.type === "ARRIVAL") {
+        actualArrival = new Date();
+        // A trip completes on arrival only when no parcel remains undelivered
+        // (traveler could still be hand-carrying a just-arrived parcel to its
+        // recipient). Otherwise it stays IN_PROGRESS until the last delivery.
+        const allDelivered = trip.parcels.length > 0 &&
+          trip.parcels.every((p) => p.status === "DELIVERED");
+        if (allDelivered && assertTripTransition(trip.status, "COMPLETED")) {
+          newTripStatus = "COMPLETED";
+        }
+      }
+
+      const [checkpoint] = await prisma.$transaction([
+        prisma.tripCheckpoint.create({
+          data: {
+            tripId: id,
+            type: input.type,
+            location: input.location as Prisma.InputJsonValue,
+            notes: input.notes,
+            photoUrl: input.photoUrl,
+            temperatureC: input.temperatureC,
+          },
+        }),
+        ...(newTripStatus !== trip.status || actualArrival
+          ? [prisma.trip.update({
+              where: { id },
+              data: {
+                ...(newTripStatus !== trip.status ? { status: newTripStatus } : {}),
+                ...(actualArrival ? { actualArrival } : {}),
+              },
+            })]
+          : []),
+      ]);
+
+      return reply.code(201).send({ checkpoint, tripStatus: newTripStatus });
+    },
+  );
+
+  // GET /trips/:id/checkpoints — chronological audit trail.
+  // Visible to the traveler and to senders with a parcel on this trip.
+  app.get(
+    "/:id/checkpoints",
+    { preHandler: [app.authenticate] },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+      const trip = await prisma.trip.findUnique({
+        where: { id },
+        select: {
+          travelerId: true,
+          parcels: { select: { senderId: true } },
+        },
+      });
+      if (!trip) return reply.code(404).send({ error: "Trip not found" });
+
+      const isTraveler = trip.travelerId === req.user.sub;
+      const isSenderOnTrip = trip.parcels.some((p) => p.senderId === req.user.sub);
+      if (!isTraveler && !isSenderOnTrip) {
+        return reply.code(403).send({ error: "Not a party to this trip" });
+      }
+
+      const checkpoints = await prisma.tripCheckpoint.findMany({
+        where: { tripId: id },
+        orderBy: { createdAt: "asc" },
+      });
+      return { checkpoints };
     },
   );
 };

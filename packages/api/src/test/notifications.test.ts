@@ -19,7 +19,7 @@ describe("message templates", () => {
   const types: NotificationType[] = [
     "MATCH_FOUND", "PARCEL_PICKED_UP", "IN_TRANSIT", "AWAITING_DELIVERY",
     "DELIVERED", "PAYOUT_SENT", "ESCROW_FUNDED", "ESCROW_REFUNDED",
-    "CHAT_MESSAGE",
+    "CHAT_MESSAGE", "KYC_APPROVED", "KYC_REJECTED",
   ];
 
   for (const type of types) {
@@ -30,6 +30,8 @@ describe("message templates", () => {
         currency: "EUR",
         senderName: "Karim",
         chatPreview: "Bonjour",
+        kycLevel: "ENHANCED",
+        reviewNote: "Document illisible",
       });
       assert.ok(typeof title === "string" && title.length > 0, "title empty");
       assert.ok(typeof body === "string" && body.length > 0, "body empty");
@@ -54,6 +56,21 @@ describe("message templates", () => {
 
   it("truncation-safe CHAT_MESSAGE with empty preview still renders", () => {
     const { body } = renderMessage("CHAT_MESSAGE", {});
+    assert.ok(body.length > 0);
+  });
+
+  it("interpolates the target level into KYC_APPROVED", () => {
+    const { body } = renderMessage("KYC_APPROVED", { kycLevel: "FULL" });
+    assert.ok(body.includes("FULL"), `expected FULL in: ${body}`);
+  });
+
+  it("includes the reviewer's note in KYC_REJECTED when present", () => {
+    const { body } = renderMessage("KYC_REJECTED", { reviewNote: "Photo floue" });
+    assert.ok(body.includes("Photo floue"), `expected note in: ${body}`);
+  });
+
+  it("KYC_REJECTED falls back to a generic message without a note", () => {
+    const { body } = renderMessage("KYC_REJECTED", {});
     assert.ok(body.length > 0);
   });
 });

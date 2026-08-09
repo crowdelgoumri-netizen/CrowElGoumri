@@ -32,7 +32,9 @@ export type NotificationType =
   | "PAYOUT_SENT"
   | "ESCROW_FUNDED"
   | "ESCROW_REFUNDED"
-  | "CHAT_MESSAGE";
+  | "CHAT_MESSAGE"
+  | "KYC_APPROVED"
+  | "KYC_REJECTED";
 
 /** Payload routes carry into notify(); templates read what they need. */
 export interface NotificationPayload {
@@ -42,6 +44,8 @@ export interface NotificationPayload {
   senderName?: string;
   travelerName?: string;
   chatPreview?: string;
+  kycLevel?: string;
+  reviewNote?: string;
   [k: string]: unknown;
 }
 
@@ -104,6 +108,16 @@ const TEMPLATES: Record<
   CHAT_MESSAGE: (p) => ({
     title: p.senderName ?? "Nouveau message",
     body: p.chatPreview ?? "Vous a envoyé un message.",
+  }),
+  KYC_APPROVED: (p) => ({
+    title: "Vérification approuvée ✅",
+    body: `Votre identité est vérifiée (niveau ${p.kycLevel ?? "supérieur"}).`,
+  }),
+  KYC_REJECTED: (p) => ({
+    title: "Vérification refusée ❌",
+    body: p.reviewNote
+      ? `Votre document a été refusé : ${p.reviewNote}`
+      : "Votre document a été refusé. Merci de le soumettre à nouveau.",
   }),
 };
 

@@ -171,6 +171,7 @@ model User {
   escrowAsSender  EscrowLedger[] @relation("EscrowSender")
   escrowAsTraveler EscrowLedger[] @relation("EscrowTraveler")
   notifications   Notification[]
+  kycSubmissions  KycSubmission[]
 
   @@index([trustScore])
   @@index([kycLevel])
@@ -464,4 +465,34 @@ model ChatMessage {
 
   @@index([parcelId, createdAt])
   @@index([senderId])
+}
+
+model KycSubmission {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+
+  // Documents (URLs — client uploads to S3, sends the URL here; same
+  // convention as Parcel.photoUrls. S3 integration itself is a dedicated
+  // cross-cutting phase.)
+  documentType    String    // "PASSPORT" | "NATIONAL_ID" | "DRIVERS_LICENSE" | "RESIDENCY_PERMIT"
+  documentUrl     String    // front of the ID
+  documentBackUrl String?   // back, for two-sided documents
+  selfieUrl       String    // liveness selfie (manual review in v1; auto-liveness with Sumsub later)
+
+  // Review state machine: PENDING → APPROVED | REJECTED
+  status          String    @default("PENDING")
+  reviewerId      String?   // admin userId who decided
+  reviewNote      String?   @db.Text // rejection reason or approval note
+  reviewedAt      DateTime?
+
+  // What KYC level to grant on approval — lets the same flow request
+  // ENHANCED (ID+selfie) or FULL (also proof of address, attached as an
+  // extra documentBackUrl/documentUrl variant in v1).
+  targetLevel     String    // "ENHANCED" | "FULL"
+
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+  @@index([status])
 }

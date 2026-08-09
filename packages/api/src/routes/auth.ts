@@ -17,6 +17,7 @@ import { z } from "zod";
 import { prisma } from "@crowdshipping/db";
 import { hashPassword, verifyPassword } from "../lib/password.js";
 import { signAccessToken, signRefreshToken } from "../lib/jwt.js";
+import { recomputeTrustForUser } from "../lib/trust-service.js";
 
 // ── Schemas ──────────────────────────────────────────────────────────
 const signupSchema = z.object({
@@ -123,6 +124,9 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       data: { kycLevel: "BASIC", kycVerifiedAt: new Date() },
       select: { id: true, kycLevel: true },
     });
+    // Trust weighs kycLevel directly — recompute now instead of leaving the
+    // cached User.trustScore/trustBadge stale until some later signal fires.
+    await recomputeTrustForUser(user.id);
 
     const accessToken = signAccessToken(app, {
       sub: user.id,

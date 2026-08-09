@@ -12,6 +12,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { env } from "./env.js";
 import { authPlugin } from "./plugins/auth.js";
+import { adminPlugin } from "./plugins/admin.js";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
@@ -21,6 +22,7 @@ import { matchingRoutes } from "./routes/matching.js";
 import { escrowRoutes } from "./routes/escrow.js";
 import { chatRoutes } from "./routes/chat.js";
 import { notificationRoutes } from "./routes/notifications.js";
+import { kycRoutes } from "./routes/kyc.js";
 import { realtimePlugin } from "./plugins/realtime.js";
 
 async function buildServer(): Promise<FastifyInstance> {
@@ -52,6 +54,8 @@ async function buildServer(): Promise<FastifyInstance> {
 
   // ── Plugins (auth must register before routes that use it) ───────
   await app.register(authPlugin);
+  // requireAdmin builds on authenticate's req.user — register after it.
+  await app.register(adminPlugin);
 
   // Socket.IO, attached to the same HTTP server. Registered after auth so
   // the socket handshake can verify JWTs with the shared @fastify/jwt.
@@ -78,6 +82,7 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(escrowRoutes, { prefix: "/escrow" });
   await app.register(chatRoutes, { prefix: "/chat" });
   await app.register(notificationRoutes, { prefix: "/notifications" });
+  await app.register(kycRoutes, { prefix: "/kyc" });
 
   return app;
 }

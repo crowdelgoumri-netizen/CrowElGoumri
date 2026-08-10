@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "CrowdShipping",
+    "slug": "crowdshipping",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "crowdshipping",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.crowdshipping.app" },
+    "android": {
+      "package": "com.crowdshipping.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "server"
+    },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": false, "tsconfigPaths": false }
+  }
+}

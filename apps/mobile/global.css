@@ -1,0 +1,8 @@
+/**
+ * NativeWind entry — @tailwind directives. Imported once in the root layout.
+ * Tailwind config (tailwind.config.ts) maps the design-board tokens to
+ * utilities; this file just turns them on.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

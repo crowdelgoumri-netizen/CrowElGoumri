@@ -6,3 +6,10 @@ allowBuilds:
   "@prisma/engines": true
   esbuild: true
   prisma: true
+# Force react-native-reanimated to the expo-52-compatible 3.x line. Without
+# this, pnpm resolves the loose reanimated peer (declared by expo-router &
+# nativewind's css-interop) to 4.x, which pulls react-native-worklets →
+# @react-native/metro-config@0.86 → metro@0.84 → metro-cache@0.84, whose
+# restrictive `exports` map breaks Metro config load under pnpm hoisting.
+overrides:
+  react-native-reanimated: "~3.16.0"

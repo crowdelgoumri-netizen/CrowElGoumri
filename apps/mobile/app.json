@@ -7,15 +7,36 @@
     "scheme": "crowdshipping",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": true, "bundleIdentifier": "com.crowdshipping.app" },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.crowdshipping.app"
+    },
     "android": {
-      "package": "com.crowdshipping.app"
+      "package": "com.crowdshipping.app",
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
       "output": "server"
     },
-    "plugins": ["expo-router"],
-    "experiments": { "typedRoutes": false, "tsconfigPaths": false }
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#FF6A2B",
+          "defaultChannel": "default"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:4000",
+      "twilioVerifySid": ""
+    },
+    "experiments": {
+      "typedRoutes": false,
+      "tsconfigPaths": false
+    }
   }
 }

@@ -15,10 +15,13 @@
 import Constants from "expo-constants";
 
 // expo's public env: must be prefixed EXPO_PUBLIC_, inlined at build.
+// Prefer EXPO_PUBLIC_* (works with a plain app.json, overrideable per env);
+// fall back to the app.json `extra` block, then localhost for dev.
 const extra = Constants.expoConfig?.extra as
   | { apiUrl?: string; twilioVerifySid?: string }
   | undefined;
-const BASE_URL = extra?.apiUrl ?? "http://localhost:4000";
+export const BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? extra?.apiUrl ?? "http://localhost:4000";
 
 /**
  * Whether the backend is running in dev OTP mode (TWILIO_VERIFY_SERVICE_SID
@@ -155,5 +158,3 @@ export async function apiFetch<T>(
   const text = await res.text();
   return (text ? JSON.parse(text) : null) as T;
 }
-
-export { BASE_URL };

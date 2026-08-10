@@ -214,7 +214,11 @@ export const matchingRoutes: FastifyPluginAsync = async (app) => {
             pickup: addrToLatLng(p.pickupAddress),
             delivery: addrToLatLng(p.deliveryAddress),
           };
-          return computeMatchScore(matchableParcel, matchableTrip);
+          // The engine scores against the single trip and returns tripId/
+          // travelerId only; attach the parcelId here so the traveler knows
+          // which parcel each ranked result refers to (POST /matching/accept).
+          const m = computeMatchScore(matchableParcel, matchableTrip);
+          return m ? { ...m, parcelId: p.id } : null;
         })
         .filter((m): m is NonNullable<typeof m> => m !== null)
         .sort((a, b) => b.score - a.score)

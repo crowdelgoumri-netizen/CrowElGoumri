@@ -31,7 +31,7 @@ export default function LoginScreen() {
         { accessToken: session.accessToken, refreshToken: session.refreshToken },
         null,
       );
-      router.replace("/home");
+      router.replace("/(tabs)");
     } catch (e) {
       if (e instanceof ApiError && e.status === 403) {
         // Backend signals unverified phone; bounce to verify with the phone

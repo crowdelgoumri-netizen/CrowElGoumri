@@ -35,7 +35,7 @@ export default function VerifyPhoneScreen() {
         { accessToken: session.accessToken, refreshToken: session.refreshToken },
         null,
       );
-      router.replace("/home");
+      router.replace("/(tabs)");
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : "Code invalide";
       Alert.alert("Vérification impossible", msg);

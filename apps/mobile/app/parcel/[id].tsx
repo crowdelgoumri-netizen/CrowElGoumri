@@ -16,6 +16,7 @@ import { Card } from "../../src/components/Card";
 import { StatusPill } from "../../src/components/StatusPill";
 import { Button } from "../../src/components/Button";
 import { Avatar } from "../../src/components/Avatar";
+import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import {
   cancelParcel,
@@ -39,6 +40,7 @@ export default function ParcelDetailScreen() {
     () => getParcel(id),
     [id],
   );
+  const user = useAuth((s) => s.user);
   const [busy, setBusy] = useState(false);
   const parcel = data?.parcel;
 
@@ -66,6 +68,8 @@ export default function ParcelDetailScreen() {
   const matched = parcel.status !== "PENDING_MATCH" && parcel.status !== "DRAFT" && parcel.status !== "CANCELLED";
   const inMotion = ["AWAITING_PICKUP", "IN_TRANSIT", "AWAITING_DELIVERY"].includes(parcel.status);
   const canCancel = ["DRAFT", "PENDING_MATCH", "MATCHED"].includes(parcel.status);
+  const isTraveler = !!user && parcel.matchedTrip?.traveler?.id === user.id;
+  const canReport = matched && (isTraveler || parcel.senderId === user?.id);
 
   async function onGeneratePin() {
     setBusy(true);
@@ -178,6 +182,17 @@ export default function ParcelDetailScreen() {
           ) : null}
           {canCancel ? (
             <Button label="Annuler ce colis" variant="ghost" onPress={onCancel} loading={busy} />
+          ) : null}
+          {canReport ? (
+            <Button
+              label="Signaler un problème"
+              variant="ghost"
+              onPress={() =>
+                router.push(
+                  `/report/${parcel.id}?role=${isTraveler ? "traveler" : "sender"}`,
+                )
+              }
+            />
           ) : null}
         </View>
       </ScrollView>

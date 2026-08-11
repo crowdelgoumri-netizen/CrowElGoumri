@@ -42,8 +42,6 @@ export default function SettingsScreen() {
         <PressableRow icon="notifications" label="Réactiver les notifications" onPress={reRegisterPush} />
         <Divider />
         <PressableRow icon="help-circle-outline" label="Comment ça marche" onPress={() => router.push("/onboarding")} />
-        <Divider />
-        <PressableRow icon="flag-outline" label="Signaler un problème" onPress={() => router.push("/report")} />
       </Card>
 
       <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">À propos</Text>

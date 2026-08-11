@@ -46,18 +46,38 @@ export async function isPushEnabled(): Promise<boolean> {
 
 /**
  * Flip the push preference. Disabling unregisters the last-known token from
- * the backend (best-effort) and clears it locally, so a later re-enable
- * requests a fresh token instead of assuming the old one still resolves.
+ * the backend and clears it locally only once that unregister succeeds, so a
+ * later re-enable requests a fresh token instead of assuming the old one
+ * still resolves.
+ *
+ * Installs that predate this feature never wrote a local token even though
+ * they're already registered server-side (registerForPush() short-circuits
+ * while push is disabled). For those, fall back to asking Expo for the
+ * device's current push token directly — permission is already granted at
+ * this point since the app has been sending pushes, so this prompts nothing
+ * new.
  */
 export async function setPushEnabled(enabled: boolean): Promise<void> {
   await saveJSON(STORAGE_KEYS.pushEnabled, enabled);
   if (!enabled) {
-    const token = await loadJSON<string>(STORAGE_KEYS.pushToken);
+    let token = await loadJSON<string>(STORAGE_KEYS.pushToken);
+    if (!token) {
+      try {
+        const { data } = await Notifications.getExpoPushTokenAsync();
+        token = typeof data === "string" ? data : String(data);
+      } catch {
+        // Simulator, no projectId, or permission genuinely never granted —
+        // nothing to unregister either way.
+      }
+    }
     if (token) {
-      await unregisterDeviceToken(token).catch(() => {
-        /* best-effort; the token still gets dropped locally below */
-      });
-      await remove(STORAGE_KEYS.pushToken);
+      try {
+        await unregisterDeviceToken(token);
+        await remove(STORAGE_KEYS.pushToken);
+      } catch {
+        // Unregister failed (network, etc.) — deliberately do NOT clear the
+        // local token, so a later attempt can still find and retry it.
+      }
     }
   }
 }

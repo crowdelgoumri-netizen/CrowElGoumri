@@ -37,6 +37,7 @@ export default function DeliveryScreen() {
   const {
     data: ratingsData,
     loading: ratingsLoading,
+    error: ratingsError,
     setData: setRatingsData,
   } = useAsync(() => getRatings(parcelId), [parcelId]);
 
@@ -119,8 +120,12 @@ export default function DeliveryScreen() {
                 La livraison a déjà été confirmée.
               </Text>
             </Card>
-            {ratingsLoading ? (
+            {!isSender && !isTraveler ? null : ratingsLoading ? (
               <Text className="text-muted">Chargement de votre avis…</Text>
+            ) : ratingsError ? (
+              <Text className="text-muted font-body text-sm">
+                Impossible de charger votre avis pour l'instant.
+              </Text>
             ) : myRating ? (
               <RatingSubmitted rating={myRating} />
             ) : (

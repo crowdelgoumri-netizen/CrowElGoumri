@@ -22,6 +22,7 @@ import { z } from "zod";
 import { prisma, Prisma } from "@crowdshipping/db";
 import {
   assertParcelParticipant,
+  counterpartyOf,
   HttpError,
 } from "../lib/chat-access.js";
 import { notify } from "../lib/notifications.js";
@@ -225,17 +226,18 @@ export const chatRoutes: FastifyPluginAsync = async (app) => {
       // Push-notify the counterparty — this is what makes chat feel real
       // when their socket is disconnected. The caller never gets blocked:
       // notify() swallows provider errors and the in-app row is fast.
-      const counterpartyId =
-        participant.role === "SENDER" ? participant.travelerId! : participant.senderId;
+      const counterpartyId = counterpartyOf(participant);
       const sender = await prisma.user.findUnique({
         where: { id: req.user.sub },
         select: { firstName: true },
       });
-      notify(counterpartyId, "CHAT_MESSAGE", {
-        parcelId,
-        senderName: sender?.firstName,
-        chatPreview: message.body.slice(0, 120),
-      }).catch(() => { /* provider errors logged inside notify() */ });
+      if (counterpartyId) {
+        notify(counterpartyId, "CHAT_MESSAGE", {
+          parcelId,
+          senderName: sender?.firstName,
+          chatPreview: message.body.slice(0, 120),
+        }).catch(() => { /* provider errors logged inside notify() */ });
+      }
 
       return reply.code(201).send({ message: { ...payload, readAt: null } });
     },

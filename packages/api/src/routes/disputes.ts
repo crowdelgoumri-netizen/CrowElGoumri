@@ -17,6 +17,7 @@ import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
 import { prisma, Prisma } from "@crowdshipping/db";
 import { assertParcelParticipant, counterpartyOf, HttpError } from "../lib/chat-access.js";
+import { assertParcelTransition } from "../lib/lifecycle.js";
 import { notify } from "../lib/notifications.js";
 
 const DISPUTE_REASONS = [
@@ -77,6 +78,19 @@ export const disputeRoutes: FastifyPluginAsync = async (app) => {
         return sendHttpError(reply, err);
       }
 
+      const parcel = await prisma.parcel.findUnique({
+        where: { id: parcelId },
+        select: { status: true },
+      });
+      if (!parcel) {
+        return reply.code(404).send({ error: "Parcel not found" });
+      }
+      if (!assertParcelTransition(parcel.status, "DISPUTED")) {
+        return reply.code(409).send({
+          error: `Parcel cannot transition ${parcel.status} → DISPUTED`,
+        });
+      }
+
       const existing = await prisma.dispute.findUnique({
         where: { parcelId },
         select: { id: true },
@@ -91,16 +105,22 @@ export const disputeRoutes: FastifyPluginAsync = async (app) => {
       const now = new Date();
       let dispute;
       try {
-        dispute = await prisma.dispute.create({
-          data: {
-            parcelId,
-            openedById: userId,
-            reason,
-            description,
-            status: "OPENED",
-            mustResolveBy: new Date(now.getTime() + SEVENTY_TWO_HOURS_MS),
-          },
-        });
+        [dispute] = await prisma.$transaction([
+          prisma.dispute.create({
+            data: {
+              parcelId,
+              openedById: userId,
+              reason,
+              description,
+              status: "OPENED",
+              mustResolveBy: new Date(now.getTime() + SEVENTY_TWO_HOURS_MS),
+            },
+          }),
+          prisma.parcel.update({
+            where: { id: parcelId },
+            data: { status: "DISPUTED" },
+          }),
+        ]);
       } catch (err) {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -112,11 +132,6 @@ export const disputeRoutes: FastifyPluginAsync = async (app) => {
         }
         throw err;
       }
-
-      await prisma.parcel.update({
-        where: { id: parcelId },
-        data: { status: "DISPUTED" },
-      });
 
       const counterpartyId = counterpartyOf(participant);
       if (counterpartyId) {

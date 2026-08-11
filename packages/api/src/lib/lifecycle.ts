@@ -27,7 +27,7 @@ const PARCEL_TRANSITIONS: Record<ParcelStatus, ParcelStatus[]> = {
   IN_TRANSIT: ["AWAITING_DELIVERY", "CUSTOMS_CHECK", "DISPUTED"],
   CUSTOMS_CHECK: ["IN_TRANSIT", "SEIZED", "DISPUTED"],
   AWAITING_DELIVERY: ["DELIVERED", "DISPUTED"],
-  DELIVERED: [], // terminal — triggers escrow release
+  DELIVERED: ["DISPUTED"], // escrow already released; a post-delivery report is still legal
   DISPUTED: ["DELIVERED", "CANCELLED"], // resolved by dispute flow
   CANCELLED: [], // terminal
   SEIZED: [], // terminal — customs seizure

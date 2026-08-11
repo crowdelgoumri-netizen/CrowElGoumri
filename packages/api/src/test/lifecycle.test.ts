@@ -60,6 +60,10 @@ describe("parcel lifecycle", () => {
     assert.ok(assertParcelTransition("IN_TRANSIT", "CUSTOMS_CHECK"));
     assert.ok(assertParcelTransition("CUSTOMS_CHECK", "IN_TRANSIT"));
   });
+
+  it("allows reporting a dispute after delivery", () => {
+    assert.ok(assertParcelTransition("DELIVERED", "DISPUTED"));
+  });
 });
 
 describe("trip lifecycle", () => {

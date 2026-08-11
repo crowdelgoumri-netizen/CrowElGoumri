@@ -69,7 +69,7 @@ export default function ParcelDetailScreen() {
   const inMotion = ["AWAITING_PICKUP", "IN_TRANSIT", "AWAITING_DELIVERY"].includes(parcel.status);
   const canCancel = ["DRAFT", "PENDING_MATCH", "MATCHED"].includes(parcel.status);
   const isTraveler = !!user && parcel.matchedTrip?.traveler?.id === user.id;
-  const canReport = matched && (isTraveler || parcel.senderId === user?.id);
+  const canReport = matched && parcel.status !== "SEIZED" && (isTraveler || parcel.senderId === user?.id);
 
   async function onGeneratePin() {
     setBusy(true);

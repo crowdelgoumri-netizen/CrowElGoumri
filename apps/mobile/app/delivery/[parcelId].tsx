@@ -36,6 +36,7 @@ export default function DeliveryScreen() {
   const parcel = data?.parcel;
   const {
     data: ratingsData,
+    loading: ratingsLoading,
     setData: setRatingsData,
   } = useAsync(() => getRatings(parcelId), [parcelId]);
 
@@ -118,7 +119,9 @@ export default function DeliveryScreen() {
                 La livraison a déjà été confirmée.
               </Text>
             </Card>
-            {myRating ? (
+            {ratingsLoading ? (
+              <Text className="text-muted">Chargement de votre avis…</Text>
+            ) : myRating ? (
               <RatingSubmitted rating={myRating} />
             ) : (
               <RatingPrompt

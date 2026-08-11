@@ -29,4 +29,6 @@ export async function remove(key: string): Promise<void> {
 export const STORAGE_KEYS = {
   tokens: "@crowdshipping/tokens",
   user: "@crowdshipping/user",
+  pushEnabled: "@crowdshipping/push-enabled",
+  pushToken: "@crowdshipping/push-token",
 } as const;

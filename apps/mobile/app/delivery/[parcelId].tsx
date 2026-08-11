@@ -12,7 +12,8 @@
  */
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
@@ -25,6 +26,7 @@ import {
   generateDeliveryPin,
   getParcel,
 } from "../../src/lib/parcels";
+import { getRatings, submitRating, type Rating } from "../../src/lib/ratings";
 import { ApiError } from "../../src/lib/api";
 
 export default function DeliveryScreen() {
@@ -32,6 +34,10 @@ export default function DeliveryScreen() {
   const user = useAuth((s) => s.user);
   const { data, loading, error, refresh } = useAsync(() => getParcel(parcelId), [parcelId]);
   const parcel = data?.parcel;
+  const {
+    data: ratingsData,
+    setData: setRatingsData,
+  } = useAsync(() => getRatings(parcelId), [parcelId]);
 
   const [pin, setPin] = useState("");
   const [revealedPin, setRevealedPin] = useState<string | null>(null);
@@ -59,6 +65,7 @@ export default function DeliveryScreen() {
 
   const isSender = !!user && parcel.senderId === user.id;
   const isTraveler = !!user && parcel.matchedTrip?.traveler?.id === user.id;
+  const myRating = ratingsData?.ratings.find((r) => r.fromUserId === user?.id) ?? null;
 
   async function onGenerate() {
     setBusy(true);
@@ -104,12 +111,26 @@ export default function DeliveryScreen() {
         <ScreenHeader title="Confirmation de livraison" />
 
         {parcel.status === "DELIVERED" ? (
-          <Card className="bg-success/10 border-success/30">
-            <Text className="text-success font-heading font-bold text-lg">Colis livré ✓</Text>
-            <Text className="text-mist font-body text-sm mt-1">
-              La livraison a déjà été confirmée.
-            </Text>
-          </Card>
+          <View className="gap-md">
+            <Card className="bg-success/10 border-success/30">
+              <Text className="text-success font-heading font-bold text-lg">Colis livré ✓</Text>
+              <Text className="text-mist font-body text-sm mt-1">
+                La livraison a déjà été confirmée.
+              </Text>
+            </Card>
+            {myRating ? (
+              <RatingSubmitted rating={myRating} />
+            ) : (
+              <RatingPrompt
+                parcelId={parcel.id}
+                onSubmitted={(rating) =>
+                  setRatingsData((prev) => ({
+                    ratings: [...(prev?.ratings ?? []), rating],
+                  }))
+                }
+              />
+            )}
+          </View>
         ) : isSender ? (
           <View className="gap-md">
             <Text className="text-white font-body">
@@ -158,5 +179,84 @@ export default function DeliveryScreen() {
         )}
       </ScrollView>
     </Screen>
+  );
+}
+
+function RatingPrompt({
+  parcelId,
+  onSubmitted,
+}: {
+  parcelId: string;
+  onSubmitted: (rating: Rating) => void;
+}) {
+  const [score, setScore] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit() {
+    if (score < 1) {
+      Alert.alert("Note manquante", "Choisissez une note de 1 à 5 étoiles.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { rating } = await submitRating({
+        parcelId,
+        score,
+        comment: comment.trim() || undefined,
+      });
+      onSubmitted(rating);
+    } catch (e) {
+      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Card className="gap-md">
+      <Text className="text-white font-heading font-bold">Notez votre expérience</Text>
+      <View className="flex-row gap-2 justify-center">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <Pressable key={n} onPress={() => setScore(n)} hitSlop={8}>
+            <Ionicons
+              name={n <= score ? "star" : "star-outline"}
+              size={32}
+              color="#FF6A2B"
+            />
+          </Pressable>
+        ))}
+      </View>
+      <Input
+        label="Commentaire (optionnel)"
+        value={comment}
+        onChangeText={setComment}
+        placeholder="Un mot sur votre expérience…"
+        multiline
+        className="h-20"
+      />
+      <Button label="Envoyer mon avis" onPress={submit} loading={submitting} />
+    </Card>
+  );
+}
+
+function RatingSubmitted({ rating }: { rating: Rating }) {
+  return (
+    <Card className="gap-2 bg-violet/10 border-violet/30">
+      <Text className="text-white font-body font-semibold">Merci pour votre avis !</Text>
+      <View className="flex-row gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <Ionicons
+            key={n}
+            name={n <= rating.score ? "star" : "star-outline"}
+            size={18}
+            color="#FF6A2B"
+          />
+        ))}
+      </View>
+      {rating.comment ? (
+        <Text className="text-muted font-body text-sm mt-1">{rating.comment}</Text>
+      ) : null}
+    </Card>
   );
 }

@@ -15,7 +15,7 @@
  */
 import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
-import { prisma } from "@crowdshipping/db";
+import { prisma, Prisma } from "@crowdshipping/db";
 import { assertParcelParticipant, counterpartyOf, HttpError } from "../lib/chat-access.js";
 import { notify } from "../lib/notifications.js";
 
@@ -89,16 +89,29 @@ export const disputeRoutes: FastifyPluginAsync = async (app) => {
       }
 
       const now = new Date();
-      const dispute = await prisma.dispute.create({
-        data: {
-          parcelId,
-          openedById: userId,
-          reason,
-          description,
-          status: "OPENED",
-          mustResolveBy: new Date(now.getTime() + SEVENTY_TWO_HOURS_MS),
-        },
-      });
+      let dispute;
+      try {
+        dispute = await prisma.dispute.create({
+          data: {
+            parcelId,
+            openedById: userId,
+            reason,
+            description,
+            status: "OPENED",
+            mustResolveBy: new Date(now.getTime() + SEVENTY_TWO_HOURS_MS),
+          },
+        });
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2002"
+        ) {
+          return reply.code(409).send({
+            error: "A dispute already exists for this parcel",
+          });
+        }
+        throw err;
+      }
 
       await prisma.parcel.update({
         where: { id: parcelId },

@@ -19,6 +19,18 @@ export type ParcelStatus =
   | "CANCELLED"
   | "SEIZED";
 
+export type DisputeReason =
+  | "PARCEL_NOT_DELIVERED"
+  | "PARCEL_DAMAGED"
+  | "PARCEL_STOLEN"
+  | "CUSTOMS_SEIZURE"
+  | "TRAVELER_NO_SHOW"
+  | "SENDER_NO_SHOW"
+  | "FRAUD_ATTEMPT"
+  | "OTHER";
+
+export type DisputeStatus = "OPENED" | "MEDIATING" | "ESCALATED" | "RESOLVED" | "CLOSED";
+
 export type TripStatus =
   | "DRAFT"
   | "PUBLISHED"

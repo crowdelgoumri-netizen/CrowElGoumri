@@ -6,6 +6,8 @@
  * NativeWind class strings in StatusPill (kept static so the JIT sees them).
  */
 import type {
+  DisputeReason,
+  DisputeStatus,
   EscrowStatus,
   KycLevel,
   ParcelCategory,
@@ -106,6 +108,25 @@ export const KYC_LEVEL: Record<KycLevel, { label: string; tone: Tone }> = {
   BASIC: { label: "Basique", tone: "muted" },
   ENHANCED: { label: "Vérifié", tone: "violet" },
   FULL: { label: "Premium", tone: "success" },
+};
+
+export const DISPUTE_REASON_LABEL: Record<DisputeReason, string> = {
+  PARCEL_NOT_DELIVERED: "Colis non livré",
+  PARCEL_DAMAGED: "Colis endommagé",
+  PARCEL_STOLEN: "Colis volé",
+  CUSTOMS_SEIZURE: "Saisie en douane",
+  TRAVELER_NO_SHOW: "Le voyageur n'est jamais venu",
+  SENDER_NO_SHOW: "L'expéditeur n'est jamais venu",
+  FRAUD_ATTEMPT: "Tentative de fraude",
+  OTHER: "Autre",
+};
+
+export const DISPUTE_STATUS: Record<DisputeStatus, { label: string; tone: Tone }> = {
+  OPENED: { label: "Ouvert", tone: "danger" },
+  MEDIATING: { label: "En médiation", tone: "accent" },
+  ESCALATED: { label: "Escaladé", tone: "danger" },
+  RESOLVED: { label: "Résolu", tone: "success" },
+  CLOSED: { label: "Clos", tone: "muted" },
 };
 
 export const MODE_LABEL: Record<TransportMode, string> = {

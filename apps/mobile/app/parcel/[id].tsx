@@ -70,6 +70,7 @@ export default function ParcelDetailScreen() {
   const canCancel = ["DRAFT", "PENDING_MATCH", "MATCHED"].includes(parcel.status);
   const isTraveler = !!user && parcel.matchedTrip?.traveler?.id === user.id;
   const canReport = matched && parcel.status !== "SEIZED" && (isTraveler || parcel.senderId === user?.id);
+  const canGoToDelivery = parcel.status === "AWAITING_DELIVERY" || parcel.status === "DELIVERED";
 
   async function onGeneratePin() {
     setBusy(true);
@@ -168,6 +169,13 @@ export default function ParcelDetailScreen() {
               variant="secondary"
               onPress={onGeneratePin}
               loading={busy}
+            />
+          ) : null}
+          {canGoToDelivery ? (
+            <Button
+              label={parcel.status === "DELIVERED" ? "Livraison & avis" : "Confirmer la livraison"}
+              variant="secondary"
+              onPress={() => router.push(`/delivery/${parcel.id}`)}
             />
           ) : null}
           {inMotion ? (

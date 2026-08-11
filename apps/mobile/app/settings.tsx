@@ -1,30 +1,42 @@
 /**
  * Settings (board 18) — account preferences + danger zone.
  *
- * Push re-registration, help/guide (onboarding), report an issue, and logout.
- * Lightweight on purpose: real preferences (language, notifications granular
- * controls) land with a settings subsystem phase.
+ * Push notification toggle, help/guide (onboarding), and logout.
+ * Lightweight on purpose: payment methods and a language selector aren't
+ * buildable yet (no saved-card API, no i18n infrastructure) — see
+ * docs/superpowers/specs/2026-08-11-settings-push-toggle-design.md.
  */
+import { useEffect, useState } from "react";
 import { router } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Switch, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Card } from "../src/components/Card";
 import { Button } from "../src/components/Button";
 import { useAuth } from "../src/store/auth";
-import { registerForPush } from "../src/lib/push";
-import { BASE_URL } from "../src/lib/api";
+import { isPushEnabled, registerForPush, setPushEnabled } from "../src/lib/push";
 
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
+  const [pushOn, setPushOn] = useState(true);
 
-  async function reRegisterPush() {
-    const token = await registerForPush();
-    Alert.alert(
-      "Notifications",
-      token ? "Ce périphérique est enregistré pour les notifications." : "Inscription impossible (simulateur ou permission refusée).",
-    );
+  useEffect(() => {
+    isPushEnabled().then(setPushOn);
+  }, []);
+
+  async function onTogglePush(next: boolean) {
+    setPushOn(next);
+    await setPushEnabled(next);
+    if (next) {
+      const token = await registerForPush();
+      if (!token) {
+        Alert.alert(
+          "Notifications",
+          "Inscription impossible (simulateur ou permission refusée).",
+        );
+      }
+    }
   }
 
   return (
@@ -33,13 +45,20 @@ export default function SettingsScreen() {
 
       <Card className="gap-1">
         <Row icon="information-circle-outline" label="Compte" value={user?.email} />
-        <Divider />
-        <Row icon="server-outline" label="Serveur API" value={BASE_URL.replace(/^https?:\/\//, "")} />
       </Card>
 
       <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">Préférences</Text>
       <Card className="gap-1">
-        <PressableRow icon="notifications" label="Réactiver les notifications" onPress={reRegisterPush} />
+        <View className="flex-row items-center py-sm">
+          <Ionicons name="notifications" size={20} color="#FF6A2B" />
+          <Text className="text-white font-body flex-1 ml-md">Notifications push</Text>
+          <Switch
+            value={pushOn}
+            onValueChange={onTogglePush}
+            trackColor={{ false: "#16213B", true: "#FF6A2B" }}
+            thumbColor="#F5F7FA"
+          />
+        </View>
         <Divider />
         <PressableRow icon="help-circle-outline" label="Comment ça marche" onPress={() => router.push("/onboarding")} />
       </Card>

@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 import { prisma } from "@crowdshipping/db";
 import {
   assertParcelParticipant,
+  counterpartyOf,
   HttpError,
 } from "../lib/chat-access.js";
 
@@ -69,6 +70,28 @@ describe("assertParcelParticipant", () => {
       () => assertParcelParticipant("missing", "u1"),
       (err: unknown) => err instanceof HttpError && err.status === 404,
     );
+  });
+});
+
+describe("counterpartyOf", () => {
+  it("returns the traveler when the caller is the sender", () => {
+    const id = counterpartyOf({
+      parcelId: "p1",
+      senderId: "u1",
+      travelerId: "u2",
+      role: "SENDER",
+    });
+    assert.strictEqual(id, "u2");
+  });
+
+  it("returns the sender when the caller is the traveler", () => {
+    const id = counterpartyOf({
+      parcelId: "p1",
+      senderId: "u1",
+      travelerId: "u2",
+      role: "TRAVELER",
+    });
+    assert.strictEqual(id, "u1");
   });
 });
 

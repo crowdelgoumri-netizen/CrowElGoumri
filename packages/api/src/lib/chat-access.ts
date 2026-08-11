@@ -67,3 +67,11 @@ export async function assertParcelParticipant(
 
   return { parcelId, senderId: parcel.senderId, travelerId, role };
 }
+
+/**
+ * The other party on a parcel thread, given the caller's resolved role.
+ * Shared by chat and disputes so "who's the counterparty" can't drift.
+ */
+export function counterpartyOf(p: ParcelParticipant): string | null {
+  return p.role === "SENDER" ? p.travelerId : p.senderId;
+}

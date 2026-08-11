@@ -19,7 +19,7 @@ describe("message templates", () => {
   const types: NotificationType[] = [
     "MATCH_FOUND", "PARCEL_PICKED_UP", "IN_TRANSIT", "AWAITING_DELIVERY",
     "DELIVERED", "PAYOUT_SENT", "ESCROW_FUNDED", "ESCROW_REFUNDED",
-    "CHAT_MESSAGE", "KYC_APPROVED", "KYC_REJECTED",
+    "CHAT_MESSAGE", "KYC_APPROVED", "KYC_REJECTED", "DISPUTE_OPENED",
   ];
 
   for (const type of types) {
@@ -32,6 +32,7 @@ describe("message templates", () => {
         chatPreview: "Bonjour",
         kycLevel: "ENHANCED",
         reviewNote: "Document illisible",
+        disputeReason: "Colis endommagé",
       });
       assert.ok(typeof title === "string" && title.length > 0, "title empty");
       assert.ok(typeof body === "string" && body.length > 0, "body empty");

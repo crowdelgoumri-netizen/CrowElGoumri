@@ -34,7 +34,8 @@ export type NotificationType =
   | "ESCROW_REFUNDED"
   | "CHAT_MESSAGE"
   | "KYC_APPROVED"
-  | "KYC_REJECTED";
+  | "KYC_REJECTED"
+  | "DISPUTE_OPENED";
 
 /** Payload routes carry into notify(); templates read what they need. */
 export interface NotificationPayload {
@@ -46,6 +47,7 @@ export interface NotificationPayload {
   chatPreview?: string;
   kycLevel?: string;
   reviewNote?: string;
+  disputeReason?: string;
   [k: string]: unknown;
 }
 
@@ -118,6 +120,12 @@ const TEMPLATES: Record<
     body: p.reviewNote
       ? `Votre document a été refusé : ${p.reviewNote}`
       : "Votre document a été refusé. Merci de le soumettre à nouveau.",
+  }),
+  DISPUTE_OPENED: (p) => ({
+    title: "Litige ouvert ⚠️",
+    body: p.disputeReason
+      ? `Un signalement a été ouvert pour votre colis (motif : ${p.disputeReason}).`
+      : "Un signalement a été ouvert pour votre colis.",
   }),
 };
 

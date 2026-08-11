@@ -66,7 +66,7 @@ export const ratingRoutes: FastifyPluginAsync = async (app) => {
       }
 
       const toUserId = counterpartyOf(participant);
-      if (!toUserId) {
+      if (!toUserId || toUserId === userId) {
         return reply.code(409).send({ error: "No counterparty to rate on this parcel" });
       }
 
@@ -96,7 +96,11 @@ export const ratingRoutes: FastifyPluginAsync = async (app) => {
         throw err;
       }
 
-      await recomputeAverageRating(toUserId);
+      try {
+        await recomputeAverageRating(toUserId);
+      } catch (err) {
+        app.log.error({ err, toUserId }, "Failed to recompute average rating after new rating");
+      }
 
       return reply.code(201).send({ rating });
     },

@@ -22,6 +22,9 @@ import {
   cancelParcel,
   generateDeliveryPin,
   getParcel,
+  markAwaitingDelivery,
+  markInTransit,
+  markPickedUp,
 } from "../../src/lib/parcels";
 import { ApiError } from "../../src/lib/api";
 import {
@@ -33,6 +36,17 @@ import {
   PARCEL_STATUS,
   URGENCY_LABEL,
 } from "../../src/lib/format";
+import type { Parcel } from "../../src/lib/parcels";
+
+/** Traveler-only status advance: MATCHED → AWAITING_PICKUP → IN_TRANSIT → AWAITING_DELIVERY. */
+const TRAVELER_STEPS: Record<
+  string,
+  { label: string; action: (id: string) => Promise<{ parcel: Parcel }> } | undefined
+> = {
+  MATCHED: { label: "Marquer le colis récupéré", action: markPickedUp },
+  AWAITING_PICKUP: { label: "Marquer en transit", action: markInTransit },
+  IN_TRANSIT: { label: "Marquer arrivé à destination", action: markAwaitingDelivery },
+};
 
 export default function ParcelDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -71,6 +85,22 @@ export default function ParcelDetailScreen() {
   const isTraveler = !!user && parcel.matchedTrip?.traveler?.id === user.id;
   const canReport = matched && parcel.status !== "SEIZED" && (isTraveler || parcel.senderId === user?.id);
   const canGoToDelivery = parcel.status === "AWAITING_DELIVERY" || parcel.status === "DELIVERED";
+  const travelerStep = isTraveler ? TRAVELER_STEPS[parcel.status] : undefined;
+
+  async function onAdvance() {
+    if (!travelerStep) return;
+    setBusy(true);
+    try {
+      // The lifecycle endpoints return the bare updated row (no relations),
+      // so refetch via getParcel to keep matchedTrip.traveler/sender populated.
+      await travelerStep.action(parcel!.id);
+      refresh();
+    } catch (e) {
+      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function onGeneratePin() {
     setBusy(true);
@@ -162,6 +192,9 @@ export default function ParcelDetailScreen() {
           ) : null}
           {parcel.status === "MATCHED" ? (
             <Button label="Sécuriser le paiement" onPress={() => router.push(`/escrow/${parcel.id}`)} />
+          ) : null}
+          {travelerStep ? (
+            <Button label={travelerStep.label} onPress={onAdvance} loading={busy} />
           ) : null}
           {matched ? (
             <Button

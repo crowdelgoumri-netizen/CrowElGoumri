@@ -7,6 +7,12 @@
       "runtimeArgs": ["--filter", "@crowdshipping/mobile", "exec", "expo", "start", "--web"],
       "port": 8081,
       "autoPort": true
+    },
+    {
+      "name": "crowdshipping-api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@crowdshipping/api", "dev"],
+      "port": 4000
     }
   ]
 }

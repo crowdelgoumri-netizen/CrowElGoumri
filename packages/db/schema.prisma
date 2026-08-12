@@ -266,7 +266,7 @@ model Parcel {
   deliveryAddress Json
   pickupNotes     String?      @db.Text
   deliveryNotes   String?      @db.Text
-  deliveryPin     String?      @db.VarChar(6) // 6-digit PIN for delivery validation
+  deliveryPin     String?      @db.VarChar(255) // bcrypt hash of the 6-digit PIN (see lib/delivery-pin.ts)
 
   // Urgency
   urgencyLevel    String       // "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"

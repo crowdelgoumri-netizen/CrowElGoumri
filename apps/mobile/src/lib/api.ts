@@ -111,7 +111,10 @@ export async function apiFetch<T>(
   opts: ApiFetchOptions = {},
 ): Promise<T> {
   const { method = "GET", body, noAuth, noRefresh } = opts;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  // Only set Content-Type when there's a body: Fastify's JSON body parser
+  // rejects an empty body sent with 'application/json' (FST_ERR_CTP_EMPTY_JSON_BODY),
+  // which every bodyless POST (escrow fund/release, parcel lifecycle, chat read) hits otherwise.
+  const headers: Record<string, string> = body !== undefined ? { "Content-Type": "application/json" } : {};
   const tokens = getTokens();
   if (!noAuth && tokens?.accessToken) {
     headers.Authorization = `Bearer ${tokens.accessToken}`;

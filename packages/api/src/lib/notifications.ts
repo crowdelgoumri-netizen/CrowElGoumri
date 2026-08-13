@@ -35,7 +35,8 @@ export type NotificationType =
   | "CHAT_MESSAGE"
   | "KYC_APPROVED"
   | "KYC_REJECTED"
-  | "DISPUTE_OPENED";
+  | "DISPUTE_OPENED"
+  | "PARCEL_SEIZED";
 
 /** Payload routes carry into notify(); templates read what they need. */
 export interface NotificationPayload {
@@ -94,6 +95,10 @@ const TEMPLATES: Record<
   DELIVERED: () => ({
     title: "Colis livré ✅",
     body: "Votre colis a été remis au destinataire.",
+  }),
+  PARCEL_SEIZED: (p) => ({
+    title: "Colis saisi ⚠️",
+    body: `Votre colis a été saisi par la douane${p.disputeReason ? ` : ${p.disputeReason}` : ""}.`,
   }),
   PAYOUT_SENT: (p) => ({
     title: "Paiement débloqué 💶",

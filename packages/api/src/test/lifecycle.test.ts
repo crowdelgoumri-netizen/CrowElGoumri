@@ -61,6 +61,13 @@ describe("parcel lifecycle", () => {
     assert.ok(assertParcelTransition("CUSTOMS_CHECK", "IN_TRANSIT"));
   });
 
+  it("allows a seizure reported mid-transit (customs outcome)", () => {
+    // A traveler can report the parcel seized directly from IN_TRANSIT (no
+    // separate "at customs" tap required) or from CUSTOMS_CHECK.
+    assert.ok(assertParcelTransition("IN_TRANSIT", "SEIZED"));
+    assert.ok(assertParcelTransition("CUSTOMS_CHECK", "SEIZED"));
+  });
+
   it("allows reporting a dispute after delivery", () => {
     assert.ok(assertParcelTransition("DELIVERED", "DISPUTED"));
   });

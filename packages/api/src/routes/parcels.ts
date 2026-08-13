@@ -576,4 +576,120 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
       return { parcel: updated, payout };
     },
   );
+
+  // ── POST /parcels/:id/customs — traveler reports customs outcome ────
+  // The in-transit half of the customs flow (blueprint §4). The creation-time
+  // gate (validateParcelCustoms) keeps prohibited items out; this captures the
+  // physical outcome at the border. CLEARED → back to IN_TRANSIT; SEIZED →
+  // terminal, logged in CustomsClearanceLog, sender notified. Escrow on
+  // seizure is NOT auto-resolved here — refund/liability (§4.2) ships with
+  // the insurance + dispute-resolution phase.
+  const customsReportSchema = z.object({
+    outcome: z.enum(["CLEARED", "SEIZED"]),
+    seizureReason: z.string().max(1000).optional(),
+    seizedBy: z.string().max(200).optional(),
+    fineAmount: z.number().nonnegative().optional(),
+    travelerNotes: z.string().max(2000).optional(),
+  });
+
+  app.post(
+    "/:id/customs",
+    { preHandler: [app.authenticate] },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+      const parsed = customsReportSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.code(400).send({ error: parsed.error.flatten() });
+      }
+      const input = parsed.data;
+
+      if (input.outcome === "SEIZED" && !input.seizureReason?.trim()) {
+        return reply
+          .code(400)
+          .send({ error: "seizureReason is required when the parcel is seized" });
+      }
+
+      const parcel = await prisma.parcel.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          senderId: true,
+          status: true,
+          category: true,
+          estimatedValue: true,
+          valueCurrency: true,
+          requiresDeclaration: true,
+          matchedTrip: { select: { travelerId: true } },
+        },
+      });
+      if (!parcel) return reply.code(404).send({ error: "Parcel not found" });
+      if (parcel.matchedTrip?.travelerId !== req.user.sub) {
+        return reply.code(403).send({ error: "Not the traveler for this parcel" });
+      }
+      if (!["IN_TRANSIT", "CUSTOMS_CHECK"].includes(parcel.status)) {
+        return reply.code(409).send({
+          error: `Cannot report customs outcome for a parcel in status ${parcel.status}`,
+        });
+      }
+
+      const from = parcel.status as "IN_TRANSIT" | "CUSTOMS_CHECK";
+      let newStatus: "IN_TRANSIT" | "CUSTOMS_CHECK" | "SEIZED" = from;
+      if (input.outcome === "CLEARED") {
+        // Cleared → resume IN_TRANSIT. From CUSTOMS_CHECK that's a transition;
+        // from IN_TRANSIT it's a no-op (passed without a formal hold).
+        if (from === "CUSTOMS_CHECK") {
+          if (!assertParcelTransition(from, "IN_TRANSIT")) {
+            return reply.code(409).send({ error: `Parcel cannot go ${from} → IN_TRANSIT` });
+          }
+          newStatus = "IN_TRANSIT";
+        }
+      } else {
+        if (!assertParcelTransition(from, "SEIZED")) {
+          return reply.code(409).send({ error: `Parcel cannot go ${from} → SEIZED` });
+        }
+        newStatus = "SEIZED";
+      }
+
+      // CustomsClearanceLog is 1:1 with the parcel — upsert so a re-report
+      // (e.g. cleared then later seized) updates rather than colliding.
+      const customsLog = await prisma.customsClearanceLog.upsert({
+        where: { parcelId: id },
+        create: {
+          parcelId: id,
+          checkpoint: input.outcome === "SEIZED" ? "SEIZED" : "CLEARED",
+          declaredCategory: parcel.category,
+          declaredValue: parcel.estimatedValue,
+          declaredCurrency: parcel.valueCurrency,
+          franchiseApplied: parcel.requiresDeclaration,
+          seizedBy: input.seizedBy,
+          seizureReason: input.seizureReason,
+          seizureDate: input.outcome === "SEIZED" ? new Date() : undefined,
+          fineAmount: input.fineAmount,
+          travelerNotes: input.travelerNotes,
+        },
+        update: {
+          checkpoint: input.outcome === "SEIZED" ? "SEIZED" : "CLEARED",
+          seizedBy: input.seizedBy,
+          seizureReason: input.seizureReason,
+          seizureDate: input.outcome === "SEIZED" ? new Date() : undefined,
+          fineAmount: input.fineAmount,
+          travelerNotes: input.travelerNotes,
+        },
+      });
+
+      const updated =
+        newStatus !== from
+          ? await prisma.parcel.update({ where: { id }, data: { status: newStatus } })
+          : parcel;
+
+      if (input.outcome === "SEIZED") {
+        notify(parcel.senderId, "PARCEL_SEIZED" as NotificationType, {
+          parcelId: id,
+          disputeReason: input.seizureReason,
+        }).catch(() => { /* provider errors logged inside notify() */ });
+      }
+
+      return reply.code(201).send({ parcel: updated, customsLog });
+    },
+  );
 };

@@ -11,7 +11,16 @@
  */
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Input } from "../src/components/Input";
@@ -21,6 +30,8 @@ import { Button } from "../src/components/Button";
 import { Card } from "../src/components/Card";
 import { createParcel, type CreateParcelInput } from "../src/lib/parcels";
 import { ApiError } from "../src/lib/api";
+import { PhotoPicker } from "../src/components/PhotoPicker";
+import { pickAndUploadImage } from "../src/lib/uploads";
 import {
   CATEGORY_LABEL,
   URGENCY_LABEL,
@@ -52,6 +63,9 @@ export default function PostParcelScreen() {
   const [lengthCm, setLengthCm] = useState("");
   const [widthCm, setWidthCm] = useState("");
   const [heightCm, setHeightCm] = useState("");
+  const [photos, setPhotos] = useState<{ localUri: string; objectUrl: string }[]>([]);
+  const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
+  const [pickingPhoto, setPickingPhoto] = useState(false);
 
   // Step 2 — itinerary
   const [originCountry, setOriginCountry] = useState("FR");
@@ -94,6 +108,26 @@ export default function PostParcelScreen() {
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   }
 
+  // Append-only photo grid: pick one image at a time until 5. Each upload
+  // goes through /uploads/presign (see lib/uploads); only objectUrl is sent
+  // to /parcels, the localUri is kept purely for the thumbnail preview.
+  async function pickPhoto() {
+    if (pickingPhoto || photos.length >= 5) return;
+    setPickingPhoto(true);
+    try {
+      const picked = await pickAndUploadImage("parcel-photo");
+      if (!picked) return; // canceled
+      setPhotos((prev) => [...prev, picked]);
+    } catch (e) {
+      Alert.alert(
+        "Envoi impossible",
+        e instanceof ApiError ? e.message : "Réessayez plus tard.",
+      );
+    } finally {
+      setPickingPhoto(false);
+    }
+  }
+
   async function submit() {
     const err = validateStep();
     if (err) {
@@ -113,6 +147,8 @@ export default function PostParcelScreen() {
         },
         estimatedValue: parseFloat(estimatedValue),
         valueCurrency: "EUR",
+        photoUrls: photos.length ? photos.map((p) => p.objectUrl) : undefined,
+        invoiceUrl: invoiceUrl ?? undefined,
         pickupAddress: {
           level: "OFFICIAL_GEOCODE",
           label: `${originCity}, ${ORIGIN_COUNTRIES.find((c) => c.code === originCountry)?.name}`,
@@ -192,6 +228,40 @@ export default function PostParcelScreen() {
                 <Input label="h (cm)" value={heightCm} onChangeText={setHeightCm} keyboardType="numeric" />
               </View>
             </View>
+
+            <View className="gap-1 mt-sm">
+              <Text className="text-mist/70 text-xs font-body uppercase">Photos (optionnel, max 5)</Text>
+              <View className="flex-row flex-wrap gap-md">
+                {photos.map((p, i) => (
+                  <View key={p.objectUrl}>
+                    <Image source={{ uri: p.localUri }} className="h-20 w-20 rounded-xl bg-navySoft" resizeMode="cover" />
+                    <Pressable
+                      onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                      hitSlop={8}
+                      className="absolute -right-2 -top-2 h-6 w-6 items-center justify-center rounded-full bg-danger"
+                    >
+                      <Text className="text-white font-body text-xs font-semibold">×</Text>
+                    </Pressable>
+                  </View>
+                ))}
+                {photos.length < 5 ? (
+                  <Pressable
+                    onPress={pickPhoto}
+                    disabled={pickingPhoto}
+                    className="h-20 w-20 items-center justify-center rounded-xl border border-dashed border-mist/30 bg-navySoft"
+                  >
+                    {pickingPhoto ? <ActivityIndicator /> : <Text className="text-muted text-2xl">+</Text>}
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+
+            <PhotoPicker
+              label="Facture (optionnel)"
+              purpose="invoice"
+              onUploaded={setInvoiceUrl}
+              onClear={() => setInvoiceUrl(null)}
+            />
           </View>
         ) : null}
 

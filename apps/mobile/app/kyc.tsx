@@ -2,19 +2,20 @@
  * KYC verification (board 09) — submit ID + selfie for manual admin review.
  *
  * Shows the current level + latest submission status, and a submit form to
- * step up to ENHANCED or FULL. Document/selfie are URLs (photo upload itself
- * is a cross-cutting storage phase); in dev, paste any image URL. On approval
- * the backend bumps kycLevel + recomputes trust (async, by an admin).
+ * step up to ENHANCED or FULL. Document + selfie are picked from the photo
+ * library and uploaded via /uploads/presign (see lib/uploads), then the
+ * resulting object URLs are submitted for review. On approval the backend
+ * bumps kycLevel + recomputes trust (async, by an admin).
  */
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Card } from "../src/components/Card";
-import { Input } from "../src/components/Input";
 import { Select } from "../src/components/Select";
 import { Button } from "../src/components/Button";
 import { StatusPill } from "../src/components/StatusPill";
+import { PhotoPicker } from "../src/components/PhotoPicker";
 import { useAuth } from "../src/store/auth";
 import { useAsync } from "../src/hooks/useAsync";
 import { getKycStatus, submitKyc, type DocumentType } from "../src/lib/kyc";
@@ -47,7 +48,7 @@ export default function KycScreen() {
 
   async function submit() {
     if (!docUrl.trim() || !selfieUrl.trim()) {
-      Alert.alert("Champ manquant", "Renseignez l'URL du document et du selfie.");
+      Alert.alert("Champ manquant", "Ajoutez la photo du document et du selfie.");
       return;
     }
     setSubmitting(true);
@@ -113,23 +114,17 @@ export default function KycScreen() {
             <View className="gap-md">
               <Text className="text-mist/70 text-xs font-body uppercase">Nouvelle demande</Text>
               <Select label="Type de document" value={docType} options={DOC_TYPES} onSelect={(v) => setDocType(v as DocumentType)} />
-              <Input
-                label="URL du document (recto)"
-                value={docUrl}
-                onChangeText={setDocUrl}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-                placeholder="https://…/passeport.jpg"
+              <PhotoPicker
+                label="Document (recto)"
+                purpose="kyc-doc"
+                onUploaded={setDocUrl}
+                onClear={() => setDocUrl("")}
               />
-              <Input
-                label="URL du selfie"
-                value={selfieUrl}
-                onChangeText={setSelfieUrl}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-                placeholder="https://…/selfie.jpg"
+              <PhotoPicker
+                label="Selfie"
+                purpose="kyc-selfie"
+                onUploaded={setSelfieUrl}
+                onClear={() => setSelfieUrl("")}
               />
               <Select
                 label="Niveau visé"

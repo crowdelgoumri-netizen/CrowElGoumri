@@ -26,13 +26,26 @@ import { recomputeTrustForUser } from "../lib/trust-service.js";
 import { notify } from "../lib/notifications.js";
 
 // ── Validation ───────────────────────────────────────────────────────
+// z.string().url() accepts any scheme Node's URL parser accepts, including
+// javascript:/data:/vbscript: -- an admin-dashboard XSS vector via these
+// URLs rendered as clickable links (fixed client-side too; this is the
+// server-side defense in depth). Restrict submitted document/selfie URLs
+// to http(s).
+const httpUrl = z.string().refine((u) => {
+  try {
+    return ["http:", "https:"].includes(new URL(u).protocol);
+  } catch {
+    return false;
+  }
+}, "must be an http(s) URL");
+
 const submitSchema = z.object({
   documentType: z.enum([
     "PASSPORT", "NATIONAL_ID", "DRIVERS_LICENSE", "RESIDENCY_PERMIT",
   ]),
-  documentUrl: z.string().url(),
-  documentBackUrl: z.string().url().optional(),
-  selfieUrl: z.string().url(),
+  documentUrl: httpUrl,
+  documentBackUrl: httpUrl.optional(),
+  selfieUrl: httpUrl,
   targetLevel: z.enum(["ENHANCED", "FULL"]),
 });
 

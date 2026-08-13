@@ -12,6 +12,8 @@
     "test": "node --import tsx --test src/test/*.test.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1109.0",
+    "@aws-sdk/s3-request-presigner": "^3.1109.0",
     "@crowdshipping/db": "workspace:*",
     "@crowdshipping/matching": "workspace:*",
     "@fastify/cors": "^10.0.1",

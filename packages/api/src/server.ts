@@ -25,6 +25,7 @@ import { notificationRoutes } from "./routes/notifications.js";
 import { kycRoutes } from "./routes/kyc.js";
 import { disputeRoutes } from "./routes/disputes.js";
 import { ratingRoutes } from "./routes/ratings.js";
+import { uploadRoutes } from "./routes/uploads.js";
 import { realtimePlugin } from "./plugins/realtime.js";
 
 async function buildServer(): Promise<FastifyInstance> {
@@ -87,6 +88,7 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(kycRoutes, { prefix: "/kyc" });
   await app.register(disputeRoutes, { prefix: "/disputes" });
   await app.register(ratingRoutes, { prefix: "/ratings" });
+  await app.register(uploadRoutes, { prefix: "/uploads" });
 
   return app;
 }

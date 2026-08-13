@@ -35,9 +35,15 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().default("whsec_placeholder"),
   STRIPE_PLATFORM_FEE_BPS: z.coerce.number().default(1000), // 10%
 
-  // Optional external services (phased in later)
+  // S3-compatible object storage (KYC docs, parcel photos) — all five must be
+  // set for uploads to be enabled; lib/storage.ts treats any missing var as
+  // "unconfigured" and POST /uploads/presign returns 503. Wasabi in prod,
+  // MinIO or any S3-compatible endpoint in dev.
   S3_ENDPOINT: z.string().optional(),
+  S3_REGION: z.string().optional(),
   S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY_ID: z.string().optional(),
+  S3_SECRET_ACCESS_KEY: z.string().optional(),
   TWILIO_ACCOUNT_SID: z.string().optional(),
   TWILIO_AUTH_TOKEN: z.string().optional(), // Phase 7: enables real SMS (Verify uses SID above)
   TWILIO_VERIFY_SERVICE_SID: z.string().optional(),

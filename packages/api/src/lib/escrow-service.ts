@@ -109,7 +109,7 @@ export async function releaseEscrowForParcel(
       status: "RELEASED",
       releasedAt: new Date(),
       stripeTransferId: transferId,
-      payoutMethod: "LEMONWAY_WALLET", // placeholder until a CONNECT payout enum value exists
+      payoutMethod: "STRIPE_CONNECT", // separate-charges transfer to the traveler's Connect account
     },
   });
 

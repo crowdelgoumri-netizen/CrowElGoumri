@@ -13,7 +13,6 @@ export default function QueuePage() {
   const router = useRouter();
   const [submissions, setSubmissions] = useState<KycSubmission[]>([]);
   const [total, setTotal] = useState(0);
-  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +25,6 @@ export default function QueuePage() {
         nextOffset === 0 ? res.submissions : [...prev, ...res.submissions],
       );
       setTotal(res.total);
-      setOffset(nextOffset);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Failed to load the review queue.");
     } finally {
@@ -83,7 +81,7 @@ export default function QueuePage() {
 
       {submissions.length < total ? (
         <button
-          onClick={() => load(offset + PAGE_SIZE)}
+          onClick={() => load(submissions.length)}
           disabled={loading}
           className="mt-6 w-full rounded-md border border-slate-300 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
         >

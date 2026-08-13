@@ -12,6 +12,7 @@ import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { prisma, Prisma } from "@crowdshipping/db";
 import { assertParcelTransition } from "../lib/lifecycle.js";
+import { validateParcelCustoms } from "../lib/customs.js";
 import {
   generateDeliveryPin,
   hashDeliveryPin,
@@ -106,6 +107,31 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
       const input = parsed.data;
       const senderId = req.user.sub;
 
+      // Customs gate (blueprint §4.1): prohibited items never enter the
+      // marketplace; over-franchise / declaration-required parcels are still
+      // created but flagged requiresDeclaration with warnings returned.
+      const customs = validateParcelCustoms({
+        category: input.category,
+        subCategory: input.subCategory,
+        description: input.description,
+        estimatedValue: input.estimatedValue,
+      });
+      if (customs.blocked) {
+        req.log.warn(
+          {
+            event: "PROHIBITED_ITEM_ATTEMPT",
+            userId: senderId,
+            category: input.category,
+            rules: customs.violations.map((v) => v.rule),
+          },
+          "parcel blocked by customs rules",
+        );
+        return reply.code(400).send({
+          error: "Ce colis ne respecte pas les règles douanières.",
+          violations: customs.violations.map((v) => v.message),
+        });
+      }
+
       const parcel = await prisma.parcel.create({
         data: {
           senderId,
@@ -130,11 +156,12 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
           priceCurrency: input.priceCurrency,
           recipientName: input.recipientName,
           recipientPhone: input.recipientPhone,
+          requiresDeclaration: customs.requiresDeclaration,
           status: input.isDraft ? "DRAFT" : "PENDING_MATCH",
         },
       });
 
-      return reply.code(201).send({ parcel });
+      return reply.code(201).send({ parcel, customs: { warnings: customs.warnings } });
     },
   );
 

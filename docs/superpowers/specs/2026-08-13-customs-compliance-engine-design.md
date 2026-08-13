@@ -1,6 +1,6 @@
 # Customs compliance engine: prohibited-items block + franchise/declaration checks
 
-**Date:** 2026-08-13 · **Status:** draft — pending user approval (ZCode session)
+**Date:** 2026-08-13 · **Status:** approved + implemented (ZCode session)
 
 ## Context
 

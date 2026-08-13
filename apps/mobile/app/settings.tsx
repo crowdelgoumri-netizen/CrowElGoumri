@@ -2,9 +2,10 @@
  * Settings (board 18) — account preferences + danger zone.
  *
  * Push notification toggle, help/guide (onboarding), and logout.
- * Lightweight on purpose: payment methods and a language selector aren't
- * buildable yet (no saved-card API, no i18n infrastructure) — see
- * docs/superpowers/specs/2026-08-11-settings-push-toggle-design.md.
+ * i18n is wired (this screen is migrated via useTranslation); the language
+ * selector lands once broader coverage exists (no fake button — see
+ * docs/superpowers/specs/2026-08-11-settings-push-toggle-design.md). Payment
+ * methods still need a saved-card API.
  */
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
@@ -16,9 +17,11 @@ import { Card } from "../src/components/Card";
 import { Button } from "../src/components/Button";
 import { useAuth } from "../src/store/auth";
 import { isPushEnabled, registerForPush, setPushEnabled } from "../src/lib/push";
+import { useTranslation } from "react-i18next";
 
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [pushOn, setPushOn] = useState(true);
 
   useEffect(() => {
@@ -31,27 +34,24 @@ export default function SettingsScreen() {
     if (next) {
       const token = await registerForPush();
       if (!token) {
-        Alert.alert(
-          "Notifications",
-          "Inscription impossible (simulateur ou permission refusée).",
-        );
+        Alert.alert(t("settings.pushAlertTitle"), t("settings.pushAlertBody"));
       }
     }
   }
 
   return (
     <Screen>
-      <ScreenHeader title="Paramètres" />
+      <ScreenHeader title={t("settings.title")} />
 
       <Card className="gap-1">
-        <Row icon="information-circle-outline" label="Compte" value={user?.email} />
+        <Row icon="information-circle-outline" label={t("settings.account")} value={user?.email} />
       </Card>
 
-      <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">Préférences</Text>
+      <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">{t("settings.preferences")}</Text>
       <Card className="gap-1">
         <View className="flex-row items-center py-sm">
           <Ionicons name="notifications" size={20} color="#FF6A2B" />
-          <Text className="text-white font-body flex-1 ml-md">Notifications push</Text>
+          <Text className="text-white font-body flex-1 ml-md">{t("settings.pushNotifications")}</Text>
           <Switch
             value={pushOn}
             onValueChange={onTogglePush}
@@ -60,19 +60,19 @@ export default function SettingsScreen() {
           />
         </View>
         <Divider />
-        <PressableRow icon="help-circle-outline" label="Comment ça marche" onPress={() => router.push("/onboarding")} />
+        <PressableRow icon="help-circle-outline" label={t("settings.howItWorks")} onPress={() => router.push("/onboarding")} />
       </Card>
 
-      <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">À propos</Text>
+      <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">{t("settings.about")}</Text>
       <Card>
-        <Text className="text-white font-heading font-bold">CrowdShipping</Text>
+        <Text className="text-white font-heading font-bold">{t("settings.appName")}</Text>
         <Text className="text-muted font-body text-xs mt-1">
-          Marketplace de livraison entre particuliers · Europe → Algérie. v0.1
+          {t("settings.aboutTagline")}
         </Text>
       </Card>
 
       <View className="mt-lg">
-        <Button label="Se déconnecter" variant="secondary" onPress={() => logout()} />
+        <Button label={t("settings.logout")} variant="secondary" onPress={() => logout()} />
       </View>
     </Screen>
   );

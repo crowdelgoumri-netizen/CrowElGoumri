@@ -10,6 +10,7 @@
  * screen so the user never sees a flash of the wrong route or the system font.
  */
 import "../global.css";
+import "../src/lib/i18n"; // boot i18next + react-i18next before any screen renders
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";

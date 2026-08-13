@@ -1,6 +1,6 @@
 # Storage: S3-compatible presigned uploads (KYC docs + parcel photos)
 
-**Date:** 2026-08-13 · **Status:** draft — pending user approval (ZCode session)
+**Date:** 2026-08-13 · **Status:** approved + implemented — backend `f86025d`, mobile `2a5dc1d` (ZCode session)
 
 ## Context
 

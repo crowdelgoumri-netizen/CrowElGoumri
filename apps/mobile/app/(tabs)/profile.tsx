@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../../src/components/Screen";
 import { Card } from "../../src/components/Card";
@@ -36,13 +37,11 @@ export default function ProfileScreen() {
     setOnboarding(true);
     try {
       const { url } = await startConnectOnboarding();
-      // Stripe Connect onboarding is a hosted web flow. In-app we'd open it via
-      // WebBrowser; here we surface the URL so the dev can open it. A native
-      // WebBrowser.openBrowserAsync lands with the auth-browser phase.
-      Alert.alert(
-        "Onboarding Stripe",
-        "Ouvrez ce lien dans votre navigateur pour compléter l'onboarding :\n\n" + url,
-      );
+      // Stripe Connect onboarding is a hosted web flow — open it in the system
+      // browser (in-app browser on iOS SFSafariViewController / Android Custom
+      // Tabs). openBrowserAsync resolves when the user returns to the app, so
+      // refresh Connect status right after to pick up payoutsEnabled.
+      await WebBrowser.openBrowserAsync(url);
       connect.refresh();
     } catch (e) {
       Alert.alert(

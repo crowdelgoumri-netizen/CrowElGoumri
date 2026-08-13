@@ -41,6 +41,20 @@ export default function QueuePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // All loaded items were decided but more are still pending server-side
+  // (e.g. the whole first page was approved/rejected before "Load more"
+  // was clicked) -- fetch the next batch automatically instead of showing
+  // the empty state and "Load more" at the same time.
+  useEffect(() => {
+    // `!error` avoids retrying in a tight loop if this auto-load itself
+    // fails (e.g. a transient network error) -- the Retry button below
+    // (shown whenever submissions.length === 0) is the manual escape hatch.
+    if (!loading && !error && submissions.length === 0 && total > 0) {
+      load(submissions.length);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submissions.length, total, loading, error]);
+
   function onDecided(id: string) {
     setSubmissions((prev) => prev.filter((s) => s.id !== id));
     setTotal((prev) => Math.max(0, prev - 1));
@@ -66,14 +80,24 @@ export default function QueuePage() {
       </div>
 
       {error ? (
-        <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p>{error}</p>
+          {submissions.length === 0 ? (
+            <button
+              onClick={() => load(0)}
+              className="mt-1 font-medium underline underline-offset-2"
+            >
+              Retry
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {loading && submissions.length === 0 ? (
         <p className="text-slate-500">Loading…</p>
       ) : null}
 
-      {!loading && submissions.length === 0 && !error ? (
+      {!loading && total === 0 && !error ? (
         <p className="text-slate-500">No pending submissions.</p>
       ) : null}
 

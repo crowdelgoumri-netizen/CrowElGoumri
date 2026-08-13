@@ -67,11 +67,22 @@ export function SubmissionCard({
     setBusy(true);
     setError(null);
     try {
-      await reviewSubmission(submission.id, decision, note.trim() || undefined);
+      // Only a REJECTED decision carries the note -- otherwise a reason
+      // typed while "Reject" was open would silently attach itself to an
+      // Approve click made after changing one's mind.
+      const trimmedNote = decision === "REJECTED" ? note.trim() || undefined : undefined;
+      await reviewSubmission(submission.id, decision, trimmedNote);
       onDecided(submission.id);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         router.replace("/login");
+        return;
+      }
+      if (e instanceof ApiError && e.status === 409) {
+        // Another admin already decided this submission -- it's no longer
+        // PENDING, so drop it from the list like a normal decision rather
+        // than leaving a stale card (which would also drift pagination).
+        onDecided(submission.id);
         return;
       }
       setError(e instanceof ApiError ? e.message : "Failed to submit decision.");

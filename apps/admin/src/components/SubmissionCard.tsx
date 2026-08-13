@@ -1,8 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ApiError } from "../lib/api";
 import { reviewSubmission, type KycSubmission } from "../lib/kyc";
+
+/** Only allow http(s) URLs through — blocks javascript:/data:/etc. XSS vectors. */
+function safeUrl(u: string): string | undefined {
+  try {
+    const p = new URL(u).protocol;
+    return p === "http:" || p === "https:" ? u : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Thumbnail for a submission's document/selfie photo. Only wraps the image
+ * in a clickable link when the URL is a safe http(s) URL — otherwise it
+ * renders the (broken-image) thumbnail without a link, so an attacker-
+ * controlled `javascript:` URL can never end up in a clicked href.
+ */
+function Thumbnail({ url, alt }: { url: string; alt: string }) {
+  const safe = safeUrl(url);
+  const img = (
+    <img
+      src={safe ?? url}
+      alt={alt}
+      className="h-24 w-24 rounded-md border border-slate-200 object-cover"
+    />
+  );
+  if (!safe) return img;
+  return (
+    <a href={safe} target="_blank" rel="noreferrer">
+      {img}
+    </a>
+  );
+}
 
 const TARGET_LEVEL_LABEL: Record<string, string> = {
   ENHANCED: "Enhanced",
@@ -23,6 +57,7 @@ export function SubmissionCard({
   submission: KycSubmission;
   onDecided: (id: string) => void;
 }) {
+  const router = useRouter();
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -35,6 +70,10 @@ export function SubmissionCard({
       await reviewSubmission(submission.id, decision, note.trim() || undefined);
       onDecided(submission.id);
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        router.replace("/login");
+        return;
+      }
       setError(e instanceof ApiError ? e.message : "Failed to submit decision.");
     } finally {
       setBusy(false);
@@ -61,29 +100,11 @@ export function SubmissionCard({
       </p>
 
       <div className="mb-4 flex gap-3">
-        <a href={submission.documentUrl} target="_blank" rel="noreferrer">
-          <img
-            src={submission.documentUrl}
-            alt="Document photo unavailable"
-            className="h-24 w-24 rounded-md border border-slate-200 object-cover"
-          />
-        </a>
+        <Thumbnail url={submission.documentUrl} alt="Document photo unavailable" />
         {submission.documentBackUrl ? (
-          <a href={submission.documentBackUrl} target="_blank" rel="noreferrer">
-            <img
-              src={submission.documentBackUrl}
-              alt="Document back photo unavailable"
-              className="h-24 w-24 rounded-md border border-slate-200 object-cover"
-            />
-          </a>
+          <Thumbnail url={submission.documentBackUrl} alt="Document back photo unavailable" />
         ) : null}
-        <a href={submission.selfieUrl} target="_blank" rel="noreferrer">
-          <img
-            src={submission.selfieUrl}
-            alt="Selfie photo unavailable"
-            className="h-24 w-24 rounded-md border border-slate-200 object-cover"
-          />
-        </a>
+        <Thumbnail url={submission.selfieUrl} alt="Selfie photo unavailable" />
       </div>
 
       {error ? (

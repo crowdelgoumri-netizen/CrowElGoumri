@@ -26,6 +26,10 @@ export default function QueuePage() {
       );
       setTotal(res.total);
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        router.replace("/login");
+        return;
+      }
       setError(e instanceof ApiError ? e.message : "Failed to load the review queue.");
     } finally {
       setLoading(false);

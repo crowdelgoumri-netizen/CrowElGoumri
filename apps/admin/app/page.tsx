@@ -2,120 +2,104 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SubmissionCard } from "../src/components/SubmissionCard";
 import { ApiError } from "../src/lib/api";
-import { listPending, type KycSubmission } from "../src/lib/kyc";
-import { clearToken } from "../src/lib/storage";
+import { getDashboard, type DashboardStats } from "../src/lib/admin";
 
-const PAGE_SIZE = 20;
-
-export default function QueuePage() {
+export default function DashboardPage() {
   const router = useRouter();
-  const [submissions, setSubmissions] = useState<KycSubmission[]>([]);
-  const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load(nextOffset: number) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await listPending(PAGE_SIZE, nextOffset);
-      setSubmissions((prev) =>
-        nextOffset === 0 ? res.submissions : [...prev, ...res.submissions],
-      );
-      setTotal(res.total);
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 401) {
-        router.replace("/login");
-        return;
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getDashboard();
+        setStats(data);
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 401) {
+          router.replace("/login");
+          return;
+        }
+        setError(e instanceof ApiError ? e.message : "Failed to load dashboard.");
+      } finally {
+        setLoading(false);
       }
-      setError(e instanceof ApiError ? e.message : "Failed to load the review queue.");
-    } finally {
-      setLoading(false);
-    }
+    })();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="px-6 py-8">
+        <h1 className="mb-6 text-xl font-semibold text-slate-900">Dashboard</h1>
+        <p className="text-slate-500">Loading stats…</p>
+      </div>
+    );
   }
 
-  useEffect(() => {
-    load(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // All loaded items were decided but more are still pending server-side
-  // (e.g. the whole first page was approved/rejected before "Load more"
-  // was clicked) -- fetch the next batch automatically instead of showing
-  // the empty state and "Load more" at the same time.
-  useEffect(() => {
-    // `!error` avoids retrying in a tight loop if this auto-load itself
-    // fails (e.g. a transient network error) -- the Retry button below
-    // (shown whenever submissions.length === 0) is the manual escape hatch.
-    if (!loading && !error && submissions.length === 0 && total > 0) {
-      load(submissions.length);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submissions.length, total, loading, error]);
-
-  function onDecided(id: string) {
-    setSubmissions((prev) => prev.filter((s) => s.id !== id));
-    setTotal((prev) => Math.max(0, prev - 1));
+  if (error) {
+    return (
+      <div className="px-6 py-8">
+        <h1 className="mb-6 text-xl font-semibold text-slate-900">Dashboard</h1>
+        <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-1 font-medium underline underline-offset-2"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  function onLogout() {
-    clearToken();
-    router.replace("/login");
-  }
+  if (!stats) return null;
+
+  const totalParcels = Object.values(stats.parcels).reduce((a, b) => a + b, 0);
+  const totalTrips = Object.values(stats.trips).reduce((a, b) => a + b, 0);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">
-          KYC review queue {total > 0 ? `(${total} pending)` : ""}
-        </h1>
-        <button
-          onClick={onLogout}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700"
-        >
-          Log out
-        </button>
+    <div className="px-6 py-8">
+      <h1 className="mb-6 text-xl font-semibold text-slate-900">Dashboard</h1>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total users" value={stats.users.total} sub={`+${stats.users.newThisWeek} this week`} />
+        <StatCard label="Total parcels" value={totalParcels} sub={Object.entries(stats.parcels).map(([k, v]) => `${k}: ${v}`).join(", ")} />
+        <StatCard label="Total trips" value={totalTrips} sub={Object.entries(stats.trips).map(([k, v]) => `${k}: ${v}`).join(", ")} />
+        <StatCard label="GMV" value={fmtCurrency(stats.financials.gmv)} sub={`Fees: ${fmtCurrency(stats.financials.platformFees)} · Payouts: ${fmtCurrency(stats.financials.travelerPayouts)}`} />
+        <StatCard label="Open disputes" value={stats.openDisputes} />
+        <StatCard label="Pending KYC" value={stats.pendingKyc} />
       </div>
-
-      {error ? (
-        <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          <p>{error}</p>
-          {submissions.length === 0 ? (
-            <button
-              onClick={() => load(0)}
-              className="mt-1 font-medium underline underline-offset-2"
-            >
-              Retry
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
-      {loading && submissions.length === 0 ? (
-        <p className="text-slate-500">Loading…</p>
-      ) : null}
-
-      {!loading && total === 0 && !error ? (
-        <p className="text-slate-500">No pending submissions.</p>
-      ) : null}
-
-      <div className="flex flex-col gap-4">
-        {submissions.map((s) => (
-          <SubmissionCard key={s.id} submission={s} onDecided={onDecided} />
-        ))}
-      </div>
-
-      {submissions.length < total ? (
-        <button
-          onClick={() => load(submissions.length)}
-          disabled={loading}
-          className="mt-6 w-full rounded-md border border-slate-300 py-2 text-sm font-medium text-slate-700 disabled:opacity-50"
-        >
-          {loading ? "Loading…" : "Load more"}
-        </button>
-      ) : null}
-    </main>
+    </div>
   );
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: number | string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-slate-900">{value}</p>
+      {sub ? (
+        <p className="mt-1 truncate text-xs text-slate-400">{sub}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function fmtCurrency(n: number): string {
+  return new Intl.NumberFormat("fr-DZ", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(n);
 }

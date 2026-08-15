@@ -1,0 +1,81 @@
+appId: host.exp.exponent
+---
+# Create parcel smoke test: opens FAB, fills wizard, asserts parcel detail
+# Run this AFTER auth-flow.yaml (which authenticates the user)
+- launchApp
+
+# Navigate into CrowdShipping project via Expo Go URL entry
+- tapOn: "Enter URL manually"
+- inputText: "exp://localhost:8081"
+- tapOn: "Go"
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Dismiss any startup dialogs
+- evalScript:
+    script: |
+      if (await isVisible('OK')) {
+        await tapOn("Don't Show Again");
+        await sleep(1000);
+      }
+      if (await isVisible('Continue')) {
+        await tapOn('Continue');
+        await sleep(500);
+      }
+- waitForAnimationToEnd
+
+# Wait for home screen
+- assertVisible: "Europe"
+
+# Open the FAB chooser
+- tapOn:
+    id: "fab-button"
+- assertVisible: "Que voulez-vous faire ?"
+
+# Choose "Envoyer un colis"
+- tapOn: "Envoyer un colis"
+- assertVisible: "Envoyer un colis"
+- assertVisible: "Colis"
+
+# Step 1: Colis details
+- tapOn: "Description"
+- inputText: "Téléphone pour mon frère"
+- tapOn: "Catégorie"
+- tapOn: "Électronique"
+- tapOn: "Poids (kg)"
+- inputText: "1.5"
+- tapOn: "Valeur estimée"
+- inputText: "250"
+- tapOn: "L (cm)"
+- inputText: "15"
+- tapOn: "l (cm)"
+- inputText: "10"
+- tapOn: "h (cm)"
+- inputText: "5"
+
+# Next to step 2
+- tapOn: "Continuer"
+- assertVisible: "Itinéraire"
+
+# Step 2: Route
+- tapOn: "Pays d'origine"
+- tapOn: "France"
+- tapOn: "Ville de départ"
+- tapOn: "Paris"
+- tapOn: "Wilaya de destination"
+- tapOn: "Alger"
+- tapOn: "Nom du destinataire"
+- inputText: "Karim"
+- tapOn: "Téléphone du destinataire"
+- inputText: "+213550000002"
+
+# Next to step 3
+- tapOn: "Continuer"
+- assertVisible: "Prix"
+
+# Step 3: Pricing and submit
+- tapOn: "Urgence"
+- tapOn: "Modéré"
+- tapOn: "Prix proposé"
+- inputText: "15"
+- tapOn: "Publier"

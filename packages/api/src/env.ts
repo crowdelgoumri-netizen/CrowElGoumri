@@ -8,7 +8,9 @@ import { resolve } from "node:path";
 
 // Load .env from the monorepo root (two levels up from packages/api/src).
 // dotenv default looks in cwd, which is packages/api when run via pnpm filter.
-loadEnv({ path: resolve(import.meta.dirname, "../../../.env") });
+// In test mode, load .env.test instead so integration tests use a separate database.
+const envFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+loadEnv({ path: resolve(import.meta.dirname, `../../../${envFile}`) });
 
 const envSchema = z.object({
   NODE_ENV: z

@@ -1,0 +1,44 @@
+appId: host.exp.exponent
+---
+# Home navigation smoke test: tab switching, verify screens render
+# Run this AFTER auth-flow.yaml (which authenticates the user)
+- launchApp
+
+# Navigate into CrowdShipping project via Expo Go URL entry
+- tapOn: "Enter URL manually"
+- inputText: "exp://localhost:8081"
+- tapOn: "Go"
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Dismiss any startup dialogs
+- evalScript:
+    script: |
+      if (await isVisible('OK')) {
+        await tapOn("Don't Show Again");
+        await sleep(1000);
+      }
+      if (await isVisible('Continue')) {
+        await tapOn('Continue');
+        await sleep(500);
+      }
+- waitForAnimationToEnd
+
+# Home tab (default)
+- assertVisible: "Europe"
+- tapOn: "Accueil"
+
+# Messages tab
+- tapOn: "Messages"
+- assertVisible: "Messages"
+
+# Profile tab
+- tapOn: "Profil"
+- assertVisible: "Portefeuille"
+- assertVisible: "Compte"
+- assertVisible: "Vérification d'identité"
+- assertVisible: "Paramètres"
+
+# Back to home
+- tapOn: "Accueil"
+- assertVisible: "Europe"

@@ -1,0 +1,65 @@
+appId: host.exp.exponent
+---
+# Auth flow smoke test: signup, verify phone, land on home screen
+- launchApp
+
+# Expo Go opens to its home screen. Navigate into the CrowdShipping project
+# by tapping the "Enter URL manually" field and entering the dev server URL.
+- tapOn: "Enter URL manually"
+- inputText: "exp://localhost:8081"
+- tapOn: "Go"
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Dismiss Android compatibility dialog if it appears (first launch only)
+- evalScript:
+    script: |
+      if (await isVisible('OK')) {
+        await tapOn("Don't Show Again");
+        await sleep(1000);
+      }
+
+# Dismiss Expo developer menu intro if it appears
+- evalScript:
+    script: |
+      if (await isVisible('Continue')) {
+        await tapOn('Continue');
+        await sleep(500);
+      }
+
+# Wait for JS bundle to load
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Should be on login screen
+- assertVisible: "Bonjour"
+- assertVisible: "Se connecter"
+
+# Navigate to signup
+- tapOn: "Créer un compte"
+- assertVisible: "Rejoignez le réseau Crowshi"
+
+# Fill signup form
+- tapOn: "Prénom"
+- inputText: "E2E"
+- tapOn: "Nom"
+- inputText: "Test"
+- tapOn: "Adresse e-mail"
+- inputText: "e2e-test@crowdshipping.local"
+- tapOn: "Téléphone (E.164)"
+- inputText: "+213550000001"
+- tapOn: "Mot de passe"
+- inputText: "Password123"
+
+# Submit
+- tapOn: "Créer mon compte"
+# Should be on verify-phone screen
+- assertVisible: "Vérifiez votre téléphone"
+
+# Enter dev OTP
+- tapOn: "Code (6 chiffres)"
+- inputText: "000000"
+- tapOn: "Vérifier"
+
+# Should land on home (Accueil tab)
+- assertVisible: "Europe"

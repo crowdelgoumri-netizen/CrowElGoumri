@@ -1,0 +1,62 @@
+appId: host.exp.exponent
+---
+# Create trip smoke test: opens FAB, fills trip form, submits
+# Run this AFTER auth-flow.yaml (which authenticates the user)
+- launchApp
+
+# Navigate into CrowdShipping project via Expo Go URL entry
+- tapOn: "Enter URL manually"
+- inputText: "exp://localhost:8081"
+- tapOn: "Go"
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Dismiss any startup dialogs
+- evalScript:
+    script: |
+      if (await isVisible('OK')) {
+        await tapOn("Don't Show Again");
+        await sleep(1000);
+      }
+      if (await isVisible('Continue')) {
+        await tapOn('Continue');
+        await sleep(500);
+      }
+- waitForAnimationToEnd
+
+# Wait for home screen
+- assertVisible: "Europe"
+
+# Open the FAB chooser
+- tapOn:
+    id: "fab-button"
+- assertVisible: "Que voulez-vous faire ?"
+
+# Choose "Proposer un trajet"
+- tapOn: "Proposer un trajet"
+- assertVisible: "Proposer un trajet"
+
+# Fill trip form
+- tapOn: "Pays d'origine"
+- tapOn: "France"
+- tapOn: "Ville de départ"
+- tapOn: "Paris"
+- tapOn: "Wilaya d'arrivée"
+- tapOn: "Alger"
+- tapOn: "Date (AAAA-MM-JJ)"
+- inputText: "2026-09-15"
+- tapOn: "Heure (HH:MM)"
+- inputText: "14:30"
+- tapOn: "Mode de transport"
+- tapOn: "Avion"
+- tapOn: "Capacité (kg)"
+- inputText: "20"
+- tapOn: "Prix/kg"
+- inputText: "8"
+- tapOn: "Distance estimée"
+- inputText: "1400"
+- tapOn: "Notes"
+- inputText: "Accepte les colis fragiles"
+
+# Submit
+- tapOn: "Publier le trajet"

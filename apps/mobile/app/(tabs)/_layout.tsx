@@ -80,6 +80,7 @@ export default function TabsLayout() {
 
       {/* Center floating "+" — opens the post chooser. */}
       <Pressable
+        testID="fab-button"
         onPress={() => setFabOpen(true)}
         className="absolute rounded-full bg-accent items-center justify-center active:opacity-80"
         style={{

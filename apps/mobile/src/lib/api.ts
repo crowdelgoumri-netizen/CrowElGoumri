@@ -1,5 +1,6 @@
 /**
- * API client — fetch wrapper with JWT attach + transparent refresh.
+ * API client — fetch wrapper with JWT attach, transparent refresh,
+ * stale GET cache, and offline mutation queue.
  *
  * Every authenticated screen calls `apiFetch`. The wrapper:
  *   1. Attaches `Authorization: Bearer <accessToken>` (read from the auth
@@ -7,6 +8,10 @@
  *   2. On 401, attempts ONE `/auth/refresh` using the stored refresh token,
  *      retries the original request, and on failure clears auth (the root
  *      layout's AuthGate then redirects to login).
+ *   3. GET requests: caches successful responses in AsyncStorage; on failure
+ *      returns stale cache if available (within TTL).
+ *   4. POST/PATCH/DELETE requests: when offline, enqueues the request to
+ *      the mutation queue instead of sending it (unless noQueue is set).
  *
  * Base URL comes from `EXPO_PUBLIC_API_URL` (Expo's public-env convention —
  * inlined at build time, no runtime secrets). One constant, no hardcoded
@@ -18,10 +23,16 @@ import Constants from "expo-constants";
 // Prefer EXPO_PUBLIC_* (works with a plain app.json, overrideable per env);
 // fall back to the app.json `extra` block, then localhost for dev.
 const extra = Constants.expoConfig?.extra as
-  | { apiUrl?: string; twilioVerifySid?: string }
+  | { apiUrl?: string; twilioVerifySid?: string; stripePublishableKey?: string }
   | undefined;
 export const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? extra?.apiUrl ?? "http://localhost:4000";
+
+/** Stripe publishable key — safe to embed in the client (designed to be public). */
+export const STRIPE_PK =
+  process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ??
+  extra?.stripePublishableKey ??
+  "";
 
 /**
  * Whether the backend is running in dev OTP mode (TWILIO_VERIFY_SERVICE_SID
@@ -40,6 +51,17 @@ export class ApiError extends Error {
   ) {
     super(message);
     this.name = "ApiError";
+  }
+}
+
+/**
+ * Thrown when a mutation is enqueued instead of sent because the device
+ * is offline. Screens can catch this for optimistic UI updates.
+ */
+export class OfflineQueuedError extends Error {
+  constructor(message = "Action enqueued — will send on reconnect") {
+    super(message);
+    this.name = "OfflineQueuedError";
   }
 }
 
@@ -97,6 +119,14 @@ async function refreshTokens(): Promise<AuthTokens | null> {
   return refreshing;
 }
 
+// ── GET cache (AsyncStorage-backed) ─────────────────────────────────
+
+import { readCache, writeCache } from "./storage";
+import { isOfflineSync } from "./network";
+import { enqueue, type QueueEntry } from "./mutation-queue";
+
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export interface ApiFetchOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
@@ -104,13 +134,76 @@ export interface ApiFetchOptions {
   noAuth?: boolean;
   /** Skip the 401 auto-refresh (used by the refresh call itself). */
   noRefresh?: boolean;
+  /** Skip GET cache read/write. */
+  noCache?: boolean;
+  /** Skip mutation queue — send immediately even when offline (Stripe, uploads, auth). */
+  noQueue?: boolean;
+  /** Client-generated idempotency key (UUID). Sent as Idempotency-Key header. */
+  idempotencyKey?: string;
+}
+
+function cacheKey(path: string, body: unknown): string {
+  const suffix = body ? `:${JSON.stringify(body)}` : "";
+  return `GET:${path}${suffix}`;
+}
+
+async function readCachedResponse(path: string, body: unknown): Promise<unknown | null> {
+  const key = cacheKey(path, body);
+  const entry = await readCache(key);
+  if (!entry) return null;
+  if (Date.now() - entry.cachedAt > CACHE_TTL_MS) return null;
+  try {
+    return JSON.parse(entry.data);
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedResponse(path: string, body: unknown, data: unknown): Promise<void> {
+  const key = cacheKey(path, body);
+  await writeCache(key, {
+    data: JSON.stringify(data),
+    cachedAt: Date.now(),
+  });
 }
 
 export async function apiFetch<T>(
   path: string,
   opts: ApiFetchOptions = {},
 ): Promise<T> {
-  const { method = "GET", body, noAuth, noRefresh } = opts;
+  const { method = "GET", body, noAuth, noRefresh, noCache, noQueue, idempotencyKey } = opts;
+
+  // ── Mutation queue: enqueue if offline (unless opted out) ─────────
+  if (method !== "GET" && !noQueue && isOfflineSync()) {
+    if (!idempotencyKey) {
+      // Generate a UUID using crypto.randomUUID (available in Expo 52+).
+      const key = crypto.randomUUID();
+      const entry: QueueEntry = {
+        id: key,
+        path,
+        method,
+        body,
+        idempotencyKey: key,
+        createdAt: Date.now(),
+        retries: 0,
+      };
+      await enqueue(entry);
+      throw new OfflineQueuedError();
+    } else {
+      const entry: QueueEntry = {
+        id: idempotencyKey,
+        path,
+        method,
+        body,
+        idempotencyKey,
+        createdAt: Date.now(),
+        retries: 0,
+      };
+      await enqueue(entry);
+      throw new OfflineQueuedError();
+    }
+  }
+
   // Only set Content-Type when there's a body: Fastify's JSON body parser
   // rejects an empty body sent with 'application/json' (FST_ERR_CTP_EMPTY_JSON_BODY),
   // which every bodyless POST (escrow fund/release, parcel lifecycle, chat read) hits otherwise.
@@ -118,6 +211,9 @@ export async function apiFetch<T>(
   const tokens = getTokens();
   if (!noAuth && tokens?.accessToken) {
     headers.Authorization = `Bearer ${tokens.accessToken}`;
+  }
+  if (idempotencyKey) {
+    headers["Idempotency-Key"] = idempotencyKey;
   }
 
   const doFetch = (auth: AuthTokens | null) =>
@@ -130,7 +226,21 @@ export async function apiFetch<T>(
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
-  let res = await doFetch(tokens);
+  let res: Response;
+
+  try {
+    res = await doFetch(tokens);
+  } catch (fetchErr) {
+    // Network-level failure (no response at all).
+    if (method === "GET" && !noCache) {
+      const stale = await readCachedResponse(path, body);
+      if (stale) {
+        console.warn(`[api] Returning stale cache for GET ${path}`);
+        return stale as T;
+      }
+    }
+    throw fetchErr;
+  }
 
   // 401 → try one refresh, then retry. Don't recurse.
   if (res.status === 401 && !noRefresh && tokens?.refreshToken) {
@@ -144,6 +254,15 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
+    // For GET requests, try stale cache on server errors too.
+    if (method === "GET" && !noCache && res.status >= 500) {
+      const stale = await readCachedResponse(path, body);
+      if (stale) {
+        console.warn(`[api] Returning stale cache for GET ${path} (server error ${res.status})`);
+        return stale as T;
+      }
+    }
+
     let errBody: unknown;
     try {
       errBody = await res.json();
@@ -159,5 +278,14 @@ export async function apiFetch<T>(
 
   // 204 / empty bodies shouldn't break JSON parsing.
   const text = await res.text();
-  return (text ? JSON.parse(text) : null) as T;
+  const parsed = (text ? JSON.parse(text) : null) as T;
+
+  // Cache successful GET responses.
+  if (method === "GET" && !noCache && parsed !== null) {
+    writeCachedResponse(path, body, parsed).catch(() => {
+      /* best-effort; non-fatal */
+    });
+  }
+
+  return parsed;
 }

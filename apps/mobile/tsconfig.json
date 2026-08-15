@@ -5,6 +5,7 @@
     "jsxImportSource": "nativewind",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "moduleSuffixes": [".ios", ".android", ".native", ".web", ""],
     "lib": [
       "ES2023",
       "DOM"

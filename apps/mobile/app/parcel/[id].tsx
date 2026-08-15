@@ -26,7 +26,7 @@ import {
   markInTransit,
   markPickedUp,
 } from "../../src/lib/parcels";
-import { ApiError } from "../../src/lib/api";
+import { ApiError, OfflineQueuedError } from "../../src/lib/api";
 import {
   CATEGORY_LABEL,
   cityOf,
@@ -96,7 +96,11 @@ export default function ParcelDetailScreen() {
       await travelerStep.action(parcel!.id);
       refresh();
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      if (e instanceof OfflineQueuedError) {
+        Alert.alert("Action enregistrée", "Envoi automatique à la reconnexion.");
+      } else {
+        Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      }
     } finally {
       setBusy(false);
     }

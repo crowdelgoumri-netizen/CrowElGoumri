@@ -15,13 +15,16 @@ import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
+import { StripeProvider } from "../src/lib/stripe-compat";
 import { useAuth } from "../src/store/auth";
 import { loadFonts } from "../src/lib/fonts";
 import { connectSocket, disconnectSocket } from "../src/lib/socket";
+import { STRIPE_PK } from "../src/lib/api";
 import {
   configurePresentation,
   registerForPush,
 } from "../src/lib/push";
+import { OfflineBanner } from "../src/components/OfflineBanner";
 
 function AuthGate() {
   const { hydrated, tokens } = useAuth();
@@ -85,8 +88,9 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <StripeProvider publishableKey={STRIPE_PK}>
       <StatusBar style="light" />
+      <OfflineBanner />
       {/* Routes (the (tabs) group + auth/* + detail screens) are auto-discovered. */}
       <Stack
         screenOptions={{
@@ -95,6 +99,6 @@ export default function RootLayout() {
         }}
       />
       <AuthGate />
-    </>
+    </StripeProvider>
   );
 }

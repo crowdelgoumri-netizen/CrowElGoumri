@@ -6,6 +6,7 @@ allowBuilds:
   "@prisma/engines": true
   esbuild: true
   prisma: true
+  unrs-resolver: true
 # Force react-native-reanimated to the expo-52-compatible 3.x line. Without
 # this, pnpm resolves the loose reanimated peer (declared by expo-router &
 # nativewind's css-interop) to 4.x, which pulls react-native-worklets →

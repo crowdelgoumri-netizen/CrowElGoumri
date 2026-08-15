@@ -28,11 +28,19 @@
           "color": "#FF6A2B",
           "defaultChannel": "default"
         }
+      ],
+      "expo-localization",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.crowdshipping.placeholder"
+        }
       ]
     ],
     "extra": {
       "apiUrl": "http://localhost:4000",
-      "twilioVerifySid": ""
+      "twilioVerifySid": "",
+      "stripePublishableKey": "pk_test_placeholder"
     },
     "experiments": {
       "typedRoutes": false,

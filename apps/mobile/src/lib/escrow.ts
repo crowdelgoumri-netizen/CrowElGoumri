@@ -48,7 +48,7 @@ export interface FundResponse {
 
 /** Sender funds the escrow → creates/reuses a Stripe PaymentIntent. */
 export function fund(parcelId: string): Promise<FundResponse> {
-  return apiFetch(`/escrow/${parcelId}/fund`, { method: "POST" });
+  return apiFetch(`/escrow/${parcelId}/fund`, { method: "POST", noQueue: true });
 }
 
 /** Either party reads the escrow state + breakdown. */
@@ -58,7 +58,7 @@ export function getEscrow(parcelId: string): Promise<{ escrow: Escrow }> {
 
 // ── Traveler Connect (Stripe Express payouts account) ──────────────────
 export function startConnectOnboarding(): Promise<{ url: string; accountId: string }> {
-  return apiFetch("/escrow/connect/onboarding", { method: "POST" });
+  return apiFetch("/escrow/connect/onboarding", { method: "POST", noQueue: true });
 }
 
 export interface ConnectStatus {
@@ -74,10 +74,10 @@ export function getConnectStatus(): Promise<ConnectStatus> {
 
 /** Sender cancels pre-transit → refund to their card (before IN_TRANSIT). */
 export function refund(parcelId: string): Promise<{ escrow: Escrow }> {
-  return apiFetch(`/escrow/${parcelId}/refund`, { method: "POST" });
+  return apiFetch(`/escrow/${parcelId}/refund`, { method: "POST", noQueue: true });
 }
 
 /** Manual release / retry (auto-release normally fires on DELIVERED). */
 export function release(parcelId: string): Promise<{ escrow: Escrow }> {
-  return apiFetch(`/escrow/${parcelId}/release`, { method: "POST" });
+  return apiFetch(`/escrow/${parcelId}/release`, { method: "POST", noQueue: true });
 }

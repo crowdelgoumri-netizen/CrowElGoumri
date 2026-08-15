@@ -62,6 +62,7 @@ export async function uploadFile(
   const presign = await apiFetch<PresignResponse>("/uploads/presign", {
     method: "POST",
     body: { purpose, contentType },
+    noQueue: true,
   });
 
   // uploadAsync streams the file off disk to the URL. The Content-Type header

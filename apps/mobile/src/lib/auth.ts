@@ -22,7 +22,7 @@ export interface SignupResponse {
 }
 
 export function signup(input: SignupInput): Promise<SignupResponse> {
-  return apiFetch("/auth/signup", { method: "POST", body: input, noAuth: true });
+  return apiFetch("/auth/signup", { method: "POST", body: input, noAuth: true, noQueue: true });
 }
 
 export interface VerifyPhoneInput {
@@ -41,6 +41,7 @@ export function verifyPhone(input: VerifyPhoneInput): Promise<AuthSession> {
     method: "POST",
     body: input,
     noAuth: true,
+    noQueue: true,
   });
 }
 
@@ -50,7 +51,7 @@ export interface LoginInput {
 }
 
 export function login(input: LoginInput): Promise<AuthSession> {
-  return apiFetch("/auth/login", { method: "POST", body: input, noAuth: true });
+  return apiFetch("/auth/login", { method: "POST", body: input, noAuth: true, noQueue: true });
 }
 
 /** Profile — GET /me shape (subset the home screen needs). */

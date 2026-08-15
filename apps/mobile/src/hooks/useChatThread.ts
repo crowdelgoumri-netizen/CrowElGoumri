@@ -9,10 +9,11 @@
  * server's gatekeeping (assertParcelParticipant), so a user only receives
  * messages for threads they're a party to.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getHistory, markRead, sendMessage, type ChatMessage } from "../lib/chat";
 import { joinThread, leaveThread, onSocketEvent } from "../lib/socket";
 import { useAsync } from "./useAsync";
+import { OfflineQueuedError } from "../lib/api";
 
 interface ReadEvent {
   parcelId: string;
@@ -26,6 +27,8 @@ export function useChatThread(parcelId: string, myId: string | undefined) {
     [parcelId],
   );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const myIdRef = useRef(myId);
+  myIdRef.current = myId;
 
   // Hydrate from REST on (re)load.
   useEffect(() => {
@@ -82,10 +85,26 @@ export function useChatThread(parcelId: string, myId: string | undefined) {
     async (body: string) => {
       const trimmed = body.trim();
       if (!trimmed) return;
-      const { message } = await sendMessage(parcelId, trimmed);
-      setMessages((prev) =>
-        prev.some((x) => x.id === message.id) ? prev : [...prev, message],
-      );
+      try {
+        const { message } = await sendMessage(parcelId, trimmed);
+        setMessages((prev) =>
+          prev.some((x) => x.id === message.id) ? prev : [...prev, message],
+        );
+      } catch (e) {
+        if (e instanceof OfflineQueuedError && myIdRef.current) {
+          // Optimistically show the message locally with a pending marker.
+          const pending: ChatMessage = {
+            id: `pending-${Date.now()}`,
+            parcelId,
+            senderId: myIdRef.current,
+            body: trimmed,
+            createdAt: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, pending]);
+        } else {
+          throw e;
+        }
+      }
     },
     [parcelId],
   );

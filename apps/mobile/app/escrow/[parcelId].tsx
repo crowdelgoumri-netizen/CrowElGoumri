@@ -1,26 +1,24 @@
 /**
- * Escrow checkout (board 10) — fund the escrow and (in real builds) confirm
- * the card payment.
+ * Escrow checkout — fund the escrow and confirm the card payment via Stripe
+ * Payment Sheet.
  *
  * POST /escrow/:id/fund returns a Stripe PaymentIntent clientSecret + the EUR
- * breakdown (traveler payout, platform fee, insurance). The actual card
- * confirmation needs @stripe/stripe-react-native (a dev build, not Expo Go),
- * so on the Expo Go path we show the full breakdown + escrow state and gate
- * the final "Pay" step behind a clear note. The clientSecret is captured so
- * the moment dev builds are adopted, flipping in Stripe.confirmCardPayment is
- * the only change.
+ * breakdown. The Payment Sheet ( @stripe/stripe-react-native ) handles card
+ * entry, 3D Secure, and Apple/Google Pay natively.
  */
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Text, View } from "react-native";
+import { useStripe } from "../../src/lib/stripe-compat";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
 import { Button } from "../../src/components/Button";
 import { StatusPill } from "../../src/components/StatusPill";
 import { useAsync } from "../../src/hooks/useAsync";
-import { fund } from "../../src/lib/escrow";
+import { fund, getEscrow } from "../../src/lib/escrow";
 import { eur, ESCROW_STATUS } from "../../src/lib/format";
+import type { EscrowStatus } from "../../src/lib/types";
 
 export default function EscrowScreen() {
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
@@ -28,24 +26,63 @@ export default function EscrowScreen() {
     () => fund(parcelId),
     [parcelId],
   );
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [busy, setBusy] = useState(false);
   const [paid, setPaid] = useState(false);
 
   const breakdown = data?.breakdown;
   const st = data ? ESCROW_STATUS[data.status] : null;
 
-  function onPay() {
-    // Card confirmation needs @stripe/stripe-react-native (dev build). On Expo
-    // Go we surface this honestly — the escrow + clientSecret are ready.
-    Alert.alert(
-      "Paiement",
-      "Le règlement par carte dans l'app nécessite le module Stripe (build de développement).\n\n" +
-        "L'escrow est prêt : " +
-        (data?.escrowId ? `n°${data.escrowId.slice(-6)}` : "") +
-        (data?.clientSecret ? "\nclientSecret ✓" : "") +
-        "\n\nEn build de dev, l'étape finale appelle Stripe.confirmCardPayment(clientSecret).",
-      [{ text: "OK" }],
-    );
-    setPaid(true);
+  const alreadyLocked = data?.status === "LOCKED" || data?.status === "RELEASED";
+
+  async function onPay() {
+    if (!data?.clientSecret) {
+      Alert.alert("Erreur", "Impossible de préparer le paiement.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const { error: initErr } = await initPaymentSheet({
+        merchantDisplayName: "CrowdShipping",
+        paymentIntentClientSecret: data.clientSecret,
+      });
+
+      if (initErr) {
+        Alert.alert("Paiement", initErr.message);
+        setBusy(false);
+        return;
+      }
+
+      const { error: payErr } = await presentPaymentSheet();
+
+      if (payErr) {
+        // User cancelled — not an error, just dismiss.
+        if (payErr.code === "Canceled") {
+          setBusy(false);
+          return;
+        }
+        Alert.alert("Paiement échoué", payErr.message, [
+          { text: "Réessayer", onPress: () => onPay() },
+          { text: "Plus tard", style: "cancel" },
+        ]);
+        setBusy(false);
+        return;
+      }
+
+      // Payment succeeded — poll escrow to confirm LOCKED (webhook may not have
+      // arrived yet, so we give it a moment).
+      setPaid(true);
+      for (let i = 0; i < 5; i++) {
+        const { escrow } = await getEscrow(parcelId);
+        if (escrow.status === ("LOCKED" as EscrowStatus)) break;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    } catch (e) {
+      Alert.alert("Paiement", e instanceof Error ? e.message : "Erreur inattendue.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -95,11 +132,22 @@ export default function EscrowScreen() {
             </Text>
           </Card>
 
-          <Button
-            label={paid ? "En attente de confirmation" : `Payer ${eur(breakdown.totalAmount)}`}
-            onPress={onPay}
-            loading={loading}
-          />
+          {alreadyLocked ? (
+            <Text className="text-muted font-body text-sm text-center">
+              Paiement déjà confirmé.
+            </Text>
+          ) : !data.clientSecret ? (
+            <Text className="text-danger font-body text-sm text-center">
+              Configuration Stripe manquante — contactez le support.
+            </Text>
+          ) : (
+            <Button
+              label={paid ? "Confirmation en cours…" : `Payer ${eur(breakdown.totalAmount)}`}
+              onPress={onPay}
+              loading={busy || paid}
+              disabled={paid}
+            />
+          )}
         </View>
       ) : null}
 

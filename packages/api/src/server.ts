@@ -6,6 +6,7 @@
  * separate services only where real operational pain appears.
  */
 import Fastify, { type FastifyInstance } from "fastify";
+import { pathToFileURL } from "node:url";
 import cors from "@fastify/cors";
 import rawBody from "fastify-raw-body";
 import swagger from "@fastify/swagger";
@@ -13,6 +14,7 @@ import swaggerUi from "@fastify/swagger-ui";
 import { env } from "./env.js";
 import { authPlugin } from "./plugins/auth.js";
 import { adminPlugin } from "./plugins/admin.js";
+import idempotencyPlugin from "./plugins/idempotency.js";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
@@ -26,9 +28,10 @@ import { kycRoutes } from "./routes/kyc.js";
 import { disputeRoutes } from "./routes/disputes.js";
 import { ratingRoutes } from "./routes/ratings.js";
 import { uploadRoutes } from "./routes/uploads.js";
+import { adminRoutes } from "./routes/admin.js";
 import { realtimePlugin } from "./plugins/realtime.js";
 
-async function buildServer(): Promise<FastifyInstance> {
+export async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       transport:
@@ -60,6 +63,10 @@ async function buildServer(): Promise<FastifyInstance> {
   // requireAdmin builds on authenticate's req.user — register after it.
   await app.register(adminPlugin);
 
+  // Idempotency: deduplicates POST requests with Idempotency-Key header.
+  // Registered after auth so req.user is available if handlers need it.
+  await app.register(idempotencyPlugin);
+
   // Socket.IO, attached to the same HTTP server. Registered after auth so
   // the socket handshake can verify JWTs with the shared @fastify/jwt.
   await app.register(realtimePlugin);
@@ -89,6 +96,7 @@ async function buildServer(): Promise<FastifyInstance> {
   await app.register(disputeRoutes, { prefix: "/disputes" });
   await app.register(ratingRoutes, { prefix: "/ratings" });
   await app.register(uploadRoutes, { prefix: "/uploads" });
+  await app.register(adminRoutes, { prefix: "/admin" });
 
   return app;
 }
@@ -108,4 +116,7 @@ async function start() {
   }
 }
 
-start();
+// Auto-start only when run directly (not when imported by tests)
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  start();
+}

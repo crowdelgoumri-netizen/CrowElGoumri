@@ -15,6 +15,7 @@ import { Card } from "../../src/components/Card";
 import { Avatar } from "../../src/components/Avatar";
 import { StatusPill } from "../../src/components/StatusPill";
 import { Button } from "../../src/components/Button";
+import { AuthWall } from "../../src/components/AuthWall";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
@@ -31,9 +32,26 @@ const BADGE_EMOJI: Record<string, string> = {
 
 export default function ProfileScreen() {
   const colors = useThemeColors();
-  const { user, logout } = useAuth();
-  const connect = useAsync(() => getConnectStatus().catch(() => null), []);
+  const { user, tokens, logout } = useAuth();
+  // Guests get the sign-in wall (profile + wallet are per-account); skip
+  // the Connect status call instead of eating a 401.
+  const connect = useAsync(
+    () =>
+      tokens
+        ? getConnectStatus().catch(() => null)
+        : Promise.resolve(null),
+    [!!tokens],
+  );
   const [onboarding, setOnboarding] = useState(false);
+
+  if (!tokens) {
+    return (
+      <AuthWall
+        title="Votre profil"
+        subtitle="Connectez-vous pour suivre vos livraisons, vos gains et votre vérification d'identité."
+      />
+    );
+  }
 
   async function startOnboarding() {
     setOnboarding(true);

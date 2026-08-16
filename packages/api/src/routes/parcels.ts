@@ -165,24 +165,28 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
     },
   );
 
-  // GET /parcels — list (sender sees own; travelers see PENDING_MATCH)
+  // GET /parcels — list. status=PENDING_MATCH is the public marketplace feed
+  // (guests allowed); every other scope is the sender's own data (auth required).
   app.get(
     "/",
-    { preHandler: [app.authenticate] },
-    async (req) => {
+    { preHandler: [app.authenticateOptional] },
+    async (req, reply) => {
       const parsed = listQuerySchema.safeParse(req.query);
       if (!parsed.success) {
         return { error: parsed.error.flatten() };
       }
       const { status, category, limit, offset } = parsed.data;
-      const senderId = req.user.sub;
+      const senderId = (req.user as { sub?: string } | undefined)?.sub;
 
       // Default: show this user's parcels. If status=PENDING_MATCH,
       // show the public marketplace feed (travelers browsing for parcels).
+      if (status !== "PENDING_MATCH" && !senderId) {
+        return reply.code(401).send({ error: "Authentication required" });
+      }
       const where =
         status === "PENDING_MATCH"
           ? { status: "PENDING_MATCH" as const, ...(category ? { category } : {}) }
-          : { senderId, ...(status ? { status } : {}) };
+          : { senderId: senderId!, ...(status ? { status } : {}) };
 
       const [parcels, total] = await Promise.all([
         prisma.parcel.findMany({
@@ -221,10 +225,12 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
     },
   );
 
-  // GET /parcels/:id — single parcel detail
+  // GET /parcels/:id — single parcel detail. Readable by guests (marketplace
+  // vetting view) except DRAFTs, which only the sender can see. Recipient
+  // PII is stripped for guests — it's only useful to the sender anyway.
   app.get(
     "/:id",
-    { preHandler: [app.authenticate] },
+    { preHandler: [app.authenticateOptional] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
       const parcel = await prisma.parcel.findUnique({
@@ -257,9 +263,16 @@ export const parcelRoutes: FastifyPluginAsync = async (app) => {
         return reply.code(404).send({ error: "Parcel not found" });
       }
 
+      const viewerId = (req.user as { sub?: string } | undefined)?.sub;
+
       // Visibility: sender sees everything; others see only non-DRAFT
-      if (parcel.senderId !== req.user.sub && parcel.status === "DRAFT") {
+      if (parcel.senderId !== viewerId && parcel.status === "DRAFT") {
         return reply.code(404).send({ error: "Parcel not found" });
+      }
+
+      if (!viewerId) {
+        parcel.recipientName = null;
+        parcel.recipientPhone = null;
       }
 
       return { parcel };

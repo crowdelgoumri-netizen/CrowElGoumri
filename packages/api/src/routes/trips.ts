@@ -114,17 +114,22 @@ export const tripRoutes: FastifyPluginAsync = async (app) => {
     },
   );
 
-  // GET /trips — list (traveler sees own; senders see PUBLISHED)
+  // GET /trips — list. PUBLISHED/MATCHING is the public feed senders browse
+  // (guests allowed); every other scope is the traveler's own data (auth required).
   app.get(
     "/",
-    { preHandler: [app.authenticate] },
-    async (req) => {
+    { preHandler: [app.authenticateOptional] },
+    async (req, reply) => {
       const parsed = listQuerySchema.safeParse(req.query);
       if (!parsed.success) {
         return { error: parsed.error.flatten() };
       }
       const { status, mode, limit, offset } = parsed.data;
-      const travelerId = req.user.sub;
+      const travelerId = (req.user as { sub?: string } | undefined)?.sub;
+
+      if (status !== "PUBLISHED" && status !== "MATCHING" && !travelerId) {
+        return reply.code(401).send({ error: "Authentication required" });
+      }
 
       const where =
         status === "PUBLISHED" || status === "MATCHING"
@@ -133,7 +138,7 @@ export const tripRoutes: FastifyPluginAsync = async (app) => {
               ...(mode ? { mode } : {}),
             }
           : {
-              travelerId,
+              travelerId: travelerId!,
               ...(status ? { status } : {}),
               ...(mode ? { mode } : {}),
             };
@@ -173,10 +178,11 @@ export const tripRoutes: FastifyPluginAsync = async (app) => {
     },
   );
 
-  // GET /trips/:id — single trip detail
+  // GET /trips/:id — single trip detail. Readable by guests (marketplace
+  // vetting view) except DRAFTs, which only the traveler can see.
   app.get(
     "/:id",
-    { preHandler: [app.authenticate] },
+    { preHandler: [app.authenticateOptional] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
       const trip = await prisma.trip.findUnique({
@@ -208,7 +214,8 @@ export const tripRoutes: FastifyPluginAsync = async (app) => {
       if (!trip) {
         return reply.code(404).send({ error: "Trip not found" });
       }
-      if (trip.travelerId !== req.user.sub && trip.status === "DRAFT") {
+      const viewerId = (req.user as { sub?: string } | undefined)?.sub;
+      if (trip.travelerId !== viewerId && trip.status === "DRAFT") {
         return reply.code(404).send({ error: "Trip not found" });
       }
 

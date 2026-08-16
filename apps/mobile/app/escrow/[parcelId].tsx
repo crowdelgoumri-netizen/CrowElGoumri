@@ -15,6 +15,8 @@ import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
 import { Button } from "../../src/components/Button";
 import { StatusPill } from "../../src/components/StatusPill";
+import { AuthWall } from "../../src/components/AuthWall";
+import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { fund, getEscrow } from "../../src/lib/escrow";
 import { eur, ESCROW_STATUS } from "../../src/lib/format";
@@ -22,13 +24,20 @@ import type { EscrowStatus } from "../../src/lib/types";
 
 export default function EscrowScreen() {
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
+  const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(
-    () => fund(parcelId),
-    [parcelId],
+    // Funding is a mutation — guests never fire it, they get the wall.
+    () => (tokens ? fund(parcelId) : Promise.resolve(null)),
+    [parcelId, !!tokens],
   );
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [busy, setBusy] = useState(false);
   const [paid, setPaid] = useState(false);
+
+  // Escrow involves the sender's payment — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Paiement sécurisé" />;
+  }
 
   const breakdown = data?.breakdown;
   const st = data ? ESCROW_STATUS[data.status] : null;

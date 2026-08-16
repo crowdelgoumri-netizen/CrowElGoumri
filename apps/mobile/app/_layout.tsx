@@ -4,8 +4,8 @@
  * Boots the auth store (hydrates from AsyncStorage), the theme store (color
  * mode: system/dark/bright), loads the brand fonts, connects the Socket.IO
  * client + registers for push while authenticated (and tears both down on
- * logout), and redirects between the auth flow and the authenticated tab
- * shell based on session state.
+ * logout), and sends logged-in users back to the tab shell if they land on
+ * an auth screen. Guests stay in the app and browse the public marketplace.
  *
  * Splash state: until hydration AND fonts are ready we show a blank Aurora
  * screen (in the resolved mode's base color) so the user never sees a flash
@@ -39,11 +39,10 @@ function AuthGate() {
   useEffect(() => {
     if (!hydrated) return;
     const inAuthGroup = segments[0] === "auth";
-    if (!tokens && !inAuthGroup) {
-      // No session → force into auth flow.
-      router.replace("/auth/login");
-    } else if (tokens && inAuthGroup) {
-      // Session exists but sitting on an auth screen → go to the app.
+    // Guests browse freely (marketplace reads are public); screens that need
+    // an account gate themselves with AuthWall. Only bounce logged-in users
+    // out of the auth flow once they have a session.
+    if (tokens && inAuthGroup) {
       router.replace("/(tabs)");
     }
   }, [hydrated, tokens, segments, router]);

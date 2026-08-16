@@ -16,6 +16,8 @@ import { StatusPill } from "../../src/components/StatusPill";
 import { Input } from "../../src/components/Input";
 import { Select, type SelectOption } from "../../src/components/Select";
 import { Button } from "../../src/components/Button";
+import { AuthWall } from "../../src/components/AuthWall";
+import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { getDispute, openDispute, type Dispute } from "../../src/lib/disputes";
 import { ApiError } from "../../src/lib/api";
@@ -44,10 +46,16 @@ export default function ReportScreen() {
     parcelId: string;
     role: "sender" | "traveler";
   }>();
+  const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, setData } = useAsync(() => getDispute(parcelId), [parcelId]);
   const [reason, setReason] = useState<DisputeReason | "">("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Disputes are between the two parties — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Signaler un problème" />;
+  }
 
   const existing = data?.dispute ?? null;
 

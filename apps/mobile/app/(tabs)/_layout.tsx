@@ -1,12 +1,13 @@
 /**
- * Tabs layout — the authenticated app shell.
+ * Tabs layout — the main app shell (guests welcome).
  *
  * Three tabs (Accueil / Messages / Profil) over the Aurora base, with a
  * floating center "+" FAB that opens a chooser: send a parcel or post a trip.
  * Both post screens push onto the root stack as modals (full-screen forms).
+ * Guests browse the Accueil feed; Messages/Profile/FAB route them to login.
  */
 import { useState } from "react";
-import { Redirect, router, Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import {
   Modal,
   Pressable,
@@ -25,13 +26,25 @@ export default function TabsLayout() {
   const [fabOpen, setFabOpen] = useState(false);
 
   // Unread badge for the Messages + Notifications affordances.
+  // Guests have no notifications — skip the call instead of eating a 401.
   const { data: notifData } = useAsync(
-    () => listNotifications({ unreadOnly: true, limit: 1 }),
-    [],
+    () =>
+      tokens
+        ? listNotifications({ unreadOnly: true, limit: 1 })
+        : Promise.resolve(null),
+    [!!tokens],
   );
   const unread = notifData?.unreadCount ?? 0;
 
-  if (!tokens) return <Redirect href="/auth/login" />;
+  // The "+" FAB publishes (parcel or trip) — an account is required, so
+  // guests are sent to login instead of the chooser.
+  function openFab() {
+    if (!tokens) {
+      router.push("/auth/login");
+      return;
+    }
+    setFabOpen(true);
+  }
 
   return (
     <View className="flex-1 bg-base">
@@ -83,7 +96,7 @@ export default function TabsLayout() {
       {/* Center floating "+" — opens the post chooser. */}
       <Pressable
         testID="fab-button"
-        onPress={() => setFabOpen(true)}
+        onPress={openFab}
         className="absolute rounded-full bg-accent items-center justify-center active:opacity-80"
         style={{
           bottom: 38,

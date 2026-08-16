@@ -40,6 +40,7 @@ type Tab = "trips" | "parcels";
 
 export default function HomeScreen() {
   const user = useAuth((s) => s.user);
+  const tokens = useAuth((s) => s.tokens);
   const colors = useThemeColors();
   const [tab, setTab] = useState<Tab>("trips");
   const [mode, setMode] = useState<string>("");
@@ -48,7 +49,14 @@ export default function HomeScreen() {
     () => tripsApi.listPublished(mode ? { mode: mode as TransportMode } : {}),
     [mode],
   );
-  const parcels = useAsync(() => parcelsApi.listMine(), []);
+  // Guests have no parcels — the "Mes colis" segment shows a login CTA.
+  const parcels = useAsync(
+    () =>
+      tokens
+        ? parcelsApi.listMine()
+        : Promise.resolve(null as parcelsApi.ListParcelsResponse | null),
+    [!!tokens],
+  );
 
   return (
     <Screen>
@@ -114,6 +122,14 @@ export default function HomeScreen() {
             error={trips.error}
             trips={trips.data?.trips ?? null}
             onRefresh={trips.refresh}
+          />
+        ) : !tokens ? (
+          <EmptyState
+            icon="cube-outline"
+            title="Vos colis ici"
+            subtitle="Créez un compte pour envoyer un colis et suivre ses livraisons."
+            ctaLabel="Se connecter"
+            onCta={() => router.push("/auth/login")}
           />
         ) : (
           <ParcelsList

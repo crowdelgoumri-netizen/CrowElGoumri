@@ -19,6 +19,7 @@ import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
 import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
+import { AuthWall } from "../../src/components/AuthWall";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
@@ -33,6 +34,7 @@ import { ApiError } from "../../src/lib/api";
 export default function DeliveryScreen() {
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const user = useAuth((s) => s.user);
+  const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(() => getParcel(parcelId), [parcelId]);
   const parcel = data?.parcel;
   const {
@@ -45,6 +47,11 @@ export default function DeliveryScreen() {
   const [pin, setPin] = useState("");
   const [revealedPin, setRevealedPin] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // The PIN handoff involves the sender/traveler — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Livraison" />;
+  }
 
   if (loading && !parcel) {
     return (

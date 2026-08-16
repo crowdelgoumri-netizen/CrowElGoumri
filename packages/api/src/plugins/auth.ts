@@ -1,6 +1,8 @@
 /**
  * Auth plugin — registers @fastify/jwt and exposes:
  *   - app.authenticate: a preHandler decorator that guards protected routes.
+ *   - app.authenticateOptional: same, but proceeds as a guest when no valid
+ *     token is present (public marketplace reads).
  *
  * Usage in a route:
  *   app.get("/me", { preHandler: [app.authenticate] }, handler)
@@ -23,6 +25,13 @@ declare module "@fastify/jwt" {
 declare module "fastify" {
   interface FastifyInstance {
     authenticate: (req: import("fastify").FastifyRequest, reply: import("fastify").FastifyReply) => Promise<void>;
+    /**
+     * Populate req.user when a valid Bearer token is present, otherwise
+     * continue as a guest (no 401). Handlers read it with
+     * `(req.user as { sub?: string } | undefined)?.sub` since the JWT type
+     * declares user as always-present but optional auth leaves it unset.
+     */
+    authenticateOptional: (req: import("fastify").FastifyRequest, reply: import("fastify").FastifyReply) => Promise<void>;
   }
 }
 
@@ -44,6 +53,23 @@ export const authPlugin = fp(async (app: import("fastify").FastifyInstance) => {
       }
     } catch {
       reply.code(401).send({ error: "Missing or invalid token" });
+    }
+  });
+
+  // Decorator: same verification, but a missing/invalid token is not an
+  // error — the request simply proceeds unauthenticated (guest browsing).
+  // A wrong token type (refresh token) is also treated as anonymous so the
+  // route's own ownership checks decide, not the token kind.
+  app.decorate("authenticateOptional", async (req) => {
+    const header = req.headers.authorization;
+    if (!header?.startsWith("Bearer ")) return;
+    try {
+      await req.jwtVerify();
+      if (req.user.type !== "access") {
+        (req as { user?: unknown }).user = undefined;
+      }
+    } catch {
+      // invalid/expired token → anonymous, not a 401
     }
   });
 }, {

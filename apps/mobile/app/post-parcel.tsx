@@ -28,6 +28,8 @@ import { Select } from "../src/components/Select";
 import { Stepper } from "../src/components/Stepper";
 import { Button } from "../src/components/Button";
 import { Card } from "../src/components/Card";
+import { AuthWall } from "../src/components/AuthWall";
+import { useAuth } from "../src/store/auth";
 import { createParcel, type CreateParcelInput } from "../src/lib/parcels";
 import { ApiError } from "../src/lib/api";
 import { PhotoPicker } from "../src/components/PhotoPicker";
@@ -52,6 +54,7 @@ const URGENCIES = Object.entries(URGENCY_LABEL).map(([value, label]) => ({ value
 const COUNTRIES = ORIGIN_COUNTRIES.map((c) => ({ value: c.code, label: c.name }));
 
 export default function PostParcelScreen() {
+  const tokens = useAuth((s) => s.tokens);
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -83,6 +86,11 @@ export default function PostParcelScreen() {
       ORIGIN_COUNTRIES.find((c) => c.code === originCountry)?.cities ?? [],
     [originCountry],
   );
+
+  // Posting requires an account — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Envoyer un colis" />;
+  }
 
   function validateStep(): string | null {
     if (step === 0) {

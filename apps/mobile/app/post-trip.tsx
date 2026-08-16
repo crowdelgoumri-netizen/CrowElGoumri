@@ -14,6 +14,8 @@ import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Input } from "../src/components/Input";
 import { Select } from "../src/components/Select";
 import { Button } from "../src/components/Button";
+import { AuthWall } from "../src/components/AuthWall";
+import { useAuth } from "../src/store/auth";
 import { createTrip, type CreateTripInput } from "../src/lib/trips";
 import { ApiError } from "../src/lib/api";
 import { MODE_LABEL } from "../src/lib/format";
@@ -24,6 +26,7 @@ const COUNTRIES = ORIGIN_COUNTRIES.map((c) => ({ value: c.code, label: c.name })
 const MODES = Object.entries(MODE_LABEL).map(([value, label]) => ({ value, label }));
 
 export default function PostTripScreen() {
+  const tokens = useAuth((s) => s.tokens);
   const [submitting, setSubmitting] = useState(false);
 
   const [originCountry, setOriginCountry] = useState("FR");
@@ -38,6 +41,11 @@ export default function PostTripScreen() {
   const [notes, setNotes] = useState("");
 
   const cities = ORIGIN_COUNTRIES.find((c) => c.code === originCountry)?.cities ?? [];
+
+  // Publishing requires an account — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Proposer un trajet" />;
+  }
 
   async function submit() {
     if (!originCity || !destinationWilaya) {

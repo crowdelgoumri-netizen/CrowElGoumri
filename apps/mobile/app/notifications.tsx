@@ -10,6 +10,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { EmptyState } from "../src/components/EmptyState";
+import { AuthWall } from "../src/components/AuthWall";
+import { useAuth } from "../src/store/auth";
 import { useAsync } from "../src/hooks/useAsync";
 import { useThemeColors } from "../src/hooks/useThemeColors";
 import { listNotifications, markRead, type AppNotification } from "../src/lib/notifications-api";
@@ -30,11 +32,20 @@ const ICON_FOR: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 export default function NotificationsScreen() {
   const colors = useThemeColors();
+  const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh, setData } = useAsync(
-    () => listNotifications({ limit: 30 }),
-    [],
+    () =>
+      tokens
+        ? listNotifications({ limit: 30 })
+        : Promise.resolve(null),
+    [!!tokens],
   );
   const notifications = data?.notifications ?? [];
+
+  // Notifications are per-account — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Notifications" />;
+  }
 
   async function markAllRead() {
     setData((prev) =>

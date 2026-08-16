@@ -14,6 +14,8 @@ import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
 import { StatusPill } from "../../src/components/StatusPill";
 import { Button } from "../../src/components/Button";
+import { AuthWall } from "../../src/components/AuthWall";
+import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { getParcel } from "../../src/lib/parcels";
@@ -40,6 +42,7 @@ const CK_LABEL: Record<CheckpointType, string> = {
 export default function TrackingScreen() {
   const colors = useThemeColors();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
+  const tokens = useAuth((s) => s.tokens);
   const parcelReq = useAsync(() => getParcel(parcelId), [parcelId]);
   const parcel = parcelReq.data?.parcel;
   const tripId = parcel?.matchedTripId ?? null;
@@ -49,6 +52,11 @@ export default function TrackingScreen() {
     [tripId],
   );
   const checkpoints = ckReq.data?.checkpoints ?? [];
+
+  // Checkpoints are party-only — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Suivi" />;
+  }
 
   if (parcelReq.loading && !parcel) {
     return (

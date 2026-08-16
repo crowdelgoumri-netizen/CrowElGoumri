@@ -15,6 +15,8 @@ import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
 import { MatchCard } from "../../src/components/MatchCard";
 import { EmptyState } from "../../src/components/EmptyState";
+import { AuthWall } from "../../src/components/AuthWall";
+import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { getMatchesForParcel } from "../../src/lib/matching";
@@ -22,11 +24,17 @@ import { getMatchesForParcel } from "../../src/lib/matching";
 export default function MatchingScreen() {
   const colors = useThemeColors();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
+  const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(
     () => getMatchesForParcel(parcelId),
     [parcelId],
   );
   const matches = data?.matches ?? [];
+
+  // Matching is tied to the sender's parcel — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Voyageurs disponibles" />;
+  }
 
   return (
     <Screen>

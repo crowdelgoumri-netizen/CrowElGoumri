@@ -10,6 +10,8 @@ import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { Screen } from "../../src/components/Screen";
 import { Avatar } from "../../src/components/Avatar";
 import { EmptyState } from "../../src/components/EmptyState";
+import { AuthWall } from "../../src/components/AuthWall";
+import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { listThreads, type ChatThread } from "../../src/lib/chat";
@@ -17,8 +19,25 @@ import { PARCEL_STATUS, timeAgo } from "../../src/lib/format";
 
 export default function MessagesScreen() {
   const colors = useThemeColors();
-  const { data, loading, error, refresh } = useAsync(() => listThreads(), []);
+  const tokens = useAuth((s) => s.tokens);
+  const { data, loading, error, refresh } = useAsync(
+    () =>
+      tokens
+        ? listThreads()
+        : Promise.resolve({ threads: [] as ChatThread[] }),
+    [!!tokens],
+  );
   const threads = data?.threads ?? [];
+
+  // Chat is party-only — guests get the login wall instead of a 401.
+  if (!tokens) {
+    return (
+      <AuthWall
+        title="Vos messages"
+        subtitle="Connectez-vous pour discuter avec vos voyageurs et expéditeurs."
+      />
+    );
+  }
 
   return (
     <Screen>

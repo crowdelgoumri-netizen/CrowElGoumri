@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Avatar } from "../../src/components/Avatar";
+import { AuthWall } from "../../src/components/AuthWall";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useChatThread } from "../../src/hooks/useChatThread";
@@ -67,6 +68,11 @@ export default function ChatScreen() {
       listRef.current?.scrollToIndex({ index: 0, animated: false, viewPosition: 0 });
     }
   }, [ordered.length]);
+
+  // Chat is party-only — guests get the login wall (after all hooks).
+  if (!user) {
+    return <AuthWall headerTitle="Discussion" />;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-base" edges={["top"]}>

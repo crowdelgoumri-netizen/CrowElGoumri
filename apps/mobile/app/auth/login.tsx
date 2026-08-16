@@ -7,7 +7,7 @@
  */
 import { useState } from "react";
 import { Link, router } from "expo-router";
-import { Alert, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { Button } from "../../src/components/Button";
 import { Input } from "../../src/components/Input";
 import { Screen } from "../../src/components/Screen";
@@ -89,6 +89,16 @@ export default function LoginScreen() {
           Créer un compte
         </Link>
       </View>
+
+      {/* Guests can always keep browsing the marketplace instead. */}
+      <Pressable
+        onPress={() => router.replace("/(tabs)")}
+        className="mt-stack-gap items-center py-sm"
+      >
+        <Text className="text-text-secondary font-body text-sm">
+          Explorer sans compte
+        </Text>
+      </Pressable>
     </Screen>
   );
 }

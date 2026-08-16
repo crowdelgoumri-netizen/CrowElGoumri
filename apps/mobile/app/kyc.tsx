@@ -16,6 +16,7 @@ import { Select } from "../src/components/Select";
 import { Button } from "../src/components/Button";
 import { StatusPill } from "../src/components/StatusPill";
 import { PhotoPicker } from "../src/components/PhotoPicker";
+import { AuthWall } from "../src/components/AuthWall";
 import { useAuth } from "../src/store/auth";
 import { useAsync } from "../src/hooks/useAsync";
 import { getKycStatus, submitKyc, type DocumentType } from "../src/lib/kyc";
@@ -34,7 +35,7 @@ const TARGET_LEVELS = [
 ];
 
 export default function KycScreen() {
-  const { refreshUser } = useAuth();
+  const { refreshUser, tokens } = useAuth();
   const { data, loading, error, refresh } = useAsync(() => getKycStatus(), []);
   const [submitting, setSubmitting] = useState(false);
 
@@ -42,6 +43,11 @@ export default function KycScreen() {
   const [docUrl, setDocUrl] = useState("");
   const [selfieUrl, setSelfieUrl] = useState("");
   const [target, setTarget] = useState<"ENHANCED" | "FULL">("ENHANCED");
+
+  // Verification is per-account — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Vérification d'identité" />;
+  }
 
   const level = data ? KYC_LEVEL[data.kycLevel] : null;
   const sub = data?.latestSubmission;

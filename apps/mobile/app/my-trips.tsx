@@ -11,14 +11,22 @@ import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { TripCard } from "../src/components/TripCard";
 import { EmptyState } from "../src/components/EmptyState";
+import { AuthWall } from "../src/components/AuthWall";
+import { useAuth } from "../src/store/auth";
 import { useAsync } from "../src/hooks/useAsync";
 import { useThemeColors } from "../src/hooks/useThemeColors";
 import { listMine } from "../src/lib/trips";
 
 export default function MyTripsScreen() {
   const colors = useThemeColors();
+  const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(() => listMine(), []);
   const trips = data?.trips ?? [];
+
+  // Own-trips is per-account — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Mes trajets" />;
+  }
 
   return (
     <Screen>

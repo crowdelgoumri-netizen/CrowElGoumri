@@ -83,7 +83,11 @@ export default function ParcelDetailScreen() {
   const inMotion = ["AWAITING_PICKUP", "IN_TRANSIT", "AWAITING_DELIVERY"].includes(parcel.status);
   const canCancel = ["DRAFT", "PENDING_MATCH", "MATCHED"].includes(parcel.status);
   const isTraveler = !!user && parcel.matchedTrip?.traveler?.id === user.id;
-  const canReport = matched && parcel.status !== "SEIZED" && (isTraveler || parcel.senderId === user?.id);
+  const isSender = !!user && parcel.senderId === user.id;
+  // Guests get a read-only vetting view — every action below needs an account
+  // and would otherwise surface a raw 401 alert.
+  const canAct = !!user;
+  const canReport = matched && parcel.status !== "SEIZED" && (isTraveler || isSender);
   const canGoToDelivery = parcel.status === "AWAITING_DELIVERY" || parcel.status === "DELIVERED";
   const travelerStep = isTraveler ? TRAVELER_STEPS[parcel.status] : undefined;
 
@@ -177,67 +181,78 @@ export default function ParcelDetailScreen() {
                   </Text>
                 ) : null}
               </View>
-              <Pressable
-                onPress={() => router.push(`/chat/${parcel.id}`)}
-                className="rounded-field bg-accent/20 px-3 py-1.5"
-              >
-                <Text className="text-accent text-xs font-bold">Discuter</Text>
-              </Pressable>
+              {canAct ? (
+                <Pressable
+                  onPress={() => router.push(`/chat/${parcel.id}`)}
+                  className="rounded-field bg-accent/20 px-3 py-1.5"
+                >
+                  <Text className="text-accent text-xs font-bold">Discuter</Text>
+                </Pressable>
+              ) : null}
             </View>
           </Card>
         ) : null}
 
         {/* Actions */}
-        <View className="gap-stack-gap mt-section-gap">
-          {parcel.status === "PENDING_MATCH" ? (
-            <Button label="Trouver un voyageur" onPress={() => router.push(`/matching/${parcel.id}`)} />
-          ) : null}
-          {parcel.status === "MATCHED" ? (
-            <Button label="Sécuriser le paiement" onPress={() => router.push(`/escrow/${parcel.id}`)} />
-          ) : null}
-          {travelerStep ? (
-            <Button label={travelerStep.label} onPress={onAdvance} loading={busy} />
-          ) : null}
-          {matched ? (
+        {canAct ? (
+          <View className="gap-stack-gap mt-section-gap">
+            {parcel.status === "PENDING_MATCH" ? (
+              <Button label="Trouver un voyageur" onPress={() => router.push(`/matching/${parcel.id}`)} />
+            ) : null}
+            {parcel.status === "MATCHED" ? (
+              <Button label="Sécuriser le paiement" onPress={() => router.push(`/escrow/${parcel.id}`)} />
+            ) : null}
+            {travelerStep ? (
+              <Button label={travelerStep.label} onPress={onAdvance} loading={busy} />
+            ) : null}
+            {matched ? (
+              <Button
+                label="Générer le code de livraison"
+                variant="secondary"
+                onPress={onGeneratePin}
+                loading={busy}
+              />
+            ) : null}
+            {canGoToDelivery ? (
+              <Button
+                label={parcel.status === "DELIVERED" ? "Livraison & avis" : "Confirmer la livraison"}
+                variant="secondary"
+                onPress={() => router.push(`/delivery/${parcel.id}`)}
+              />
+            ) : null}
+            {inMotion ? (
+              <Button label="Suivre le colis" onPress={() => router.push(`/tracking/${parcel.id}`)} />
+            ) : null}
+            {matched ? (
+              <Button
+                label="Suivi & détails"
+                variant="ghost"
+                onPress={() => router.push(`/tracking/${parcel.id}`)}
+              />
+            ) : null}
+            {canCancel ? (
+              <Button label="Annuler ce colis" variant="ghost" onPress={onCancel} loading={busy} />
+            ) : null}
+            {canReport ? (
+              <Button
+                label="Signaler un problème"
+                variant="ghost"
+                onPress={() =>
+                  router.push(
+                    `/report/${parcel.id}?role=${isTraveler ? "traveler" : "sender"}`,
+                  )
+                }
+              />
+            ) : null}
+          </View>
+        ) : (
+          <View className="mt-section-gap">
             <Button
-              label="Générer le code de livraison"
-              variant="secondary"
-              onPress={onGeneratePin}
-              loading={busy}
+              label="Se connecter pour envoyer un colis"
+              onPress={() => router.push("/auth/login")}
             />
-          ) : null}
-          {canGoToDelivery ? (
-            <Button
-              label={parcel.status === "DELIVERED" ? "Livraison & avis" : "Confirmer la livraison"}
-              variant="secondary"
-              onPress={() => router.push(`/delivery/${parcel.id}`)}
-            />
-          ) : null}
-          {inMotion ? (
-            <Button label="Suivre le colis" onPress={() => router.push(`/tracking/${parcel.id}`)} />
-          ) : null}
-          {matched ? (
-            <Button
-              label="Suivi & détails"
-              variant="ghost"
-              onPress={() => router.push(`/tracking/${parcel.id}`)}
-            />
-          ) : null}
-          {canCancel ? (
-            <Button label="Annuler ce colis" variant="ghost" onPress={onCancel} loading={busy} />
-          ) : null}
-          {canReport ? (
-            <Button
-              label="Signaler un problème"
-              variant="ghost"
-              onPress={() =>
-                router.push(
-                  `/report/${parcel.id}?role=${isTraveler ? "traveler" : "sender"}`,
-                )
-              }
-            />
-          ) : null}
-        </View>
+          </View>
+        )}
       </ScrollView>
     </Screen>
   );

@@ -15,6 +15,7 @@ import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Card } from "../src/components/Card";
 import { Button } from "../src/components/Button";
+import { AuthWall } from "../src/components/AuthWall";
 import { useAuth } from "../src/store/auth";
 import { useTheme, type ThemeMode } from "../src/store/theme";
 import { useThemeColors } from "../src/hooks/useThemeColors";
@@ -29,7 +30,7 @@ const MODE_OPTIONS: { value: ThemeMode; label: string }[] = [
 
 export default function SettingsScreen() {
   const colors = useThemeColors();
-  const { user, logout } = useAuth();
+  const { user, tokens, logout } = useAuth();
   const { t } = useTranslation();
   const themeMode = useTheme((s) => s.mode);
   const setThemeMode = useTheme((s) => s.setMode);
@@ -38,6 +39,11 @@ export default function SettingsScreen() {
   useEffect(() => {
     isPushEnabled().then(setPushOn);
   }, []);
+
+  // Settings manage an account — guests get the login wall.
+  if (!tokens) {
+    return <AuthWall headerTitle="Paramètres" />;
+  }
 
   async function onTogglePush(next: boolean) {
     setPushOn(next);

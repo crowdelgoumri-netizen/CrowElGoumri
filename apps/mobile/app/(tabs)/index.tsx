@@ -24,6 +24,7 @@ import { EmptyState } from "../../src/components/EmptyState";
 import { Select } from "../../src/components/Select";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
 import * as parcelsApi from "../../src/lib/parcels";
 import { MODE_LABEL } from "../../src/lib/format";
@@ -39,6 +40,7 @@ type Tab = "trips" | "parcels";
 
 export default function HomeScreen() {
   const user = useAuth((s) => s.user);
+  const colors = useThemeColors();
   const [tab, setTab] = useState<Tab>("trips");
   const [mode, setMode] = useState<string>("");
 
@@ -53,47 +55,47 @@ export default function HomeScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between mt-md">
         <View className="flex-1">
-          <Text className="text-muted font-body text-sm">
+          <Text className="text-text-muted font-body text-sm">
             Bonjour, {user?.firstName ?? "👋"}
           </Text>
-          <Text className="text-white font-heading text-2xl font-bold">
+          <Text className="text-text-primary font-heading text-2xl font-bold">
             Europe → Algérie
           </Text>
         </View>
         <Pressable
           onPress={() => router.push("/notifications")}
-          className="h-11 w-11 items-center justify-center rounded-full bg-navySoft/60"
+          className="h-11 w-11 items-center justify-center rounded-full bg-glass border border-hairline"
         >
-          <Ionicons name="notifications-outline" size={22} color="#F5F7FA" />
+          <Ionicons name="notifications-outline" size={22} color={colors.textPrimary} />
         </Pressable>
       </View>
 
       {/* Popular corridors */}
-      <View className="mt-md">
-        <Text className="text-mist/60 text-xs font-body mb-2 uppercase tracking-wide">
+      <View className="mt-section-gap">
+        <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mb-2">
           Corridors populaires
         </Text>
         <View className="flex-row flex-wrap gap-2">
           {POPULAR_CORRIDORS.map((c) => (
             <View
               key={c}
-              className="rounded-pill bg-navySoft/60 border border-line px-3 py-1.5"
+              className="rounded-chip bg-chip-bg border border-chip-border px-3 py-1.5"
             >
-              <Text className="text-mist font-body text-xs">{c}</Text>
+              <Text className="text-text-secondary font-body text-xs">{c}</Text>
             </View>
           ))}
         </View>
       </View>
 
       {/* Segmented toggle */}
-      <View className="flex-row bg-navySoft/60 rounded-pill p-1 mt-lg">
+      <View className="flex-row bg-glass rounded-chip p-1 mt-section-gap">
         <SegBtn label="Voyageurs" active={tab === "trips"} onPress={() => setTab("trips")} />
         <SegBtn label="Mes colis" active={tab === "parcels"} onPress={() => setTab("parcels")} />
       </View>
 
       {/* Filter (trips only) */}
       {tab === "trips" ? (
-        <View className="mt-md">
+        <View className="mt-stack-gap">
           <Select
             label="Filtrer par mode de transport"
             value={mode}
@@ -105,7 +107,7 @@ export default function HomeScreen() {
       ) : null}
 
       {/* List */}
-      <View className="mt-md">
+      <View className="mt-stack-gap">
         {tab === "trips" ? (
           <TripsList
             loading={trips.loading}
@@ -139,14 +141,14 @@ function SegBtn({
     <Pressable
       onPress={onPress}
       className={
-        "flex-1 items-center py-2.5 rounded-pill " +
+        "flex-1 items-center py-2.5 rounded-chip " +
         (active ? "bg-accent" : "bg-transparent")
       }
     >
       <Text
         className={
           "font-body font-semibold text-sm " +
-          (active ? "text-white" : "text-muted")
+          (active ? "text-accent-on" : "text-text-muted")
         }
       >
         {label}
@@ -166,6 +168,7 @@ function TripsList({
   trips: tripsApi.Trip[] | null;
   onRefresh: () => void;
 }) {
+  const colors = useThemeColors();
   if (loading && !trips) {
     return <Loader />;
   }
@@ -198,7 +201,7 @@ function TripsList({
       )}
       ItemSeparatorComponent={() => <View className="h-3" />}
       scrollEnabled={false}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor="#FF6A2B" />}
+      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor={colors.accent} />}
     />
   );
 }
@@ -214,6 +217,7 @@ function ParcelsList({
   parcels: parcelsApi.Parcel[] | null;
   onRefresh: () => void;
 }) {
+  const colors = useThemeColors();
   if (loading && !parcels) {
     return <Loader />;
   }
@@ -246,15 +250,16 @@ function ParcelsList({
       )}
       ItemSeparatorComponent={() => <View className="h-3" />}
       scrollEnabled={false}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor="#FF6A2B" />}
+      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor={colors.accent} />}
     />
   );
 }
 
 function Loader() {
+  const colors = useThemeColors();
   return (
     <View className="py-xl items-center">
-      <ActivityIndicator color="#FF6A2B" />
+      <ActivityIndicator color={colors.accent} />
     </View>
   );
 }

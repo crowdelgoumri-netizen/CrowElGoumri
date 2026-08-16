@@ -3,7 +3,7 @@
  *
  * useChatThread merges the REST history with realtime Socket.IO delivery, so a
  * message from the counterparty appears instantly. Bubbles: mine on the right
- * (accent), theirs on the left (navySoft). The thread is marked read on mount.
+ * (accent), theirs on the left (glass). The thread is marked read on mount.
  */
 import { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -23,11 +23,13 @@ import { Avatar } from "../../src/components/Avatar";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useChatThread } from "../../src/hooks/useChatThread";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { getParcel } from "../../src/lib/parcels";
 import { timeAgo } from "../../src/lib/format";
 import type { ChatMessage } from "../../src/lib/chat";
 
 export default function ChatScreen() {
+  const colors = useThemeColors();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const user = useAuth((s) => s.user);
   const myId = user?.id;
@@ -67,7 +69,7 @@ export default function ChatScreen() {
   }, [ordered.length]);
 
   return (
-    <SafeAreaView className="flex-1 bg-navy" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-base" edges={["top"]}>
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -84,7 +86,7 @@ export default function ChatScreen() {
           keyExtractor={(m) => m.id}
           inverted
           onScrollToIndexFailed={() => {}}
-          contentContainerClassName="px-md py-md"
+          contentContainerClassName="px-screen-edge py-card-padding"
           renderItem={({ item }) => (
             <Bubble mine={item.senderId === myId} message={item} showRead={!!myId && item.senderId === myId} />
           )}
@@ -92,10 +94,10 @@ export default function ChatScreen() {
           ListEmptyComponent={
             <View className="items-center py-xl">
               <Avatar name={counterpartyName} size="lg" />
-              <Text className="text-white font-heading font-bold mt-md">
+              <Text className="text-text-primary font-heading font-bold mt-section-gap">
                 {counterpartyName ?? "Nouvelle conversation"}
               </Text>
-              <Text className="text-muted font-body text-sm mt-1 text-center max-w-[260px]">
+              <Text className="text-text-muted font-body text-sm mt-1 text-center max-w-[260px]">
                 Envoyez votre premier message. La discussion est liée à ce colis.
               </Text>
             </View>
@@ -103,14 +105,14 @@ export default function ChatScreen() {
         />
 
         {/* Composer */}
-        <View className="flex-row items-end gap-2 px-md py-md border-t border-line bg-navy">
-          <View className="flex-1 flex-row items-center rounded-pill bg-navySoft/60 border border-line px-md">
+        <View className="flex-row items-end gap-2 px-screen-edge py-card-padding border-t border-hairline bg-base">
+          <View className="flex-1 flex-row items-center rounded-field bg-glass border border-hairline px-card-padding">
             <TextInput
               value={draft}
               onChangeText={setDraft}
               placeholder="Message…"
-              placeholderTextColor="#8A94A6"
-              className="flex-1 text-white font-body text-base py-3"
+              placeholderTextColor={colors.placeholder}
+              className="flex-1 text-text-primary font-body text-base py-3"
               multiline
               maxLength={5000}
             />
@@ -121,7 +123,7 @@ export default function ChatScreen() {
             className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
             style={{ opacity: draft.trim() && !sending ? 1 : 0.4 }}
           >
-            <Ionicons name="send" size={18} color="#0B1220" />
+            <Ionicons name="send" size={18} color={colors.accentOn} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -142,15 +144,15 @@ function Bubble({
     <View className={mine ? "items-end" : "items-start"}>
       <View
         className={
-          "max-w-[78%] rounded-card px-md py-2 " +
-          (mine ? "bg-accent" : "bg-navySoft border border-line")
+          "max-w-[78%] rounded-card px-card-padding py-2 " +
+          (mine ? "bg-accent" : "bg-glass border border-hairline")
         }
       >
-        <Text className={mine ? "text-white font-body text-sm" : "text-mist font-body text-sm"}>
+        <Text className={mine ? "text-accent-on font-body text-sm" : "text-text-oncard font-body text-sm"}>
           {message.body}
         </Text>
       </View>
-      <Text className="text-muted text-[10px] font-body mt-0.5 mr-1">
+      <Text className="text-text-muted text-[10px] font-body mt-0.5 mr-1">
         {timeAgo(message.createdAt)}
         {showRead && message.readAt ? " · Lu" : ""}
       </Text>

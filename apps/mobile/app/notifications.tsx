@@ -11,6 +11,7 @@ import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { EmptyState } from "../src/components/EmptyState";
 import { useAsync } from "../src/hooks/useAsync";
+import { useThemeColors } from "../src/hooks/useThemeColors";
 import { listNotifications, markRead, type AppNotification } from "../src/lib/notifications-api";
 import { timeAgo } from "../src/lib/format";
 
@@ -28,6 +29,7 @@ const ICON_FOR: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 export default function NotificationsScreen() {
+  const colors = useThemeColors();
   const { data, loading, error, refresh, setData } = useAsync(
     () => listNotifications({ limit: 30 }),
     [],
@@ -65,7 +67,7 @@ export default function NotificationsScreen() {
       />
 
       {data && data.unreadCount > 0 ? (
-        <Text className="text-muted font-body text-xs mb-2">
+        <Text className="text-text-muted font-body text-xs mb-2">
           {data.unreadCount} non lue{data.unreadCount > 1 ? "s" : ""}
         </Text>
       ) : null}
@@ -74,7 +76,7 @@ export default function NotificationsScreen() {
         data={notifications}
         keyExtractor={(n) => n.id}
         renderItem={({ item }) => <NotifRow n={item} />}
-        ItemSeparatorComponent={() => <View className="h-px bg-line ml-14" />}
+        ItemSeparatorComponent={() => <View className="h-px bg-divider ml-14" />}
         ListEmptyComponent={
           loading ? null : error ? (
             <EmptyState
@@ -92,30 +94,31 @@ export default function NotificationsScreen() {
             />
           )
         }
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor="#FF6A2B" />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.accent} />}
       />
     </Screen>
   );
 }
 
 function NotifRow({ n }: { n: AppNotification }) {
+  const colors = useThemeColors();
   const icon = ICON_FOR[n.type] ?? "notifications";
   return (
-    <View className="flex-row items-start gap-md py-md">
+    <View className="flex-row items-start gap-stack-gap py-card-padding">
       <View
         className={
           "h-9 w-9 items-center justify-center rounded-full " +
-          (n.isRead ? "bg-navySoft/60" : "bg-accent/20")
+          (n.isRead ? "bg-glass" : "bg-accent/20")
         }
       >
-        <Ionicons name={icon} size={16} color={n.isRead ? "#8A94A6" : "#FF6A2B"} />
+        <Ionicons name={icon} size={16} color={n.isRead ? colors.textMuted : colors.accent} />
       </View>
       <View className="flex-1">
-        <Text className={"font-body text-sm " + (n.isRead ? "text-muted" : "text-white font-semibold")}>
+        <Text className={"font-body text-sm " + (n.isRead ? "text-text-muted" : "text-text-primary font-semibold")}>
           {n.title}
         </Text>
-        {n.body ? <Text className="text-muted font-body text-xs mt-0.5">{n.body}</Text> : null}
-        <Text className="text-mist/50 text-[10px] font-body mt-0.5">{timeAgo(n.createdAt)}</Text>
+        {n.body ? <Text className="text-text-muted font-body text-xs mt-0.5">{n.body}</Text> : null}
+        <Text className="text-text-muted/50 text-[10px] font-body mt-0.5">{timeAgo(n.createdAt)}</Text>
       </View>
       {!n.isRead ? <View className="h-2 w-2 rounded-full bg-accent mt-2" /> : null}
     </View>

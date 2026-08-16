@@ -52,17 +52,17 @@ export default function LoginScreen() {
   }
 
   return (
-    <Screen variant="dark">
+    <Screen>
       <View className="mt-xl">
-        <Text className="text-white font-heading text-3xl font-bold">
+        <Text className="text-text-primary font-heading text-screen-title font-bold">
           Bonjour 👋
         </Text>
-        <Text className="text-muted font-body text-base mt-1">
+        <Text className="text-text-muted font-body text-base mt-1">
           Connectez-vous pour envoyer ou transporter.
         </Text>
       </View>
 
-      <View className="mt-xl gap-md">
+      <View className="mt-xl gap-stack-gap">
         <Input
           label="Adresse e-mail"
           value={email}
@@ -83,8 +83,8 @@ export default function LoginScreen() {
         <Button label="Se connecter" onPress={submit} loading={loading} />
       </View>
 
-      <View className="mt-lg flex-row justify-center gap-1">
-        <Text className="text-muted font-body">Pas encore de compte ?</Text>
+      <View className="mt-section-gap flex-row justify-center gap-1">
+        <Text className="text-text-muted font-body">Pas encore de compte ?</Text>
         <Link href="/auth/signup" className="text-accent font-body font-semibold">
           Créer un compte
         </Link>

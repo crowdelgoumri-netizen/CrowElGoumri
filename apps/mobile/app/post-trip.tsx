@@ -103,15 +103,15 @@ export default function PostTripScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScreenHeader title="Proposer un trajet" />
 
-        <View className="gap-md">
-          <Text className="text-mist/70 text-xs font-body ml-1">Départ (Europe)</Text>
+        <View className="gap-stack-gap">
+          <Text className="font-mono text-meta text-text-secondary ml-1">Départ (Europe)</Text>
           <Select label="Pays d'origine" value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
           <Select label="Ville de départ" value={originCity} options={cities} onSelect={setOriginCity} placeholder="Choisir une ville" />
 
-          <Text className="text-mist/70 text-xs font-body ml-1 mt-sm">Arrivée (Algérie)</Text>
+          <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">Arrivée (Algérie)</Text>
           <Select label="Wilaya d'arrivée" value={destinationWilaya} options={WILAYAS_1_58} onSelect={setDestinationWilaya} />
 
-          <View className="flex-row gap-md">
+          <View className="flex-row gap-stack-gap">
             <View className="flex-1">
               <Input label="Date (AAAA-MM-JJ)" value={date} onChangeText={setDate} placeholder="2026-09-01" />
             </View>
@@ -122,7 +122,7 @@ export default function PostTripScreen() {
 
           <Select label="Mode de transport" value={mode} options={MODES} onSelect={(v) => setMode(v as TransportMode)} />
 
-          <View className="flex-row gap-md">
+          <View className="flex-row gap-stack-gap">
             <View className="flex-1">
               <Input label="Capacité (kg)" value={maxWeightKg} onChangeText={setMaxWeightKg} keyboardType="numeric" placeholder="20" />
             </View>
@@ -134,7 +134,7 @@ export default function PostTripScreen() {
           <Input label="Distance estimée (km)" value={distanceKm} onChangeText={setDistanceKm} keyboardType="numeric" placeholder="1500" />
           <Input label="Notes (optionnel)" value={notes} onChangeText={setNotes} placeholder="Climatisé, accepts fragile…" multiline className="h-20" />
 
-          <View className="mt-lg">
+          <View className="mt-section-gap">
             <Button label="Publier le trajet" onPress={submit} loading={submitting} />
           </View>
         </View>

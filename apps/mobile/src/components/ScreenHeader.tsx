@@ -1,14 +1,13 @@
 /**
  * ScreenHeader — back button + title bar for pushed detail screens.
  *
- * The root tab screens have their own headers; this is for the stack routes
- * (parcel/[id], tracking, escrow, chat thread, etc.) that need a back affordance.
- * Renders above the Screen's scroll content.
+ * Aurora-styled with glass back button and updated typography.
  */
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { clsx } from "../lib/clsx";
+import { useThemeColors } from "../hooks/useThemeColors";
 
 interface ScreenHeaderProps {
   title: string;
@@ -26,21 +25,22 @@ export function ScreenHeader({
   right,
   className,
 }: ScreenHeaderProps) {
+  const colors = useThemeColors();
   return (
     <View className={clsx("flex-row items-center gap-md mb-md", className)}>
       <Pressable
         onPress={onBack ?? (() => router.back())}
         hitSlop={12}
-        className="h-10 w-10 items-center justify-center rounded-full bg-navySoft/60"
+        className="h-10 w-10 items-center justify-center rounded-full bg-glass border border-hairline"
       >
-        <Ionicons name="chevron-back" size={22} color="#F5F7FA" />
+        <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
       </Pressable>
       <View className="flex-1">
-        <Text className="text-white font-heading text-xl font-bold" numberOfLines={1}>
+        <Text className="text-text-primary font-heading text-screen-title font-bold" numberOfLines={1}>
           {title}
         </Text>
         {subtitle ? (
-          <Text className="text-muted font-body text-xs" numberOfLines={1}>
+          <Text className="text-text-muted font-mono text-meta" numberOfLines={1}>
             {subtitle}
           </Text>
         ) : null}

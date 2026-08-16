@@ -22,6 +22,7 @@ import { Avatar } from "../../src/components/Avatar";
 import { EmptyState } from "../../src/components/EmptyState";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import {
   addCheckpoint,
   getTrip,
@@ -42,6 +43,7 @@ import {
 import type { TransportMode } from "../../src/lib/types";
 
 export default function TripDetailScreen() {
+  const colors = useThemeColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user);
   const { data, loading, error, refresh } = useAsync(() => getTrip(id), [id]);
@@ -53,7 +55,7 @@ export default function TripDetailScreen() {
     return (
       <Screen scroll={false}>
         <ScreenHeader title="Trajet" />
-        <Text className="text-muted">Chargement…</Text>
+        <Text className="text-text-muted">Chargement…</Text>
       </Screen>
     );
   }
@@ -62,7 +64,7 @@ export default function TripDetailScreen() {
       <Screen scroll={false}>
         <ScreenHeader title="Trajet" />
         <Text className="text-danger">{error ?? "Trajet introuvable."}</Text>
-        <View className="mt-md">
+        <View className="mt-section-gap">
           <Button label="Réessayer" variant="secondary" onPress={refresh} />
         </View>
       </Screen>
@@ -79,10 +81,10 @@ export default function TripDetailScreen() {
         <StatusPill label={st.label} tone={st.tone} />
 
         {/* Trip info */}
-        <Card className="mt-md gap-2">
+        <Card className="mt-section-gap gap-2">
           <View className="flex-row items-center gap-2">
-            <Ionicons name={MODE_ICON[trip.mode as TransportMode] as keyof typeof Ionicons.glyphMap} size={18} color="#FF6A2B" />
-            <Text className="text-white font-heading font-bold text-lg flex-1">
+            <Ionicons name={MODE_ICON[trip.mode as TransportMode] as keyof typeof Ionicons.glyphMap} size={18} color={colors.accent} />
+            <Text className="text-text-primary font-heading font-bold text-lg flex-1">
               {cityOf(trip.origin)} → {cityOf(trip.destination)}
             </Text>
           </View>
@@ -94,14 +96,14 @@ export default function TripDetailScreen() {
         </Card>
 
         {/* Traveler */}
-        <Card className="mt-md">
-          <View className="flex-row items-center gap-md">
+        <Card className="mt-section-gap">
+          <View className="flex-row items-center gap-stack-gap">
             <Avatar name={trip.traveler?.firstName} />
             <View className="flex-1">
-              <Text className="text-white font-body font-semibold">
+              <Text className="text-text-primary font-body font-semibold">
                 {trip.traveler?.firstName} {trip.traveler?.lastName ?? ""}
               </Text>
-              <Text className="text-muted text-xs font-body">
+              <Text className="text-text-muted text-xs font-body">
                 {trip.traveler?.completedTrips ?? 0} trajets · {trip.traveler?.trustBadge ?? "—"}
               </Text>
             </View>
@@ -110,8 +112,8 @@ export default function TripDetailScreen() {
 
         {/* Accepted parcels */}
         {trip.parcels && trip.parcels.length > 0 ? (
-          <View className="mt-md">
-            <Text className="text-mist/60 text-xs font-body uppercase mb-2">
+          <View className="mt-section-gap">
+            <Text className="font-mono text-meta uppercase text-text-secondary mb-2">
               Colis transportés ({trip.parcels.length})
             </Text>
             {trip.parcels.map((p) => {
@@ -120,13 +122,13 @@ export default function TripDetailScreen() {
                 <Pressable
                   key={p.id}
                   onPress={() => router.push(`/parcel/${p.id}`)}
-                  className="flex-row items-center justify-between rounded-card bg-navySoft/60 border border-line p-md mb-2 active:opacity-70"
+                  className="flex-row items-center justify-between rounded-card bg-glass border border-hairline p-card-padding mb-2 active:opacity-70"
                 >
                   <View className="flex-1">
-                    <Text className="text-white font-body text-sm" numberOfLines={1}>
+                    <Text className="text-text-primary font-body text-sm" numberOfLines={1}>
                       {p.description}
                     </Text>
-                    <Text className="text-muted text-xs font-body">{p.weightKg} kg</Text>
+                    <Text className="text-text-muted text-xs font-body">{p.weightKg} kg</Text>
                   </View>
                   {ps ? <StatusPill label={ps.label} tone={ps.tone} /> : null}
                 </Pressable>
@@ -137,7 +139,7 @@ export default function TripDetailScreen() {
 
         {/* Traveler-only: matches + checkpoints */}
         {isTraveler ? (
-          <View className="mt-lg gap-md">
+          <View className="mt-section-gap gap-stack-gap">
             {bookable ? (
               <TravelerMatches tripId={trip.id} onAccepted={refresh} />
             ) : null}
@@ -171,9 +173,9 @@ function TravelerMatches({ tripId, onAccepted }: { tripId: string; onAccepted: (
 
   return (
     <View>
-      <Text className="text-mist/60 text-xs font-body uppercase mb-2">Colis recommandés</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">Colis recommandés</Text>
       {loading && matches.length === 0 ? (
-        <Text className="text-muted">Recherche de colis…</Text>
+        <Text className="text-text-muted">Recherche de colis…</Text>
       ) : null}
       {error ? (
         <Text className="text-danger text-sm">{error}</Text>
@@ -210,18 +212,19 @@ function ParcelMatchCard({
   accepting: boolean;
   onAccept: () => void;
 }) {
+  const colors = useThemeColors();
   const score = Math.round(match.score ?? 0);
   return (
-    <Card variant={top ? "light" : "dark"} className={top ? "border-accent gap-2 mb-3" : "gap-2 mb-3"}>
+    <Card raised={top} className={top ? "border-accent gap-2 mb-3" : "gap-2 mb-3"}>
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <Ionicons name="cube" size={18} color="#FF6A2B" />
-          <Text className="text-white font-body font-semibold">
+          <Ionicons name="cube" size={18} color={colors.accent} />
+          <Text className="text-text-primary font-body font-semibold">
             Colis #{match.parcelId?.slice(-5) ?? "—"}
           </Text>
         </View>
         {top ? (
-          <View className="rounded-pill bg-success px-2 py-0.5">
+          <View className="rounded-chip bg-success px-2 py-0.5">
             <Text className="text-white text-xs font-bold">Top</Text>
           </View>
         ) : null}
@@ -229,22 +232,22 @@ function ParcelMatchCard({
 
       <View className="flex-row flex-wrap gap-1.5">
         {(match.reasons ?? []).slice(0, 3).map((r, i) => (
-          <View key={i} className="rounded-pill bg-navySoft/60 px-2 py-1">
-            <Text className="text-mist text-xs font-body">{r}</Text>
+          <View key={i} className="rounded-chip bg-chip-bg px-2 py-1">
+            <Text className="text-text-secondary text-xs font-body">{r}</Text>
           </View>
         ))}
       </View>
 
       <View className="flex-row items-center justify-between mt-1">
         <View className="flex-row items-center gap-1.5 flex-1">
-          <Ionicons name="sparkles" size={14} color="#FF6A2B" />
-          <View className="h-1.5 flex-1 max-w-[80px] rounded-full bg-mist/10 overflow-hidden">
+          <Ionicons name="sparkles" size={14} color={colors.accent} />
+          <View className="h-1.5 flex-1 max-w-[80px] rounded-full bg-text-muted/10 overflow-hidden">
             <View
               className="h-full rounded-full bg-accent"
               style={{ width: `${Math.min(100, Math.max(8, score))}%` }}
             />
           </View>
-          <Text className="text-mist text-xs font-body">{score}%</Text>
+          <Text className="text-text-secondary text-xs font-body">{score}%</Text>
         </View>
         {match.estimatedPrice != null ? (
           <Text className="text-accent font-heading font-bold">{eur(match.estimatedPrice)}</Text>
@@ -252,7 +255,7 @@ function ParcelMatchCard({
         <Pressable
           onPress={onAccept}
           disabled={accepting}
-          className="rounded-pill bg-accent px-3 py-1.5 ml-2"
+          className="rounded-field bg-accent px-3 py-1.5 ml-2"
         >
           <Text className="text-white text-xs font-bold">
             {accepting ? "…" : "Accepter"}
@@ -271,6 +274,7 @@ const CHECKPOINTS: { type: CheckpointType; label: string; icon: keyof typeof Ion
 ];
 
 function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
+  const colors = useThemeColors();
   const [busy, setBusy] = useState<string | null>(null);
 
   async function post(type: CheckpointType, label: string) {
@@ -291,30 +295,30 @@ function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
 
   return (
     <View>
-      <Text className="text-mist/60 text-xs font-body uppercase mb-2">Avancement du trajet</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">Avancement du trajet</Text>
       <View className="flex-row flex-wrap gap-2">
         {CHECKPOINTS.map((c) => (
           <Pressable
             key={c.type}
             onPress={() => post(c.type, c.label)}
             disabled={busy !== null}
-            className="flex-row items-center gap-1.5 rounded-pill bg-navySoft/60 border border-line px-3 py-2 active:opacity-70"
+            className="flex-row items-center gap-1.5 rounded-field bg-glass border border-hairline px-3 py-2 active:opacity-70"
           >
-            <Ionicons name={c.icon} size={14} color="#FF6A2B" />
-            <Text className="text-white font-body text-sm">{c.label}</Text>
+            <Ionicons name={c.icon} size={14} color={colors.accent} />
+            <Text className="text-text-primary font-body text-sm">{c.label}</Text>
           </Pressable>
         ))}
       </View>
-      {busy ? <Text className="text-muted text-xs mt-2">Enregistrement…</Text> : null}
+      {busy ? <Text className="text-text-muted text-xs mt-2">Enregistrement…</Text> : null}
     </View>
   );
 }
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <View className="flex-row justify-between gap-md">
-      <Text className="text-muted font-body text-sm">{k}</Text>
-      <Text className="text-white font-body text-sm font-semibold text-right flex-shrink" numberOfLines={2}>
+    <View className="flex-row justify-between gap-stack-gap">
+      <Text className="text-text-muted font-body text-sm">{k}</Text>
+      <Text className="text-text-primary font-body text-sm font-semibold text-right flex-shrink" numberOfLines={2}>
         {v}
       </Text>
     </View>

@@ -1,28 +1,31 @@
 /**
- * Card — the board's signature frosted-glass surface.
+ * Card — Aurora glass surface with hairline border and top highlight.
  *
- * On dark screens it's a translucent navy panel; on light screens it's the
- * white-frosted look. All the content cards in the design board use this.
+ * Default = glass surface. Pass `raised` for stronger glass + card shadow
+ * (used for elevated summaries, wallet cards).
  */
 import { type ViewProps, View } from "react-native";
 import { clsx } from "../lib/clsx";
 
 interface CardProps extends ViewProps {
-  variant?: "dark" | "light";
+  raised?: boolean;
 }
 
-export function Card({ variant = "dark", className, children, ...rest }: CardProps) {
-  const styles =
-    variant === "dark"
-      ? "bg-navySoft/60 border-line"
-      : "bg-white/55 border-white/70";
+export function Card({ raised = false, className, children, ...rest }: CardProps) {
   return (
     <View
       className={clsx(
-        "rounded-card border p-md",
-        styles,
+        "rounded-card border p-card-padding",
+        raised
+          ? "bg-glass-raised border-hairline-raised"
+          : "bg-glass border-hairline",
         className,
       )}
+      style={
+        raised
+          ? [{ boxShadow: "0 12px 28px rgba(0,0,0,0.32)" }]
+          : undefined
+      }
       {...rest}
     >
       {children}

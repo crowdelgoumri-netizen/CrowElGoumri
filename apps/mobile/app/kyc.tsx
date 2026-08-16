@@ -78,15 +78,15 @@ export default function KycScreen() {
       {loading ? null : error ? (
         <Text>{error}</Text>
       ) : (
-        <View className="gap-md">
+        <View className="gap-stack-gap">
           <Card className="gap-2">
             <View className="flex-row items-center justify-between">
-              <Text className="text-mist/70 text-xs font-body uppercase">Niveau actuel</Text>
+              <Text className="font-mono text-meta uppercase text-text-secondary">Niveau actuel</Text>
               {level ? <StatusPill label={level.label} tone={level.tone} /> : null}
             </View>
             {sub ? (
               <View>
-                <Text className="text-muted text-xs font-body">
+                <Text className="text-text-muted text-xs font-body">
                   Dernière demande : {sub.status === "PENDING" ? "En revue" : sub.status === "APPROVED" ? "Approuvée" : "Rejetée"}
                   {" · "}{formatDateTime(sub.createdAt)}
                 </Text>
@@ -104,15 +104,15 @@ export default function KycScreen() {
               </Text>
             </Card>
           ) : pending ? (
-            <Card className="bg-violet/10 border-violet/30">
-              <Text className="text-mist font-body text-sm">
+            <Card className="bg-info/10 border-info/30">
+              <Text className="text-text-secondary font-body text-sm">
                 Votre demande est en cours de revue par notre équipe. Vous
                 serez notifié dès qu'elle sera traitée.
               </Text>
             </Card>
           ) : (
-            <View className="gap-md">
-              <Text className="text-mist/70 text-xs font-body uppercase">Nouvelle demande</Text>
+            <View className="gap-stack-gap">
+              <Text className="font-mono text-meta uppercase text-text-secondary">Nouvelle demande</Text>
               <Select label="Type de document" value={docType} options={DOC_TYPES} onSelect={(v) => setDocType(v as DocumentType)} />
               <PhotoPicker
                 label="Document (recto)"

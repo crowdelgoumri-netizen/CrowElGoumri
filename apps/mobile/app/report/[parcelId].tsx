@@ -71,7 +71,6 @@ export default function ReportScreen() {
       );
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
-        // Race: someone opened a dispute for this parcel between our GET and this POST.
         const { dispute } = await getDispute(parcelId);
         setData({ dispute });
       } else {
@@ -86,7 +85,7 @@ export default function ReportScreen() {
     <Screen>
       <ScreenHeader title="Signaler un problème" />
 
-      {loading ? <Text className="text-muted">Chargement…</Text> : null}
+      {loading ? <Text className="text-text-muted">Chargement…</Text> : null}
       {error ? <Text className="text-danger">{error}</Text> : null}
 
       {!loading && !error && existing ? (
@@ -94,7 +93,7 @@ export default function ReportScreen() {
       ) : null}
 
       {!loading && !error && !existing ? (
-        <View className="gap-md">
+        <View className="gap-stack-gap">
           <Select
             label="Motif"
             value={reason || null}
@@ -122,11 +121,11 @@ function DisputeReadOnly({ dispute }: { dispute: Dispute }) {
   return (
     <Card className="gap-2">
       <StatusPill label={st.label} tone={st.tone} />
-      <Text className="text-white font-body font-semibold mt-1">
+      <Text className="text-text-primary font-body font-semibold mt-1">
         {DISPUTE_REASON_LABEL[dispute.reason]}
       </Text>
-      <Text className="text-muted font-body text-sm">{dispute.description}</Text>
-      <Text className="text-mist/50 font-body text-xs mt-2">
+      <Text className="text-text-muted font-body text-sm">{dispute.description}</Text>
+      <Text className="text-text-muted/50 font-body text-xs mt-2">
         Signalé le {formatDateTime(dispute.createdAt)}
       </Text>
     </Card>

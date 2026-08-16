@@ -12,9 +12,11 @@ import { ScreenHeader } from "../src/components/ScreenHeader";
 import { TripCard } from "../src/components/TripCard";
 import { EmptyState } from "../src/components/EmptyState";
 import { useAsync } from "../src/hooks/useAsync";
+import { useThemeColors } from "../src/hooks/useThemeColors";
 import { listMine } from "../src/lib/trips";
 
 export default function MyTripsScreen() {
+  const colors = useThemeColors();
   const { data, loading, error, refresh } = useAsync(() => listMine(), []);
   const trips = data?.trips ?? [];
 
@@ -47,7 +49,7 @@ export default function MyTripsScreen() {
             />
           )
         }
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor="#FF6A2B" />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.accent} />}
       />
     </Screen>
   );

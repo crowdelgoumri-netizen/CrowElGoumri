@@ -16,12 +16,23 @@ import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Card } from "../src/components/Card";
 import { Button } from "../src/components/Button";
 import { useAuth } from "../src/store/auth";
+import { useTheme, type ThemeMode } from "../src/store/theme";
+import { useThemeColors } from "../src/hooks/useThemeColors";
 import { isPushEnabled, registerForPush, setPushEnabled } from "../src/lib/push";
 import { useTranslation } from "react-i18next";
 
+const MODE_OPTIONS: { value: ThemeMode; label: string }[] = [
+  { value: "system", label: "Système" },
+  { value: "dark", label: "Sombre" },
+  { value: "bright", label: "Clair" },
+];
+
 export default function SettingsScreen() {
+  const colors = useThemeColors();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const themeMode = useTheme((s) => s.mode);
+  const setThemeMode = useTheme((s) => s.setMode);
   const [pushOn, setPushOn] = useState(true);
 
   useEffect(() => {
@@ -47,31 +58,54 @@ export default function SettingsScreen() {
         <Row icon="information-circle-outline" label={t("settings.account")} value={user?.email} />
       </Card>
 
-      <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">{t("settings.preferences")}</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">{t("settings.preferences")}</Text>
       <Card className="gap-1">
-        <View className="flex-row items-center py-sm">
-          <Ionicons name="notifications" size={20} color="#FF6A2B" />
-          <Text className="text-white font-body flex-1 ml-md">{t("settings.pushNotifications")}</Text>
+        <View className="flex-row items-center py-card-padding">
+          <Ionicons name="notifications" size={20} color={colors.accent} />
+          <Text className="text-text-primary font-body flex-1 ml-stack-gap">{t("settings.pushNotifications")}</Text>
           <Switch
             value={pushOn}
             onValueChange={onTogglePush}
-            trackColor={{ false: "#16213B", true: "#FF6A2B" }}
-            thumbColor="#F5F7FA"
+            trackColor={{ false: colors.chipBg, true: colors.accent }}
+            thumbColor="#FFFFFF"
           />
         </View>
         <Divider />
         <PressableRow icon="help-circle-outline" label={t("settings.howItWorks")} onPress={() => router.push("/onboarding")} />
       </Card>
 
-      <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">{t("settings.about")}</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">Apparence</Text>
+      <View className="flex-row bg-glass rounded-chip p-1 gap-1">
+        {MODE_OPTIONS.map((opt) => (
+          <Pressable
+            key={opt.value}
+            onPress={() => setThemeMode(opt.value)}
+            className={
+              "flex-1 items-center py-2.5 rounded-chip " +
+              (themeMode === opt.value ? "bg-accent" : "bg-transparent")
+            }
+          >
+            <Text
+              className={
+                "font-body font-semibold text-sm " +
+                (themeMode === opt.value ? "text-accent-on" : "text-text-muted")
+              }
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">{t("settings.about")}</Text>
       <Card>
-        <Text className="text-white font-heading font-bold">{t("settings.appName")}</Text>
-        <Text className="text-muted font-body text-xs mt-1">
+        <Text className="text-text-primary font-heading font-bold">{t("settings.appName")}</Text>
+        <Text className="text-text-muted font-body text-xs mt-1">
           {t("settings.aboutTagline")}
         </Text>
       </Card>
 
-      <View className="mt-lg">
+      <View className="mt-section-gap">
         <Button label={t("settings.logout")} variant="secondary" onPress={() => logout()} />
       </View>
     </Screen>
@@ -79,25 +113,27 @@ export default function SettingsScreen() {
 }
 
 function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value?: string }) {
+  const colors = useThemeColors();
   return (
-    <View className="flex-row items-center py-sm">
-      <Ionicons name={icon} size={20} color="#FF6A2B" />
-      <Text className="text-white font-body flex-1 ml-md">{label}</Text>
-      {value ? <Text className="text-muted font-body text-xs">{value}</Text> : null}
+    <View className="flex-row items-center py-card-padding">
+      <Ionicons name={icon} size={20} color={colors.accent} />
+      <Text className="text-text-primary font-body flex-1 ml-stack-gap">{label}</Text>
+      {value ? <Text className="text-text-muted font-body text-xs">{value}</Text> : null}
     </View>
   );
 }
 
 function PressableRow({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+  const colors = useThemeColors();
   return (
-    <Pressable onPress={onPress} className="flex-row items-center py-sm active:opacity-70">
-      <Ionicons name={icon} size={20} color="#FF6A2B" />
-      <Text className="text-white font-body flex-1 ml-md">{label}</Text>
-      <Ionicons name="chevron-forward" size={16} color="#8A94A6" />
+    <Pressable onPress={onPress} className="flex-row items-center py-card-padding active:opacity-70">
+      <Ionicons name={icon} size={20} color={colors.accent} />
+      <Text className="text-text-primary font-body flex-1 ml-stack-gap">{label}</Text>
+      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
     </Pressable>
   );
 }
 
 function Divider() {
-  return <View className="h-px bg-line" />;
+  return <View className="h-px bg-divider" />;
 }

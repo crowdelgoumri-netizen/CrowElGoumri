@@ -90,14 +90,14 @@ export default function EscrowScreen() {
       <ScreenHeader title="Paiement sécurisé" subtitle="Fonds bloqués jusqu'à la livraison" />
 
       {loading ? (
-        <Text className="text-muted">Préparation du paiement…</Text>
+        <Text className="text-text-muted">Préparation du paiement…</Text>
       ) : null}
 
       {error ? (
-        <View className="gap-md">
+        <View className="gap-stack-gap">
           <Text className="text-danger">{error}</Text>
           {error.includes("must be MATCHED") ? (
-            <Text className="text-muted font-body text-sm">
+            <Text className="text-text-muted font-body text-sm">
               Le colis doit d'abord être accepté par un voyageur pour pouvoir payer.
             </Text>
           ) : null}
@@ -106,34 +106,34 @@ export default function EscrowScreen() {
       ) : null}
 
       {breakdown ? (
-        <View className="gap-md">
+        <View className="gap-stack-gap">
           {st ? <StatusPill label={st.label} tone={st.tone} /> : null}
 
           <Card className="gap-2">
-            <Text className="text-mist/70 text-xs font-body uppercase">Détail du paiement</Text>
+            <Text className="font-mono text-meta uppercase text-text-secondary">Détail du paiement</Text>
             <Line k="Montant voyageur" v={eur(breakdown.travelerPayout)} />
             <Line k="Frais de plateforme" v={eur(breakdown.platformFee)} />
             {breakdown.insuranceFee > 0 ? (
               <Line k="Assurance" v={eur(breakdown.insuranceFee)} />
             ) : null}
-            <View className="h-px bg-line my-1" />
+            <View className="h-px bg-divider my-1" />
             <View className="flex-row justify-between items-center">
-              <Text className="text-white font-heading text-lg font-bold">Total bloqué</Text>
-              <Text className="text-accent font-heading text-2xl font-bold">
+              <Text className="text-text-primary font-heading text-lg font-bold">Total bloqué</Text>
+              <Text className="text-accent font-heading text-numeral font-bold">
                 {eur(breakdown.totalAmount)}
               </Text>
             </View>
           </Card>
 
-          <Card className="bg-violet/10 border-violet/30">
-            <Text className="text-mist font-body text-xs">
+          <Card className="bg-info/10 border-info/30">
+            <Text className="text-text-secondary font-body text-xs">
               🔒 Les fonds sont séquestrés (escrow) et libérés au voyageur
               automatiquement dès que vous confirmez la livraison par code PIN.
             </Text>
           </Card>
 
           {alreadyLocked ? (
-            <Text className="text-muted font-body text-sm text-center">
+            <Text className="text-text-muted font-body text-sm text-center">
               Paiement déjà confirmé.
             </Text>
           ) : !data.clientSecret ? (
@@ -161,8 +161,8 @@ export default function EscrowScreen() {
 function Line({ k, v }: { k: string; v: string }) {
   return (
     <View className="flex-row justify-between">
-      <Text className="text-muted font-body text-sm">{k}</Text>
-      <Text className="text-white font-body text-sm font-semibold">{v}</Text>
+      <Text className="text-text-muted font-body text-sm">{k}</Text>
+      <Text className="text-text-primary font-body text-sm font-semibold">{v}</Text>
     </View>
   );
 }

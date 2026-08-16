@@ -47,22 +47,22 @@ export default function SignupScreen() {
   }
 
   return (
-    <Screen variant="dark">
+    <Screen>
       <View className="mt-xl">
-        <Text className="text-white font-heading text-3xl font-bold">
+        <Text className="text-text-primary font-heading text-screen-title font-bold">
           Créer un compte
         </Text>
-        <Text className="text-muted font-body text-base mt-1">
+        <Text className="text-text-muted font-body text-base mt-1">
           Rejoignez le réseau Crowshi — Europe → Algérie.
         </Text>
       </View>
 
       <ScrollView
-        contentContainerClassName="mt-xl gap-md pb-xl"
+        contentContainerClassName="mt-xl gap-stack-gap pb-xl"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-row gap-md">
+        <View className="flex-row gap-stack-gap">
           <View className="flex-1">
             <Input label="Prénom" value={firstName} onChangeText={setFirstName} />
           </View>
@@ -98,8 +98,8 @@ export default function SignupScreen() {
 
         <Button label="Créer mon compte" onPress={submit} loading={loading} />
 
-        <View className="mt-lg flex-row justify-center gap-1">
-          <Text className="text-muted font-body">Déjà un compte ?</Text>
+        <View className="mt-section-gap flex-row justify-center gap-1">
+          <Text className="text-text-muted font-body">Déjà un compte ?</Text>
           <Link href="/auth/login" className="text-accent font-body font-semibold">
             Se connecter
           </Link>

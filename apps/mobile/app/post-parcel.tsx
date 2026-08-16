@@ -188,7 +188,7 @@ export default function PostParcelScreen() {
         <Stepper steps={STEPS} current={step} />
 
         {step === 0 ? (
-          <View className="gap-md">
+          <View className="gap-stack-gap">
             <Input
               label="Description"
               value={description}
@@ -217,7 +217,7 @@ export default function PostParcelScreen() {
               keyboardType="numeric"
               placeholder="350"
             />
-            <View className="flex-row gap-md">
+            <View className="flex-row gap-stack-gap">
               <View className="flex-1">
                 <Input label="L (cm)" value={lengthCm} onChangeText={setLengthCm} keyboardType="numeric" />
               </View>
@@ -230,17 +230,17 @@ export default function PostParcelScreen() {
             </View>
 
             <View className="gap-1 mt-sm">
-              <Text className="text-mist/70 text-xs font-body uppercase">Photos (optionnel, max 5)</Text>
-              <View className="flex-row flex-wrap gap-md">
+              <Text className="font-mono text-meta uppercase text-text-secondary">Photos (optionnel, max 5)</Text>
+              <View className="flex-row flex-wrap gap-stack-gap">
                 {photos.map((p, i) => (
                   <View key={p.objectUrl}>
-                    <Image source={{ uri: p.localUri }} className="h-20 w-20 rounded-xl bg-navySoft" resizeMode="cover" />
+                    <Image source={{ uri: p.localUri }} className="h-20 w-20 rounded-xl bg-glass" resizeMode="cover" />
                     <Pressable
                       onPress={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
                       hitSlop={8}
                       className="absolute -right-2 -top-2 h-6 w-6 items-center justify-center rounded-full bg-danger"
                     >
-                      <Text className="text-white font-body text-xs font-semibold">×</Text>
+                      <Text className="text-text-primary font-body text-xs font-semibold">×</Text>
                     </Pressable>
                   </View>
                 ))}
@@ -248,9 +248,9 @@ export default function PostParcelScreen() {
                   <Pressable
                     onPress={pickPhoto}
                     disabled={pickingPhoto}
-                    className="h-20 w-20 items-center justify-center rounded-xl border border-dashed border-mist/30 bg-navySoft"
+                    className="h-20 w-20 items-center justify-center rounded-xl border border-dashed border-hairline bg-glass"
                   >
-                    {pickingPhoto ? <ActivityIndicator /> : <Text className="text-muted text-2xl">+</Text>}
+                    {pickingPhoto ? <ActivityIndicator /> : <Text className="text-text-muted text-2xl">+</Text>}
                   </Pressable>
                 ) : null}
               </View>
@@ -266,8 +266,8 @@ export default function PostParcelScreen() {
         ) : null}
 
         {step === 1 ? (
-          <View className="gap-md">
-            <Text className="text-mist/70 text-xs font-body ml-1">Départ (Europe)</Text>
+          <View className="gap-stack-gap">
+            <Text className="font-mono text-meta text-text-secondary ml-1">Départ (Europe)</Text>
             <Select label="Pays d'origine" value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
             <Select
               label="Ville de départ"
@@ -276,7 +276,7 @@ export default function PostParcelScreen() {
               onSelect={setOriginCity}
               placeholder="Choisir une ville"
             />
-            <Text className="text-mist/70 text-xs font-body ml-1 mt-sm">Arrivée (Algérie)</Text>
+            <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">Arrivée (Algérie)</Text>
             <Select
               label="Wilaya de destination"
               value={destinationWilaya}
@@ -298,7 +298,7 @@ export default function PostParcelScreen() {
         ) : null}
 
         {step === 2 ? (
-          <View className="gap-md">
+          <View className="gap-stack-gap">
             <Select
               label="Urgence"
               value={urgency}
@@ -312,8 +312,8 @@ export default function PostParcelScreen() {
               keyboardType="numeric"
               placeholder="30"
             />
-            <Card className="gap-2 mt-sm">
-              <Text className="text-mist/70 text-xs font-body uppercase">Récapitulatif</Text>
+            <Card raised className="gap-2 mt-sm">
+              <Text className="font-mono text-meta uppercase text-text-secondary">Récapitulatif</Text>
               <Row k="Colis" v={`${weightKg || "—"} kg · ${CATEGORY_LABEL[category]}`} />
               <Row
                 k="Itinéraire"
@@ -327,7 +327,7 @@ export default function PostParcelScreen() {
           </View>
         ) : null}
 
-        <View className="flex-row gap-md mt-xl">
+        <View className="flex-row gap-stack-gap mt-section-gap">
           {step > 0 ? (
             <View className="flex-1">
               <Button label="Retour" variant="secondary" onPress={() => setStep((s) => s - 1)} />
@@ -349,8 +349,8 @@ export default function PostParcelScreen() {
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <View className="flex-row justify-between">
-      <Text className="text-muted font-body text-sm">{k}</Text>
-      <Text className="text-white font-body text-sm font-semibold">{v}</Text>
+      <Text className="text-text-muted font-body text-sm">{k}</Text>
+      <Text className="text-text-primary font-body text-sm font-semibold">{v}</Text>
     </View>
   );
 }

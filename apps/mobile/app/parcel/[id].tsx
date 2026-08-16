@@ -62,7 +62,7 @@ export default function ParcelDetailScreen() {
     return (
       <Screen scroll={false}>
         <ScreenHeader title="Colis" />
-        <Text className="text-muted">Chargement…</Text>
+        <Text className="text-text-muted">Chargement…</Text>
       </Screen>
     );
   }
@@ -71,7 +71,7 @@ export default function ParcelDetailScreen() {
       <Screen scroll={false}>
         <ScreenHeader title="Colis" />
         <Text className="text-danger">{error ?? "Colis introuvable."}</Text>
-        <View className="mt-md">
+        <View className="mt-section-gap">
           <Button label="Réessayer" variant="secondary" onPress={refresh} />
         </View>
       </Screen>
@@ -91,8 +91,6 @@ export default function ParcelDetailScreen() {
     if (!travelerStep) return;
     setBusy(true);
     try {
-      // The lifecycle endpoints return the bare updated row (no relations),
-      // so refetch via getParcel to keep matchedTrip.traveler/sender populated.
       await travelerStep.action(parcel!.id);
       refresh();
     } catch (e) {
@@ -149,7 +147,7 @@ export default function ParcelDetailScreen() {
 
         <StatusPill label={st.label} tone={st.tone} />
 
-        <Card className="mt-md gap-2">
+        <Card className="mt-section-gap gap-2">
           <Row k="Itinéraire" v={`${cityOf(parcel.pickupAddress)} → ${cityOf(parcel.deliveryAddress)}`} />
           <Row k="Poids" v={`${parcel.weightKg} kg`} />
           <Row k="Catégorie" v={CATEGORY_LABEL[parcel.category] ?? parcel.category} />
@@ -165,23 +163,23 @@ export default function ParcelDetailScreen() {
 
         {/* Matched traveler */}
         {parcel.matchedTrip?.traveler ? (
-          <Card className="mt-md gap-2">
-            <Text className="text-mist/70 text-xs font-body uppercase">Voyageur</Text>
-            <View className="flex-row items-center gap-md">
+          <Card className="mt-section-gap gap-2">
+            <Text className="font-mono text-meta uppercase text-text-secondary">Voyageur</Text>
+            <View className="flex-row items-center gap-stack-gap">
               <Avatar name={parcel.matchedTrip.traveler.firstName} />
               <View className="flex-1">
-                <Text className="text-white font-body font-semibold">
+                <Text className="text-text-primary font-body font-semibold">
                   {parcel.matchedTrip.traveler.firstName}
                 </Text>
                 {parcel.matchedTrip.departureTime ? (
-                  <Text className="text-muted text-xs font-body">
+                  <Text className="text-text-muted text-xs font-body">
                     Départ {formatDate(parcel.matchedTrip.departureTime)}
                   </Text>
                 ) : null}
               </View>
               <Pressable
                 onPress={() => router.push(`/chat/${parcel.id}`)}
-                className="rounded-pill bg-accent/20 px-3 py-1.5"
+                className="rounded-field bg-accent/20 px-3 py-1.5"
               >
                 <Text className="text-accent text-xs font-bold">Discuter</Text>
               </Pressable>
@@ -190,7 +188,7 @@ export default function ParcelDetailScreen() {
         ) : null}
 
         {/* Actions */}
-        <View className="gap-md mt-lg">
+        <View className="gap-stack-gap mt-section-gap">
           {parcel.status === "PENDING_MATCH" ? (
             <Button label="Trouver un voyageur" onPress={() => router.push(`/matching/${parcel.id}`)} />
           ) : null}
@@ -247,9 +245,9 @@ export default function ParcelDetailScreen() {
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <View className="flex-row justify-between gap-md">
-      <Text className="text-muted font-body text-sm">{k}</Text>
-      <Text className="text-white font-body text-sm font-semibold text-right flex-shrink" numberOfLines={2}>
+    <View className="flex-row justify-between gap-stack-gap">
+      <Text className="text-text-muted font-body text-sm">{k}</Text>
+      <Text className="text-text-primary font-body text-sm font-semibold text-right flex-shrink" numberOfLines={2}>
         {v}
       </Text>
     </View>

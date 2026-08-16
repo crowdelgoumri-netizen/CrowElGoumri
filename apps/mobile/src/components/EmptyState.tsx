@@ -1,13 +1,12 @@
 /**
  * EmptyState — icon + title + subtitle + optional CTA.
  *
- * Used for the "no matches" screen (board 12), empty inbox, empty parcel list,
- * and notification-less states. Keeps the "nothing here yet" moment friendly
- * instead of a blank screen.
+ * Aurora-styled with a glass icon circle and updated spacing.
  */
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 import { Button } from "./Button";
+import { useThemeColors } from "../hooks/useThemeColors";
 
 interface EmptyStateProps {
   icon?: keyof typeof Ionicons.glyphMap;
@@ -24,16 +23,17 @@ export function EmptyState({
   ctaLabel,
   onCta,
 }: EmptyStateProps) {
+  const colors = useThemeColors();
   return (
     <View className="items-center justify-center py-xl px-lg">
-      <View className="h-20 w-20 items-center justify-center rounded-full bg-navySoft/60 mb-md">
-        <Ionicons name={icon} size={36} color="#6D5AA6" />
+      <View className="h-20 w-20 items-center justify-center rounded-full bg-glass mb-md">
+        <Ionicons name={icon} size={36} color={colors.accent} />
       </View>
-      <Text className="text-white font-heading text-lg font-bold text-center">
+      <Text className="text-text-primary font-heading text-lg font-bold text-center">
         {title}
       </Text>
       {subtitle ? (
-        <Text className="text-muted font-body text-sm text-center mt-1.5 max-w-[280px]">
+        <Text className="text-text-muted font-body text-sm text-center mt-1.5 max-w-[280px]">
           {subtitle}
         </Text>
       ) : null}

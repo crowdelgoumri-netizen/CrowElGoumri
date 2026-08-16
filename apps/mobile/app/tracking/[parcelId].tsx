@@ -15,6 +15,7 @@ import { Card } from "../../src/components/Card";
 import { StatusPill } from "../../src/components/StatusPill";
 import { Button } from "../../src/components/Button";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { getParcel } from "../../src/lib/parcels";
 import { getCheckpoints, type Checkpoint, type CheckpointType } from "../../src/lib/trips";
 import { cityOf, formatDateTime, PARCEL_STATUS } from "../../src/lib/format";
@@ -37,6 +38,7 @@ const CK_LABEL: Record<CheckpointType, string> = {
 };
 
 export default function TrackingScreen() {
+  const colors = useThemeColors();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const parcelReq = useAsync(() => getParcel(parcelId), [parcelId]);
   const parcel = parcelReq.data?.parcel;
@@ -52,7 +54,7 @@ export default function TrackingScreen() {
     return (
       <Screen scroll={false}>
         <ScreenHeader title="Suivi" />
-        <ActivityIndicator color="#FF6A2B" />
+        <ActivityIndicator color={colors.accent} />
       </Screen>
     );
   }
@@ -61,7 +63,7 @@ export default function TrackingScreen() {
       <Screen scroll={false}>
         <ScreenHeader title="Suivi" />
         <Text className="text-danger">{parcelReq.error ?? "Colis introuvable."}</Text>
-        <View className="mt-md">
+        <View className="mt-section-gap">
           <Button label="Réessayer" variant="secondary" onPress={parcelReq.refresh} />
         </View>
       </Screen>
@@ -80,28 +82,28 @@ export default function TrackingScreen() {
         <StatusPill label={st.label} tone={st.tone} />
 
         {parcel.deliveredAt ? (
-          <Card className="mt-md bg-success/10 border-success/30">
+          <Card className="mt-section-gap bg-success/10 border-success/30">
             <Text className="text-success font-heading font-bold">Livré ✓</Text>
-            <Text className="text-mist font-body text-xs mt-1">
+            <Text className="text-text-secondary font-body text-xs mt-1">
               {formatDateTime(parcel.deliveredAt)}
             </Text>
           </Card>
         ) : null}
 
-        <Text className="text-mist/60 text-xs font-body uppercase mt-lg mb-2">
+        <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">
           Chronologie
         </Text>
 
         {checkpoints.length === 0 && !ckReq.loading ? (
           <Card>
-            <Text className="text-muted font-body text-sm">
+            <Text className="text-text-muted font-body text-sm">
               Aucun point de suivi pour l'instant. Le voyageur mettra à jour le
               statut au fil du trajet.
             </Text>
           </Card>
         ) : null}
 
-        <View className="mt-sm">
+        <View className="mt-stack-gap">
           {checkpoints
             .slice()
             .reverse() // most recent first
@@ -110,7 +112,7 @@ export default function TrackingScreen() {
             ))}
         </View>
 
-        <View className="mt-lg">
+        <View className="mt-section-gap">
           <Button
             label="Discuter avec le voyageur"
             variant="secondary"
@@ -123,29 +125,30 @@ export default function TrackingScreen() {
 }
 
 function TimelineRow({ ck, last }: { ck: Checkpoint; last: boolean }) {
+  const colors = useThemeColors();
   const icon = CK_ICON[ck.type] ?? "ellipse";
   return (
     <View className="flex-row">
-      <View className="items-center mr-md" style={{ width: 28 }}>
+      <View className="items-center mr-stack-gap" style={{ width: 28 }}>
         <View className="h-7 w-7 items-center justify-center rounded-full bg-accent/20">
-          <Ionicons name={icon} size={14} color="#FF6A2B" />
+          <Ionicons name={icon} size={14} color={colors.accent} />
         </View>
-        {!last ? <View className="flex-1 w-px bg-line mt-1" /> : null}
+        {!last ? <View className="flex-1 w-px bg-divider mt-1" /> : null}
       </View>
-      <View className="flex-1 pb-md">
-        <Text className="text-white font-body font-semibold">
+      <View className="flex-1 pb-stack-gap">
+        <Text className="text-text-primary font-body font-semibold">
           {CK_LABEL[ck.type] ?? ck.type}
         </Text>
-        <Text className="text-muted text-xs font-body">
+        <Text className="text-text-muted text-xs font-body">
           {formatDateTime(ck.createdAt)}
         </Text>
         {ck.location?.address ? (
-          <Text className="text-mist text-xs font-body mt-0.5">
+          <Text className="text-text-secondary text-xs font-body mt-0.5">
             {String(ck.location.address)}
           </Text>
         ) : null}
         {ck.notes ? (
-          <Text className="text-mist/70 text-xs font-body mt-0.5">{ck.notes}</Text>
+          <Text className="text-text-secondary/70 text-xs font-body mt-0.5">{ck.notes}</Text>
         ) : null}
       </View>
     </View>

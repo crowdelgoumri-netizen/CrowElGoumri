@@ -1,13 +1,13 @@
 /**
- * Tailwind / NativeWind config — the design board's tokens.
+ * Tailwind / NativeWind config — Aurora design system (dark + bright).
  *
- * The palette, fonts, and radii are lifted directly from the "Crowshi"
- * design board (Crowshi App.dc.html) and re-skinned for the Algeria/EUR
- * market. Every value here maps to a utility class (bg-navy, text-accent,
- * font-heading…) so screens stay declarative.
- *
- * Font files load via expo-google-fonts in the root layout; this config
- * only names them so utilities resolve.
+ * Every color resolves through a CSS custom property (`var(--color-*)`)
+ * instead of a literal value — src/theme/ThemeProvider.tsx swaps the actual
+ * values per the active mode via NativeWind's `vars()`, so className usage
+ * across screens never needs to change when the mode does. The var names
+ * here and the keys ThemeProvider sets must match exactly; both are
+ * generated from src/theme/tokens.ts's THEME_COLORS, the single source of
+ * truth (itself lifted from design_handoff_crowshi_aurora/tokens.json).
  */
 import type { Config } from "tailwindcss";
 
@@ -17,30 +17,68 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Surfaces
-        navy: "#0B1220", // primary background (board's base)
-        navySoft: "#16213B", // elevated surface
-        ink: "#0B1220", // primary text on light
-        // Accents
-        accent: "#FF6A2B", // orange — primary actions
-        accentDeep: "#E4541C",
-        violet: "#6D5AA6", // purple — secondary
-        violetDeep: "#3B2A5C",
-        // Neutrals
-        mist: "#F5F7FA", // light surface
-        haze: "#E9ECF4",
-        muted: "#8A94A6", // secondary text
-        line: "rgba(255,255,255,0.08)", // dividers on dark
-        success: "#22C55E",
+        base: "var(--color-bg-base)",
+        "aurora-warm": "var(--color-aurora-warm)",
+        "aurora-warm-band": "var(--color-aurora-warm-band)",
+        "aurora-cool": "var(--color-aurora-cool)",
+        "aurora-cool-band": "var(--color-aurora-cool-band)",
+        glass: "var(--color-glass)",
+        "glass-raised": "var(--color-glass-raised)",
+        "glass-strong": "var(--color-glass-strong)",
+        hairline: "var(--color-glass-border)",
+        "hairline-raised": "var(--color-glass-border-raised)",
+        "hairline-strong": "var(--color-glass-border-strong)",
+        divider: "var(--color-divider)",
+        chrome: "var(--color-chrome-bar)",
+        "chrome-border": "var(--color-chrome-border)",
+        "tab-inactive": "var(--color-tab-inactive)",
+        // Text
+        "text-primary": "var(--color-text-primary)",
+        "text-secondary": "var(--color-text-secondary)",
+        "text-muted": "var(--color-text-muted)",
+        "text-oncard": "var(--color-text-oncard)",
+        // Accent
+        accent: "var(--color-accent)",
+        "accent-on": "var(--color-accent-on)",
+        "accent-text": "var(--color-accent-text)",
+        // Semantic
+        "success-text": "var(--color-success-text)",
+        "success-bg": "var(--color-success-bg)",
+        "success-border": "var(--color-success-border)",
+        "info-text": "var(--color-info-text)",
+        "info-icon": "var(--color-info-icon)",
+        "info-bg": "var(--color-info-bg)",
+        "info-border": "var(--color-info-border)",
+        // Neutral chips
+        "chip-bg": "var(--color-chip-bg)",
+        "chip-border": "var(--color-chip-border)",
+        // Functional
         danger: "#EF4444",
       },
       fontFamily: {
-        heading: ["SpaceGrotesk", "Space Grotesk", "system-ui"],
-        body: ["PlusJakartaSans", "Plus Jakarta Sans", "system-ui"],
+        heading: ["SpaceGrotesk", "system-ui"],
+        body: ["PlusJakartaSans", "system-ui"],
+        mono: ["IBMPlexMono", "monospace"],
       },
       borderRadius: {
-        card: "16px",
-        pill: "9999px",
+        card: "20px",
+        field: "16px",
+        chip: "999px",
+        "tab-icon": "7px",
+      },
+      spacing: {
+        "screen-edge": "20px",
+        "screen-edge-hero": "28px",
+        "card-padding": "16px",
+        "stack-gap": "12px",
+        "section-gap": "14px",
+      },
+      fontSize: {
+        hero: ["42px", { lineHeight: "1.02", letterSpacing: "-0.035em" }],
+        "screen-title": ["22px", { lineHeight: "1.2", letterSpacing: "-0.028em" }],
+        numeral: ["29px", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
+        "route-code": ["20px", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+        meta: ["11px", { lineHeight: "1.4", letterSpacing: "0.08em" }],
       },
     },
   },

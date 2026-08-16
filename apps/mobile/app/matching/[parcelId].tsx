@@ -16,9 +16,11 @@ import { Card } from "../../src/components/Card";
 import { MatchCard } from "../../src/components/MatchCard";
 import { EmptyState } from "../../src/components/EmptyState";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { getMatchesForParcel } from "../../src/lib/matching";
 
 export default function MatchingScreen() {
+  const colors = useThemeColors();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const { data, loading, error, refresh } = useAsync(
     () => getMatchesForParcel(parcelId),
@@ -63,12 +65,12 @@ export default function MatchingScreen() {
         )}
         ItemSeparatorComponent={() => <View className="h-3" />}
         scrollEnabled={false}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor="#FF6A2B" />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.accent} />}
       />
 
       {matches.length > 0 ? (
-        <Card className="mt-lg bg-violet/10 border-violet/30">
-          <Text className="text-mist font-body text-xs">
+        <Card className="mt-section-gap bg-info/10 border-info/30">
+          <Text className="text-text-secondary font-body text-xs">
             💡 Dès qu'un voyageur accepte votre colis, recevez une notification et
             sécurisez le paiement en escrow. Le voyageur confirme la livraison
             avec un code à 6 chiffres.

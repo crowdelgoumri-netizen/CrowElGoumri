@@ -45,17 +45,17 @@ export default function VerifyPhoneScreen() {
   }
 
   return (
-    <Screen variant="dark">
+    <Screen>
       <View className="mt-xl">
-        <Text className="text-white font-heading text-3xl font-bold">
+        <Text className="text-text-primary font-heading text-screen-title font-bold">
           Vérifiez votre téléphone
         </Text>
-        <Text className="text-muted font-body text-base mt-1">
+        <Text className="text-text-muted font-body text-base mt-1">
           Entrez le code à 6 chiffres reçu par SMS.
         </Text>
       </View>
 
-      <View className="mt-xl gap-md">
+      <View className="mt-xl gap-stack-gap">
         <Input
           label="Téléphone (E.164)"
           value={phone}
@@ -74,7 +74,7 @@ export default function VerifyPhoneScreen() {
         />
 
         {isDevOtpMode() ? (
-          <Text className="text-muted font-body text-xs ml-1">
+          <Text className="text-text-muted font-body text-xs ml-1">
             📱 Dev mode : utilisez le code 000000
           </Text>
         ) : null}

@@ -21,6 +21,7 @@ import { Input } from "../../src/components/Input";
 import { Button } from "../../src/components/Button";
 import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import {
   deliverParcel,
   generateDeliveryPin,
@@ -49,7 +50,7 @@ export default function DeliveryScreen() {
     return (
       <Screen scroll={false}>
         <ScreenHeader title="Livraison" />
-        <Text className="text-muted">Chargement…</Text>
+        <Text className="text-text-muted">Chargement…</Text>
       </Screen>
     );
   }
@@ -58,7 +59,7 @@ export default function DeliveryScreen() {
       <Screen scroll={false}>
         <ScreenHeader title="Livraison" />
         <Text className="text-danger">{error ?? "Colis introuvable."}</Text>
-        <View className="mt-md">
+        <View className="mt-section-gap">
           <Button label="Réessayer" variant="secondary" onPress={refresh} />
         </View>
       </Screen>
@@ -113,17 +114,17 @@ export default function DeliveryScreen() {
         <ScreenHeader title="Confirmation de livraison" />
 
         {parcel.status === "DELIVERED" ? (
-          <View className="gap-md">
+          <View className="gap-stack-gap">
             <Card className="bg-success/10 border-success/30">
               <Text className="text-success font-heading font-bold text-lg">Colis livré ✓</Text>
-              <Text className="text-mist font-body text-sm mt-1">
+              <Text className="text-text-secondary font-body text-sm mt-1">
                 La livraison a déjà été confirmée.
               </Text>
             </Card>
             {!isSender && !isTraveler ? null : ratingsLoading ? (
-              <Text className="text-muted">Chargement de votre avis…</Text>
+              <Text className="text-text-muted">Chargement de votre avis…</Text>
             ) : ratingsError ? (
-              <Text className="text-muted font-body text-sm">
+              <Text className="text-text-muted font-body text-sm">
                 Impossible de charger votre avis pour l'instant.
               </Text>
             ) : myRating ? (
@@ -140,19 +141,19 @@ export default function DeliveryScreen() {
             )}
           </View>
         ) : isSender ? (
-          <View className="gap-md">
-            <Text className="text-white font-body">
+          <View className="gap-stack-gap">
+            <Text className="text-text-primary font-body">
               Générez un code à 6 chiffres et partagez-le hors-app avec le
               destinataire (ex. WhatsApp). Le voyageur le saisira à la remise
               pour confirmer la livraison et déclencher le paiement.
             </Text>
             {revealedPin ? (
-              <Card className="items-center bg-violet/15 border-violet/40 py-xl">
-                <Text className="text-mist/70 text-xs font-body uppercase">Code de livraison</Text>
+              <Card className="items-center bg-info/15 border-info/40 py-xl">
+                <Text className="font-mono text-meta uppercase text-text-secondary">Code de livraison</Text>
                 <Text className="text-accent font-heading text-5xl font-bold tracking-[0.3em] mt-2">
                   {revealedPin}
                 </Text>
-                <Text className="text-muted text-xs font-body mt-3 text-center">
+                <Text className="text-text-muted text-xs font-body mt-3 text-center">
                   Ne partagez ce code qu'avec le destinataire final.
                 </Text>
               </Card>
@@ -164,8 +165,8 @@ export default function DeliveryScreen() {
             />
           </View>
         ) : isTraveler ? (
-          <View className="gap-md">
-            <Text className="text-white font-body">
+          <View className="gap-stack-gap">
+            <Text className="text-text-primary font-body">
               À la remise, demandez le code à 6 chiffres au destinataire et
               saisissez-le pour confirmer la livraison. Le paiement est libéré
               automatiquement.
@@ -181,7 +182,7 @@ export default function DeliveryScreen() {
             <Button label="Confirmer la livraison" onPress={onDeliver} loading={busy} />
           </View>
         ) : (
-          <Text className="text-muted">
+          <Text className="text-text-muted">
             Vous n'êtes pas partie à ce colis.
           </Text>
         )}
@@ -197,6 +198,7 @@ function RatingPrompt({
   parcelId: string;
   onSubmitted: (rating: Rating) => void;
 }) {
+  const colors = useThemeColors();
   const [score, setScore] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -222,15 +224,15 @@ function RatingPrompt({
   }
 
   return (
-    <Card className="gap-md">
-      <Text className="text-white font-heading font-bold">Notez votre expérience</Text>
+    <Card className="gap-stack-gap">
+      <Text className="text-text-primary font-heading font-bold">Notez votre expérience</Text>
       <View className="flex-row gap-2 justify-center">
         {[1, 2, 3, 4, 5].map((n) => (
           <Pressable key={n} onPress={() => setScore(n)} hitSlop={8}>
             <Ionicons
               name={n <= score ? "star" : "star-outline"}
               size={32}
-              color="#FF6A2B"
+              color={colors.accent}
             />
           </Pressable>
         ))}
@@ -249,21 +251,22 @@ function RatingPrompt({
 }
 
 function RatingSubmitted({ rating }: { rating: Rating }) {
+  const colors = useThemeColors();
   return (
-    <Card className="gap-2 bg-violet/10 border-violet/30">
-      <Text className="text-white font-body font-semibold">Merci pour votre avis !</Text>
+    <Card className="gap-2 bg-info/10 border-info/30">
+      <Text className="text-text-primary font-body font-semibold">Merci pour votre avis !</Text>
       <View className="flex-row gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <Ionicons
             key={n}
             name={n <= rating.score ? "star" : "star-outline"}
             size={18}
-            color="#FF6A2B"
+            color={colors.accent}
           />
         ))}
       </View>
       {rating.comment ? (
-        <Text className="text-muted font-body text-sm mt-1">{rating.comment}</Text>
+        <Text className="text-text-muted font-body text-sm mt-1">{rating.comment}</Text>
       ) : null}
     </Card>
   );

@@ -11,26 +11,28 @@ import { Screen } from "../../src/components/Screen";
 import { Avatar } from "../../src/components/Avatar";
 import { EmptyState } from "../../src/components/EmptyState";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { listThreads, type ChatThread } from "../../src/lib/chat";
 import { PARCEL_STATUS, timeAgo } from "../../src/lib/format";
 
 export default function MessagesScreen() {
+  const colors = useThemeColors();
   const { data, loading, error, refresh } = useAsync(() => listThreads(), []);
   const threads = data?.threads ?? [];
 
   return (
     <Screen>
-      <Text className="text-white font-heading text-2xl font-bold mt-md">
+      <Text className="text-text-primary font-heading text-screen-title font-bold mt-md">
         Messages
       </Text>
 
       <FlatList
-        className="mt-md"
+        className="mt-stack-gap"
         data={threads}
         keyExtractor={(t) => t.parcelId}
         renderItem={({ item }) => <ThreadRow thread={item} />}
         ItemSeparatorComponent={() => (
-          <View className="h-px bg-line ml-16" />
+          <View className="h-px bg-divider ml-16" />
         )}
         ListEmptyComponent={
           loading ? null : error ? (
@@ -50,7 +52,7 @@ export default function MessagesScreen() {
           )
         }
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={refresh} tintColor="#FF6A2B" />
+          <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.accent} />
         }
       />
     </Screen>
@@ -62,28 +64,28 @@ function ThreadRow({ thread }: { thread: ChatThread }) {
   return (
     <Pressable
       onPress={() => router.push(`/chat/${thread.parcelId}`)}
-      className="flex-row items-center gap-md py-md active:opacity-70"
+      className="flex-row items-center gap-stack-gap py-stack-gap active:opacity-70"
     >
       <Avatar name={thread.counterparty.firstName} size="md" />
       <View className="flex-1">
         <View className="flex-row items-center justify-between">
-          <Text className="text-white font-body font-semibold" numberOfLines={1}>
+          <Text className="text-text-primary font-body font-semibold" numberOfLines={1}>
             {thread.counterparty.firstName}
           </Text>
-          <Text className="text-muted text-xs font-body">
+          <Text className="text-text-muted text-xs font-body">
             {timeAgo(thread.lastMessage?.createdAt)}
           </Text>
         </View>
-        <Text className="text-muted font-body text-sm" numberOfLines={1}>
+        <Text className="text-text-secondary font-body text-sm" numberOfLines={1}>
           {thread.lastMessage?.body ?? "Nouvelle conversation · " + (st?.label ?? thread.status)}
         </Text>
-        <Text className="text-mist/50 text-xs font-body mt-0.5" numberOfLines={1}>
+        <Text className="text-text-muted/50 text-xs font-body mt-0.5" numberOfLines={1}>
           {thread.description}
         </Text>
       </View>
       {thread.unreadCount > 0 ? (
         <View className="h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-accent">
-          <Text className="text-white text-xs font-bold">{thread.unreadCount}</Text>
+          <Text className="text-accent-on text-xs font-bold">{thread.unreadCount}</Text>
         </View>
       ) : null}
     </Pressable>

@@ -1,15 +1,7 @@
 /**
  * PhotoPicker — tap to choose + upload an image, shown as a thumbnail.
  *
- * Wraps lib/uploads.pickAndUploadImage so each screen doesn't reimplement the
- * pick → presign → upload → error flow. Single-image field; callers needing a
- * multi-photo grid (post-parcel) call pickAndUploadImage directly and manage
- * an array.
- *
- * The parent owns the resulting objectUrl via onUploaded; this component only
- * holds its own preview URI + loading state. The preview uses the picker's
- * local file URI (always displayable, even when the bucket is private) rather
- * than the stored objectUrl.
+ * Aurora glass styling for the upload zone.
  */
 import { useState } from "react";
 import {
@@ -64,12 +56,12 @@ export function PhotoPicker({
 
   return (
     <View className="gap-1">
-      <Text className="text-mist/70 text-xs font-body uppercase">{label}</Text>
+      <Text className="text-text-secondary text-xs font-mono font-medium uppercase">{label}</Text>
       {localUri ? (
         <View className="flex-row items-center gap-md">
           <Image
             source={{ uri: localUri }}
-            className="h-20 w-20 rounded-xl bg-navySoft"
+            className="h-20 w-20 rounded-xl bg-glass"
             resizeMode="cover"
           />
           <View className="flex-1 gap-1">
@@ -88,12 +80,12 @@ export function PhotoPicker({
         <Pressable
           onPress={pick}
           disabled={uploading}
-          className="h-20 items-center justify-center rounded-xl border border-dashed border-mist/30 bg-navySoft"
+          className="h-20 items-center justify-center rounded-xl border border-dashed border-hairline bg-glass"
         >
           {uploading ? (
             <ActivityIndicator />
           ) : (
-            <Text className="text-muted font-body text-sm">
+            <Text className="text-text-muted font-body text-sm">
               Choisir une photo
             </Text>
           )}

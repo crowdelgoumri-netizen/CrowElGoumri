@@ -1,7 +1,7 @@
 /**
  * Tabs layout — the authenticated app shell.
  *
- * Three tabs (Accueil / Messages / Profil) over the board's navy, with a
+ * Three tabs (Accueil / Messages / Profil) over the Aurora base, with a
  * floating center "+" FAB that opens a chooser: send a parcel or post a trip.
  * Both post screens push onto the root stack as modals (full-screen forms).
  */
@@ -17,8 +17,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../src/store/auth";
 import { listNotifications } from "../../src/lib/notifications-api";
 import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
 
 export default function TabsLayout() {
+  const colors = useThemeColors();
   const tokens = useAuth((s) => s.tokens);
   const [fabOpen, setFabOpen] = useState(false);
 
@@ -32,19 +34,19 @@ export default function TabsLayout() {
   if (!tokens) return <Redirect href="/auth/login" />;
 
   return (
-    <View className="flex-1 bg-navy">
+    <View className="flex-1 bg-base">
       <Tabs
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: "#0B1220",
-            borderTopColor: "rgba(255,255,255,0.08)",
+            backgroundColor: colors.chromeBar,
+            borderTopColor: colors.chromeBorder,
             height: 64,
             paddingBottom: 8,
             paddingTop: 8,
           },
-          tabBarActiveTintColor: "#FF6A2B",
-          tabBarInactiveTintColor: "#8A94A6",
+          tabBarActiveTintColor: colors.accent,
+          tabBarInactiveTintColor: colors.textMuted,
           tabBarLabelStyle: { fontFamily: "PlusJakartaSans", fontSize: 11 },
         }}
       >
@@ -88,14 +90,14 @@ export default function TabsLayout() {
           alignSelf: "center",
           width: 60,
           height: 60,
-          shadowColor: "#FF6A2B",
-          shadowOpacity: 0.45,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
+          shadowColor: colors.accent,
+          shadowOpacity: 0.28,
+          shadowRadius: 15,
+          shadowOffset: { width: 0, height: 10 },
           elevation: 8,
         }}
       >
-        <Ionicons name="add" size={30} color="#0B1220" />
+        <Ionicons name="add" size={30} color={colors.accentOn} />
       </Pressable>
 
       <Modal
@@ -106,11 +108,11 @@ export default function TabsLayout() {
       >
         <Pressable className="flex-1 justify-end" onPress={() => setFabOpen(false)}>
           <View className="flex-1 bg-black/50" />
-          <View className="bg-navySoft border-t border-line rounded-t-card p-lg pb-xl">
+          <View className="bg-glass-strong border-t border-hairline rounded-t-card p-lg pb-xl">
             <View className="items-center py-3">
-              <View className="h-1 w-10 rounded-full bg-mist/20" />
+              <View className="h-1 w-10 rounded-full bg-divider" />
             </View>
-            <Text className="text-white font-heading font-bold text-lg mb-md">
+            <Text className="text-text-primary font-heading font-bold text-lg mb-stack-gap">
               Que voulez-vous faire ?
             </Text>
             <ChooserOption
@@ -149,19 +151,20 @@ function ChooserOption({
   subtitle: string;
   onPress: () => void;
 }) {
+  const colors = useThemeColors();
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-md rounded-card bg-navy/60 border border-line p-md mb-sm active:opacity-80"
+      className="flex-row items-center gap-stack-gap rounded-card bg-glass border border-hairline p-card-padding mb-sm active:opacity-80"
     >
       <View className="h-11 w-11 items-center justify-center rounded-full bg-accent/20">
-        <Ionicons name={icon} size={22} color="#FF6A2B" />
+        <Ionicons name={icon} size={22} color={colors.accent} />
       </View>
       <View className="flex-1">
-        <Text className="text-white font-body font-semibold">{title}</Text>
-        <Text className="text-muted font-body text-xs">{subtitle}</Text>
+        <Text className="text-text-primary font-body font-semibold">{title}</Text>
+        <Text className="text-text-muted font-body text-xs">{subtitle}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color="#8A94A6" />
+      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
     </Pressable>
   );
 }

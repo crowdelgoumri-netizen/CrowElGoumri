@@ -1,11 +1,12 @@
 /**
- * Font loading — Space Grotesk (headings) + Plus Jakarta Sans (body).
+ * Font loading — Space Grotesk (headings) + Plus Jakarta Sans (body)
+ * + IBM Plex Mono (meta/eyebrow labels).
  *
- * tailwind.config.ts names these as `font-heading` / `font-body`; without
- * actually loading the files the utilities silently fall back to the system
- * font. This module loads them via expo-google-fonts and expo-font, returning
- * a `ready` flag the root layout gates its splash on so text never flashes in
- * the system face.
+ * tailwind.config.ts names these as `font-heading` / `font-body` / `font-mono`;
+ * without actually loading the files the utilities silently fall back to the
+ * system font. This module loads them via expo-google-fonts and expo-font,
+ * returning a `ready` flag the root layout gates its splash on so text never
+ * flashes in the system face.
  */
 import {
   SpaceGrotesk_500Medium,
@@ -19,6 +20,10 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from "@expo-google-fonts/plus-jakarta-sans";
+import {
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+} from "@expo-google-fonts/ibm-plex-mono";
 import * as Font from "expo-font";
 
 let loaded = false;
@@ -41,6 +46,9 @@ export async function loadFonts(): Promise<void> {
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
+    IBMPlexMono: IBMPlexMono_500Medium,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_600SemiBold,
   });
   loaded = true;
 }

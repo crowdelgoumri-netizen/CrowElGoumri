@@ -67,11 +67,10 @@ export async function uploadFile(
 
   // uploadAsync streams the file off disk to the URL. The Content-Type header
   // must match what presign signed (above) or S3 rejects the signature.
-  // httpMethod is a string union in expo-file-system v18 ('POST'|'PUT'|'PATCH').
   const result = await FileSystem.uploadAsync(presign.uploadUrl, localUri, {
     httpMethod: "PUT",
     headers: { "Content-Type": contentType },
-    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+    uploadType: FileSystem.UploadType.BINARY_CONTENT as unknown as number,
   });
 
   if (result.status < 200 || result.status >= 300) {

@@ -18,6 +18,7 @@
  * host, so dev/prod/CI each point at their own backend.
  */
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 
 // expo's public env: must be prefixed EXPO_PUBLIC_, inlined at build.
 // Prefer EXPO_PUBLIC_* (works with a plain app.json, overrideable per env);
@@ -25,8 +26,20 @@ import Constants from "expo-constants";
 const extra = Constants.expoConfig?.extra as
   | { apiUrl?: string; twilioVerifySid?: string; stripePublishableKey?: string }
   | undefined;
-export const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? extra?.apiUrl ?? "http://localhost:4000";
+const configuredUrl = process.env.EXPO_PUBLIC_API_URL ?? extra?.apiUrl;
+
+// The Android emulator is its own network namespace — "localhost" there
+// resolves to the emulator device itself, not the host machine running the
+// API, and connections fail outright. 10.0.2.2 is the emulator's standing
+// alias for the host loopback (iOS simulator and web don't need this: they
+// share the host's network stack, so plain localhost already works there).
+// Only rewrite the default we fall back to ourselves — an explicitly
+// configured EXPO_PUBLIC_API_URL/app.json value (e.g. a LAN IP for physical
+// devices) is left untouched.
+const DEV_DEFAULT =
+  Platform.OS === "android" ? "http://10.0.2.2:4000" : "http://localhost:4000";
+
+export const BASE_URL = configuredUrl ?? DEV_DEFAULT;
 
 /** Stripe publishable key — safe to embed in the client (designed to be public). */
 export const STRIPE_PK =

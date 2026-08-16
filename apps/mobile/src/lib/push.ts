@@ -15,10 +15,21 @@
  * Graceful by design: push is a best-effort channel. A failure to register
  * never blocks app use; the in-app notification list (screen 11) still works.
  */
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { registerDeviceToken, unregisterDeviceToken } from "./notifications-api";
 import { loadJSON, saveJSON, remove, STORAGE_KEYS } from "./storage";
+
+// Expo Go on Android dropped remote-notification support at SDK 53 — on that
+// combination, `expo-notifications`' own entry module throws synchronously
+// the moment it's require()'d, not just when a function is called. A static
+// `import` can't be try/caught, so require() it lazily and guard every use;
+// every exported function below degrades to a safe no-op when this is null.
+let Notifications: typeof import("expo-notifications") | null = null;
+try {
+  Notifications = require("expo-notifications");
+} catch (e) {
+  console.warn("[push] expo-notifications unavailable:", (e as Error).message);
+}
 
 /**
  * Configure how incoming notifications appear while the app is foregrounded.
@@ -26,13 +37,20 @@ import { loadJSON, saveJSON, remove, STORAGE_KEYS } from "./storage";
  * landing in the tray.
  */
 export function configurePresentation(): void {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
+  if (!Notifications) return;
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  } catch (e) {
+    console.warn("[push] presentation config skipped:", (e as Error).message);
+  }
 }
 
 /**
@@ -61,7 +79,7 @@ export async function setPushEnabled(enabled: boolean): Promise<void> {
   await saveJSON(STORAGE_KEYS.pushEnabled, enabled);
   if (!enabled) {
     let token = await loadJSON<string>(STORAGE_KEYS.pushToken);
-    if (!token) {
+    if (!token && Notifications) {
       try {
         const { data } = await Notifications.getExpoPushTokenAsync();
         token = typeof data === "string" ? data : String(data);
@@ -85,9 +103,11 @@ export async function setPushEnabled(enabled: boolean): Promise<void> {
 /**
  * Request permission + obtain + register the Expo push token. Safe to call on
  * every boot; the backend dedupes the token per user. Returns the token on
- * success, null if push is disabled or unavailable (sim, denied, no projectId).
+ * success, null if push is disabled or unavailable (sim, denied, no projectId,
+ * or expo-notifications itself isn't usable on this platform/runtime).
  */
 export async function registerForPush(): Promise<string | null> {
+  if (!Notifications) return null;
   if (!(await isPushEnabled())) return null;
 
   try {

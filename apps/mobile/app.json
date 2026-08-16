@@ -35,10 +35,11 @@
         {
           "merchantIdentifier": "merchant.crowdshipping.placeholder"
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "extra": {
-      "apiUrl": "http://localhost:4000",
       "twilioVerifySid": "",
       "stripePublishableKey": "pk_test_placeholder"
     },

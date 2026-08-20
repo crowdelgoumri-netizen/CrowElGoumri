@@ -14,6 +14,7 @@ import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
@@ -32,6 +33,7 @@ import { getRatings, submitRating, type Rating } from "../../src/lib/ratings";
 import { ApiError } from "../../src/lib/api";
 
 export default function DeliveryScreen() {
+  const { t } = useTranslation();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const user = useAuth((s) => s.user);
   const tokens = useAuth((s) => s.tokens);
@@ -50,24 +52,24 @@ export default function DeliveryScreen() {
 
   // The PIN handoff involves the sender/traveler — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Livraison" />;
+    return <AuthWall headerTitle={t("delivery.title")} />;
   }
 
   if (loading && !parcel) {
     return (
       <Screen scroll={false}>
-        <ScreenHeader title="Livraison" />
-        <Text className="text-text-muted">Chargement…</Text>
+        <ScreenHeader title={t("delivery.title")} />
+        <Text className="text-text-muted">{t("common.loading")}</Text>
       </Screen>
     );
   }
   if (error || !parcel) {
     return (
       <Screen scroll={false}>
-        <ScreenHeader title="Livraison" />
-        <Text className="text-danger">{error ?? "Colis introuvable."}</Text>
+        <ScreenHeader title={t("delivery.title")} />
+        <Text className="text-danger">{error ?? t("parcelDetail.notFound")}</Text>
         <View className="mt-section-gap">
-          <Button label="Réessayer" variant="secondary" onPress={refresh} />
+          <Button label={t("common.retry")} variant="secondary" onPress={refresh} />
         </View>
       </Screen>
     );
@@ -83,7 +85,7 @@ export default function DeliveryScreen() {
       const { pin: p } = await generateDeliveryPin(parcel!.id);
       setRevealedPin(p);
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
     } finally {
       setBusy(false);
     }
@@ -91,7 +93,7 @@ export default function DeliveryScreen() {
 
   async function onDeliver() {
     if (!/^\d{6}$/.test(pin.trim())) {
-      Alert.alert("Code invalide", "Entrez les 6 chiffres.");
+      Alert.alert(t("delivery.invalidCodeTitle"), t("delivery.invalidCodeBody"));
       return;
     }
     setBusy(true);
@@ -99,17 +101,17 @@ export default function DeliveryScreen() {
       const res = await deliverParcel(parcel!.id, pin.trim());
       const payout = res.payout as { status?: string };
       Alert.alert(
-        "Livraison confirmée ✓",
-        "Le colis est livré. " +
+        t("delivery.deliveredAlertTitle"),
+        t("delivery.deliveredBody") + " " +
           (payout?.status === "RELEASED"
-            ? "Le paiement a été libéré au voyageur."
+            ? t("delivery.payoutReleased")
             : payout?.status === "PAYOUT_PENDING"
-              ? "Le paiement sera libéré dès que le voyageur aura configuré ses paiements."
-              : "Le paiement est en cours de libération."),
-        [{ text: "OK", onPress: () => router.replace(`/parcel/${parcel!.id}`) }],
+              ? t("delivery.payoutPendingSetup")
+              : t("delivery.payoutReleasing")),
+        [{ text: t("common.ok"), onPress: () => router.replace(`/parcel/${parcel!.id}`) }],
       );
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
     } finally {
       setBusy(false);
     }
@@ -118,21 +120,21 @@ export default function DeliveryScreen() {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-xl">
-        <ScreenHeader title="Confirmation de livraison" />
+        <ScreenHeader title={t("delivery.fullTitle")} />
 
         {parcel.status === "DELIVERED" ? (
           <View className="gap-stack-gap">
             <Card className="bg-success/10 border-success/30">
-              <Text className="text-success font-heading font-bold text-lg">Colis livré ✓</Text>
+              <Text className="text-success font-heading font-bold text-lg">{t("delivery.deliveredTitle")}</Text>
               <Text className="text-text-secondary font-body text-sm mt-1">
-                La livraison a déjà été confirmée.
+                {t("delivery.alreadyConfirmed")}
               </Text>
             </Card>
             {!isSender && !isTraveler ? null : ratingsLoading ? (
-              <Text className="text-text-muted">Chargement de votre avis…</Text>
+              <Text className="text-text-muted">{t("delivery.loadingRating")}</Text>
             ) : ratingsError ? (
               <Text className="text-text-muted font-body text-sm">
-                Impossible de charger votre avis pour l'instant.
+                {t("delivery.ratingLoadError")}
               </Text>
             ) : myRating ? (
               <RatingSubmitted rating={myRating} />
@@ -150,23 +152,21 @@ export default function DeliveryScreen() {
         ) : isSender ? (
           <View className="gap-stack-gap">
             <Text className="text-text-primary font-body">
-              Générez un code à 6 chiffres et partagez-le hors-app avec le
-              destinataire (ex. WhatsApp). Le voyageur le saisira à la remise
-              pour confirmer la livraison et déclencher le paiement.
+              {t("delivery.senderIntro")}
             </Text>
             {revealedPin ? (
               <Card className="items-center bg-info/15 border-info/40 py-xl">
-                <Text className="font-mono text-meta uppercase text-text-secondary">Code de livraison</Text>
+                <Text className="font-mono text-meta uppercase text-text-secondary">{t("parcelDetail.pinTitle")}</Text>
                 <Text className="text-accent font-heading text-5xl font-bold tracking-[0.3em] mt-2">
                   {revealedPin}
                 </Text>
                 <Text className="text-text-muted text-xs font-body mt-3 text-center">
-                  Ne partagez ce code qu'avec le destinataire final.
+                  {t("delivery.pinWarning")}
                 </Text>
               </Card>
             ) : null}
             <Button
-              label={revealedPin ? "Régénérer le code" : "Générer le code"}
+              label={revealedPin ? t("delivery.regenerate") : t("delivery.generate")}
               onPress={onGenerate}
               loading={busy}
             />
@@ -174,23 +174,21 @@ export default function DeliveryScreen() {
         ) : isTraveler ? (
           <View className="gap-stack-gap">
             <Text className="text-text-primary font-body">
-              À la remise, demandez le code à 6 chiffres au destinataire et
-              saisissez-le pour confirmer la livraison. Le paiement est libéré
-              automatiquement.
+              {t("delivery.travelerIntro")}
             </Text>
             <Input
-              label="Code de livraison (6 chiffres)"
+              label={t("delivery.pinInput")}
               value={pin}
               onChangeText={setPin}
               keyboardType="number-pad"
               maxLength={6}
               placeholder="••••••"
             />
-            <Button label="Confirmer la livraison" onPress={onDeliver} loading={busy} />
+            <Button label={t("parcelDetail.confirmDelivery")} onPress={onDeliver} loading={busy} />
           </View>
         ) : (
           <Text className="text-text-muted">
-            Vous n'êtes pas partie à ce colis.
+            {t("delivery.notParty")}
           </Text>
         )}
       </ScrollView>
@@ -206,13 +204,14 @@ function RatingPrompt({
   onSubmitted: (rating: Rating) => void;
 }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [score, setScore] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function submit() {
     if (score < 1) {
-      Alert.alert("Note manquante", "Choisissez une note de 1 à 5 étoiles.");
+      Alert.alert(t("delivery.ratingMissingTitle"), t("delivery.ratingMissingBody"));
       return;
     }
     setSubmitting(true);
@@ -224,7 +223,7 @@ function RatingPrompt({
       });
       onSubmitted(rating);
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
     } finally {
       setSubmitting(false);
     }
@@ -232,7 +231,7 @@ function RatingPrompt({
 
   return (
     <Card className="gap-stack-gap">
-      <Text className="text-text-primary font-heading font-bold">Notez votre expérience</Text>
+      <Text className="text-text-primary font-heading font-bold">{t("delivery.rateTitle")}</Text>
       <View className="flex-row gap-2 justify-center">
         {[1, 2, 3, 4, 5].map((n) => (
           <Pressable key={n} onPress={() => setScore(n)} hitSlop={8}>
@@ -245,23 +244,24 @@ function RatingPrompt({
         ))}
       </View>
       <Input
-        label="Commentaire (optionnel)"
+        label={t("delivery.comment")}
         value={comment}
         onChangeText={setComment}
-        placeholder="Un mot sur votre expérience…"
+        placeholder={t("delivery.commentPlaceholder")}
         multiline
         className="h-20"
       />
-      <Button label="Envoyer mon avis" onPress={submit} loading={submitting} />
+      <Button label={t("delivery.submitRating")} onPress={submit} loading={submitting} />
     </Card>
   );
 }
 
 function RatingSubmitted({ rating }: { rating: Rating }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   return (
     <Card className="gap-2 bg-info/10 border-info/30">
-      <Text className="text-text-primary font-body font-semibold">Merci pour votre avis !</Text>
+      <Text className="text-text-primary font-body font-semibold">{t("delivery.thanks")}</Text>
       <View className="flex-row gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <Ionicons

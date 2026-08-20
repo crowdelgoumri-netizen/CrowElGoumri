@@ -7,6 +7,7 @@
  */
 import { router } from "expo-router";
 import { FlatList, RefreshControl, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { TripCard } from "../src/components/TripCard";
@@ -19,18 +20,19 @@ import { listMine } from "../src/lib/trips";
 
 export default function MyTripsScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(() => listMine(), []);
   const trips = data?.trips ?? [];
 
   // Own-trips is per-account — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Mes trajets" />;
+    return <AuthWall headerTitle={t("myTrips.title")} />;
   }
 
   return (
     <Screen>
-      <ScreenHeader title="Mes trajets" />
+      <ScreenHeader title={t("myTrips.title")} />
       <FlatList
         data={trips}
         keyExtractor={(t) => t.id}
@@ -42,17 +44,17 @@ export default function MyTripsScreen() {
           loading ? null : error ? (
             <EmptyState
               icon="cloud-offline-outline"
-              title="Connexion impossible"
+              title={t("common.errorTitle")}
               subtitle={error}
-              ctaLabel="Réessayer"
+              ctaLabel={t("common.retry")}
               onCta={refresh}
             />
           ) : (
             <EmptyState
               icon="airplane-outline"
-              title="Aucun trajet"
-              subtitle="Touchez le bouton + pour proposer votre premier trajet."
-              ctaLabel="Proposer un trajet"
+              title={t("myTrips.emptyTitle")}
+              subtitle={t("myTrips.emptySubtitle")}
+              ctaLabel={t("myTrips.postTripCta")}
               onCta={() => router.push("/post-trip")}
             />
           )

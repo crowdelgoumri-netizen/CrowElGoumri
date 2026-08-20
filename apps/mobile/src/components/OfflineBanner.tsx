@@ -6,10 +6,12 @@
  * actions will be replayed on reconnect.
  */
 import { Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useIsOffline } from "../hooks/useIsOffline";
 import { useMutationQueue } from "../hooks/useMutationQueue";
 
 export function OfflineBanner() {
+  const { t } = useTranslation();
   const { isOffline } = useIsOffline();
   const { pendingCount } = useMutationQueue();
 
@@ -17,11 +19,11 @@ export function OfflineBanner() {
 
   let message: string;
   if (isOffline && pendingCount > 0) {
-    message = `Hors connexion — ${pendingCount} action${pendingCount > 1 ? "s" : ""} en attente`;
+    message = t("offline.pending", { count: pendingCount });
   } else if (isOffline) {
-    message = "Hors connexion — les actions seront envoyées automatiquement";
+    message = t("offline.message");
   } else {
-    message = `${pendingCount} action${pendingCount > 1 ? "s" : ""} en cours d'envoi…`;
+    message = t("offline.sending", { count: pendingCount });
   }
 
   return (

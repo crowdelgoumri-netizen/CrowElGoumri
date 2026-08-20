@@ -10,6 +10,7 @@
  */
 import { router, useLocalSearchParams } from "expo-router";
 import { FlatList, RefreshControl, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
@@ -23,6 +24,7 @@ import { getMatchesForParcel } from "../../src/lib/matching";
 
 export default function MatchingScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(
@@ -33,19 +35,19 @@ export default function MatchingScreen() {
 
   // Matching is tied to the sender's parcel — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Voyageurs disponibles" />;
+    return <AuthWall headerTitle={t("matching.title")} />;
   }
 
   return (
     <Screen>
-      <ScreenHeader title="Voyageurs disponibles" subtitle={`${data?.totalCandidates ?? 0} trajets candidats`} />
+      <ScreenHeader title={t("matching.title")} subtitle={t("matching.candidatesSubtitle", { n: data?.totalCandidates ?? 0 })} />
 
       {matches.length === 0 && !loading && !error ? (
         <EmptyState
           icon="search-outline"
-          title="Aucun voyageur pour l'instant"
-          subtitle="Aucun trajet ne correspond à votre colis actuellement. Dès qu'un voyageur accepte, vous serez notifié."
-          ctaLabel="Retour au colis"
+          title={t("matching.emptyTitle")}
+          subtitle={t("matching.emptySubtitle")}
+          ctaLabel={t("matching.backToParcel")}
           onCta={() => router.back()}
         />
       ) : null}
@@ -53,9 +55,9 @@ export default function MatchingScreen() {
       {error ? (
         <EmptyState
           icon="cloud-offline-outline"
-          title="Connexion impossible"
+          title={t("common.errorTitle")}
           subtitle={error}
-          ctaLabel="Réessayer"
+          ctaLabel={t("common.retry")}
           onCta={refresh}
         />
       ) : null}
@@ -67,7 +69,7 @@ export default function MatchingScreen() {
           <MatchCard
             match={item}
             index={index}
-            ctaLabel="Voir le trajet"
+            ctaLabel={t("matching.viewTrip")}
             onPress={(m) => router.push(`/trip/${m.tripId}`)}
           />
         )}
@@ -79,9 +81,7 @@ export default function MatchingScreen() {
       {matches.length > 0 ? (
         <Card className="mt-section-gap bg-info/10 border-info/30">
           <Text className="text-text-secondary font-body text-xs">
-            💡 Dès qu'un voyageur accepte votre colis, recevez une notification et
-            sécurisez le paiement en escrow. Le voyageur confirme la livraison
-            avec un code à 6 chiffres.
+            {t("matching.hint")}
           </Text>
         </Card>
       ) : null}

@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { TripCard } from "../../src/components/TripCard";
 import { ParcelCard } from "../../src/components/ParcelCard";
@@ -27,14 +28,9 @@ import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
 import * as parcelsApi from "../../src/lib/parcels";
-import { MODE_LABEL } from "../../src/lib/format";
+import { MODE_KEY } from "../../src/lib/format";
 import { POPULAR_CORRIDORS } from "../../src/config/corridors";
 import type { TransportMode } from "../../src/lib/types";
-
-const MODE_OPTIONS = [
-  { value: "", label: "Tous les modes" },
-  ...Object.entries(MODE_LABEL).map(([value, label]) => ({ value, label })),
-];
 
 type Tab = "trips" | "parcels";
 
@@ -42,8 +38,14 @@ export default function HomeScreen() {
   const user = useAuth((s) => s.user);
   const tokens = useAuth((s) => s.tokens);
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("trips");
   const [mode, setMode] = useState<string>("");
+
+  const modeOptions = [
+    { value: "", label: t("home.allModes") },
+    ...Object.entries(MODE_KEY).map(([value, key]) => ({ value, label: t(key) })),
+  ];
 
   const trips = useAsync(
     () => tripsApi.listPublished(mode ? { mode: mode as TransportMode } : {}),
@@ -64,10 +66,10 @@ export default function HomeScreen() {
       <View className="flex-row items-center justify-between mt-md">
         <View className="flex-1">
           <Text className="text-text-muted font-body text-sm">
-            Bonjour, {user?.firstName ?? "👋"}
+            {t("home.greeting", { name: user?.firstName ?? "👋" })}
           </Text>
           <Text className="text-text-primary font-heading text-2xl font-bold">
-            Europe → Algérie
+            {t("home.corridor")}
           </Text>
         </View>
         <Pressable
@@ -81,7 +83,7 @@ export default function HomeScreen() {
       {/* Popular corridors */}
       <View className="mt-section-gap">
         <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mb-2">
-          Corridors populaires
+          {t("home.popularCorridors")}
         </Text>
         <View className="flex-row flex-wrap gap-2">
           {POPULAR_CORRIDORS.map((c) => (
@@ -97,19 +99,19 @@ export default function HomeScreen() {
 
       {/* Segmented toggle */}
       <View className="flex-row bg-glass rounded-chip p-1 mt-section-gap">
-        <SegBtn label="Voyageurs" active={tab === "trips"} onPress={() => setTab("trips")} />
-        <SegBtn label="Mes colis" active={tab === "parcels"} onPress={() => setTab("parcels")} />
+        <SegBtn label={t("home.segmentTrips")} active={tab === "trips"} onPress={() => setTab("trips")} />
+        <SegBtn label={t("home.segmentParcels")} active={tab === "parcels"} onPress={() => setTab("parcels")} />
       </View>
 
       {/* Filter (trips only) */}
       {tab === "trips" ? (
         <View className="mt-stack-gap">
           <Select
-            label="Filtrer par mode de transport"
+            label={t("home.filterMode")}
             value={mode}
-            options={MODE_OPTIONS}
+            options={modeOptions}
             onSelect={setMode}
-            placeholder="Tous les modes"
+            placeholder={t("home.allModes")}
           />
         </View>
       ) : null}
@@ -126,9 +128,9 @@ export default function HomeScreen() {
         ) : !tokens ? (
           <EmptyState
             icon="cube-outline"
-            title="Vos colis ici"
-            subtitle="Créez un compte pour envoyer un colis et suivre ses livraisons."
-            ctaLabel="Se connecter"
+            title={t("home.guestParcelsTitle")}
+            subtitle={t("home.guestParcelsSubtitle")}
+            ctaLabel={t("common.login")}
             onCta={() => router.push("/auth/login")}
           />
         ) : (
@@ -185,6 +187,7 @@ function TripsList({
   onRefresh: () => void;
 }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   if (loading && !trips) {
     return <Loader />;
   }
@@ -192,9 +195,9 @@ function TripsList({
     return (
       <EmptyState
         icon="cloud-offline-outline"
-        title="Connexion impossible"
+        title={t("common.errorTitle")}
         subtitle={error}
-        ctaLabel="Réessayer"
+        ctaLabel={t("common.retry")}
         onCta={onRefresh}
       />
     );
@@ -203,8 +206,8 @@ function TripsList({
     return (
       <EmptyState
         icon="airplane-outline"
-        title="Aucun trajet publié"
-        subtitle="Les voyageurs apparaîtront ici. Revenez bientôt !"
+        title={t("home.noTripsTitle")}
+        subtitle={t("home.noTripsSubtitle")}
       />
     );
   }
@@ -234,6 +237,7 @@ function ParcelsList({
   onRefresh: () => void;
 }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   if (loading && !parcels) {
     return <Loader />;
   }
@@ -241,9 +245,9 @@ function ParcelsList({
     return (
       <EmptyState
         icon="cloud-offline-outline"
-        title="Connexion impossible"
+        title={t("common.errorTitle")}
         subtitle={error}
-        ctaLabel="Réessayer"
+        ctaLabel={t("common.retry")}
         onCta={onRefresh}
       />
     );
@@ -252,8 +256,8 @@ function ParcelsList({
     return (
       <EmptyState
         icon="cube-outline"
-        title="Aucun colis"
-        subtitle="Touchez le bouton + pour envoyer votre premier colis."
+        title={t("home.noParcelsTitle")}
+        subtitle={t("home.noParcelsSubtitle")}
       />
     );
   }

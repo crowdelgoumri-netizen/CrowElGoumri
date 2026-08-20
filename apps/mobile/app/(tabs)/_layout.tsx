@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../src/store/auth";
 import { listNotifications } from "../../src/lib/notifications-api";
 import { useAsync } from "../../src/hooks/useAsync";
@@ -22,6 +23,7 @@ import { useThemeColors } from "../../src/hooks/useThemeColors";
 
 export default function TabsLayout() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const [fabOpen, setFabOpen] = useState(false);
 
@@ -66,7 +68,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Accueil",
+            title: t("tabs.home"),
             tabBarIcon: ({ color }) => (
               <Ionicons name="grid-outline" size={22} color={color} />
             ),
@@ -75,7 +77,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="messages"
           options={{
-            title: "Messages",
+            title: t("tabs.messages"),
             tabBarIcon: ({ color }) => (
               <Ionicons name="chatbubble-outline" size={22} color={color} />
             ),
@@ -85,7 +87,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            title: "Profil",
+            title: t("tabs.profile"),
             tabBarIcon: ({ color }) => (
               <Ionicons name="person-outline" size={22} color={color} />
             ),
@@ -126,12 +128,12 @@ export default function TabsLayout() {
               <View className="h-1 w-10 rounded-full bg-divider" />
             </View>
             <Text className="text-text-primary font-heading font-bold text-lg mb-stack-gap">
-              Que voulez-vous faire ?
+              {t("fab.title")}
             </Text>
             <ChooserOption
               icon="cube"
-              title="Envoyer un colis"
-              subtitle="Trouvez un voyageur pour livrer en Algérie"
+              title={t("fab.sendParcel")}
+              subtitle={t("fab.sendParcelSubtitle")}
               onPress={() => {
                 setFabOpen(false);
                 router.push("/post-parcel");
@@ -139,8 +141,8 @@ export default function TabsLayout() {
             />
             <ChooserOption
               icon="airplane"
-              title="Proposer un trajet"
-              subtitle="Gagnez de l'espace disponible dans vos bagages"
+              title={t("fab.postTrip")}
+              subtitle={t("fab.postTripSubtitle")}
               onPress={() => {
                 setFabOpen(false);
                 router.push("/post-trip");

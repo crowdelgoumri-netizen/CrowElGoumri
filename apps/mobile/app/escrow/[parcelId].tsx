@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStripe } from "../../src/lib/stripe-compat";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
@@ -23,6 +24,7 @@ import { eur, ESCROW_STATUS } from "../../src/lib/format";
 import type { EscrowStatus } from "../../src/lib/types";
 
 export default function EscrowScreen() {
+  const { t } = useTranslation();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(
@@ -36,7 +38,7 @@ export default function EscrowScreen() {
 
   // Escrow involves the sender's payment — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Paiement sécurisé" />;
+    return <AuthWall headerTitle={t("escrow.title")} />;
   }
 
   const breakdown = data?.breakdown;
@@ -46,7 +48,7 @@ export default function EscrowScreen() {
 
   async function onPay() {
     if (!data?.clientSecret) {
-      Alert.alert("Erreur", "Impossible de préparer le paiement.");
+      Alert.alert(t("escrow.errorTitle"), t("escrow.prepareError"));
       return;
     }
 
@@ -58,7 +60,7 @@ export default function EscrowScreen() {
       });
 
       if (initErr) {
-        Alert.alert("Paiement", initErr.message);
+        Alert.alert(t("escrow.payment"), initErr.message);
         setBusy(false);
         return;
       }
@@ -71,9 +73,9 @@ export default function EscrowScreen() {
           setBusy(false);
           return;
         }
-        Alert.alert("Paiement échoué", payErr.message, [
-          { text: "Réessayer", onPress: () => onPay() },
-          { text: "Plus tard", style: "cancel" },
+        Alert.alert(t("escrow.payFailed"), payErr.message, [
+          { text: t("common.retry"), onPress: () => onPay() },
+          { text: t("escrow.later"), style: "cancel" },
         ]);
         setBusy(false);
         return;
@@ -88,7 +90,7 @@ export default function EscrowScreen() {
         await new Promise((r) => setTimeout(r, 1000));
       }
     } catch (e) {
-      Alert.alert("Paiement", e instanceof Error ? e.message : "Erreur inattendue.");
+      Alert.alert(t("escrow.payment"), e instanceof Error ? e.message : t("escrow.unexpected"));
     } finally {
       setBusy(false);
     }
@@ -96,10 +98,10 @@ export default function EscrowScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Paiement sécurisé" subtitle="Fonds bloqués jusqu'à la livraison" />
+      <ScreenHeader title={t("escrow.title")} subtitle={t("escrow.subtitle")} />
 
       {loading ? (
-        <Text className="text-text-muted">Préparation du paiement…</Text>
+        <Text className="text-text-muted">{t("escrow.preparing")}</Text>
       ) : null}
 
       {error ? (
@@ -107,27 +109,27 @@ export default function EscrowScreen() {
           <Text className="text-danger">{error}</Text>
           {error.includes("must be MATCHED") ? (
             <Text className="text-text-muted font-body text-sm">
-              Le colis doit d'abord être accepté par un voyageur pour pouvoir payer.
+              {t("escrow.mustBeMatched")}
             </Text>
           ) : null}
-          <Button label="Retour" variant="secondary" onPress={() => router.back()} />
+          <Button label={t("postParcel.back")} variant="secondary" onPress={() => router.back()} />
         </View>
       ) : null}
 
       {breakdown ? (
         <View className="gap-stack-gap">
-          {st ? <StatusPill label={st.label} tone={st.tone} /> : null}
+          {st ? <StatusPill label={t(st.key)} tone={st.tone} /> : null}
 
           <Card className="gap-2">
-            <Text className="font-mono text-meta uppercase text-text-secondary">Détail du paiement</Text>
-            <Line k="Montant voyageur" v={eur(breakdown.travelerPayout)} />
-            <Line k="Frais de plateforme" v={eur(breakdown.platformFee)} />
+            <Text className="font-mono text-meta uppercase text-text-secondary">{t("escrow.details")}</Text>
+            <Line k={t("escrow.travelerPayout")} v={eur(breakdown.travelerPayout)} />
+            <Line k={t("escrow.platformFee")} v={eur(breakdown.platformFee)} />
             {breakdown.insuranceFee > 0 ? (
-              <Line k="Assurance" v={eur(breakdown.insuranceFee)} />
+              <Line k={t("escrow.insurance")} v={eur(breakdown.insuranceFee)} />
             ) : null}
             <View className="h-px bg-divider my-1" />
             <View className="flex-row justify-between items-center">
-              <Text className="text-text-primary font-heading text-lg font-bold">Total bloqué</Text>
+              <Text className="text-text-primary font-heading text-lg font-bold">{t("escrow.total")}</Text>
               <Text className="text-accent font-heading text-numeral font-bold">
                 {eur(breakdown.totalAmount)}
               </Text>
@@ -136,22 +138,21 @@ export default function EscrowScreen() {
 
           <Card className="bg-info/10 border-info/30">
             <Text className="text-text-secondary font-body text-xs">
-              🔒 Les fonds sont séquestrés (escrow) et libérés au voyageur
-              automatiquement dès que vous confirmez la livraison par code PIN.
+              {t("escrow.escrowHint")}
             </Text>
           </Card>
 
           {alreadyLocked ? (
             <Text className="text-text-muted font-body text-sm text-center">
-              Paiement déjà confirmé.
+              {t("escrow.alreadyPaid")}
             </Text>
           ) : !data.clientSecret ? (
             <Text className="text-danger font-body text-sm text-center">
-              Configuration Stripe manquante — contactez le support.
+              {t("escrow.stripeMissing")}
             </Text>
           ) : (
             <Button
-              label={paid ? "Confirmation en cours…" : `Payer ${eur(breakdown.totalAmount)}`}
+              label={paid ? t("escrow.confirming") : t("escrow.pay", { amount: eur(breakdown.totalAmount) })}
               onPress={onPay}
               loading={busy || paid}
               disabled={paid}
@@ -161,7 +162,7 @@ export default function EscrowScreen() {
       ) : null}
 
       {!loading && !error && !breakdown ? (
-        <Button label="Réessayer" variant="secondary" onPress={refresh} />
+        <Button label={t("common.retry")} variant="secondary" onPress={refresh} />
       ) : null}
     </Screen>
   );

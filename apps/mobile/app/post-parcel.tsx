@@ -21,6 +21,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Input } from "../src/components/Input";
@@ -35,8 +36,8 @@ import { ApiError } from "../src/lib/api";
 import { PhotoPicker } from "../src/components/PhotoPicker";
 import { pickAndUploadImage } from "../src/lib/uploads";
 import {
-  CATEGORY_LABEL,
-  URGENCY_LABEL,
+  CATEGORY_KEY,
+  URGENCY_KEY,
   eur,
 } from "../src/lib/format";
 import {
@@ -48,15 +49,17 @@ import type {
   UrgencyLevel,
 } from "../src/lib/types";
 
-const STEPS = ["Colis", "Itinéraire", "Prix"];
-const CATEGORIES = Object.entries(CATEGORY_LABEL).map(([value, label]) => ({ value, label }));
-const URGENCIES = Object.entries(URGENCY_LABEL).map(([value, label]) => ({ value, label }));
 const COUNTRIES = ORIGIN_COUNTRIES.map((c) => ({ value: c.code, label: c.name }));
 
 export default function PostParcelScreen() {
+  const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+
+  const steps = [t("postParcel.stepParcel"), t("postParcel.stepItinerary"), t("postParcel.stepPrice")];
+  const categories = Object.entries(CATEGORY_KEY).map(([value, key]) => ({ value, label: t(key) }));
+  const urgencies = Object.entries(URGENCY_KEY).map(([value, key]) => ({ value, label: t(key) }));
 
   // Step 1 — parcel details
   const [description, setDescription] = useState("");
@@ -89,20 +92,20 @@ export default function PostParcelScreen() {
 
   // Posting requires an account — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Envoyer un colis" />;
+    return <AuthWall headerTitle={t("postParcel.title")} />;
   }
 
   function validateStep(): string | null {
     if (step === 0) {
-      if (description.trim().length < 10) return "Décrivez le colis (10 caractères min).";
-      if (!parseFloat(weightKg)) return "Poids requis.";
-      if (!parseFloat(estimatedValue)) return "Valeur estimée requise.";
+      if (description.trim().length < 10) return t("postParcel.errDescription");
+      if (!parseFloat(weightKg)) return t("postParcel.errWeight");
+      if (!parseFloat(estimatedValue)) return t("postParcel.errValue");
       if (!parseFloat(lengthCm) || !parseFloat(widthCm) || !parseFloat(heightCm))
-        return "Dimensions requises.";
+        return t("postParcel.errDimensions");
     }
     if (step === 1) {
-      if (!originCity) return "Ville de départ requise.";
-      if (!destinationWilaya) return "Wilaya de destination requise.";
+      if (!originCity) return t("postParcel.errOriginCity");
+      if (!destinationWilaya) return t("postParcel.errWilaya");
     }
     return null;
   }
@@ -110,10 +113,10 @@ export default function PostParcelScreen() {
   function next() {
     const err = validateStep();
     if (err) {
-      Alert.alert("Champ manquant", err);
+      Alert.alert(t("common.missingTitle"), err);
       return;
     }
-    setStep((s) => Math.min(STEPS.length - 1, s + 1));
+    setStep((s) => Math.min(steps.length - 1, s + 1));
   }
 
   // Append-only photo grid: pick one image at a time until 5. Each upload
@@ -128,8 +131,8 @@ export default function PostParcelScreen() {
       setPhotos((prev) => [...prev, picked]);
     } catch (e) {
       Alert.alert(
-        "Envoi impossible",
-        e instanceof ApiError ? e.message : "Réessayez plus tard.",
+        t("common.uploadError"),
+        e instanceof ApiError ? e.message : t("common.retryLater"),
       );
     } finally {
       setPickingPhoto(false);
@@ -139,7 +142,7 @@ export default function PostParcelScreen() {
   async function submit() {
     const err = validateStep();
     if (err) {
-      Alert.alert("Champ manquant", err);
+      Alert.alert(t("common.missingTitle"), err);
       return;
     }
     setSubmitting(true);
@@ -179,8 +182,8 @@ export default function PostParcelScreen() {
       router.replace(`/parcel/${parcel.id}`);
     } catch (e) {
       Alert.alert(
-        "Publication impossible",
-        e instanceof ApiError ? e.message : "Réessayez plus tard.",
+        t("common.publishError"),
+        e instanceof ApiError ? e.message : t("common.retryLater"),
       );
     } finally {
       setSubmitting(false);
@@ -192,34 +195,34 @@ export default function PostParcelScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScreenHeader title="Envoyer un colis" />
-        <Stepper steps={STEPS} current={step} />
+        <ScreenHeader title={t("postParcel.title")} />
+        <Stepper steps={steps} current={step} />
 
         {step === 0 ? (
           <View className="gap-stack-gap">
             <Input
-              label="Description"
+              label={t("postParcel.description")}
               value={description}
               onChangeText={setDescription}
-              placeholder="Ex : Téléphone pour mon frère, emballage d'origine"
+              placeholder={t("postParcel.descriptionPlaceholder")}
               multiline
               className="h-24"
             />
             <Select
-              label="Catégorie"
+              label={t("postParcel.category")}
               value={category}
-              options={CATEGORIES}
+              options={categories}
               onSelect={(v) => setCategory(v as ParcelCategory)}
             />
             <Input
-              label="Poids (kg)"
+              label={t("postParcel.weight")}
               value={weightKg}
               onChangeText={setWeightKg}
               keyboardType="numeric"
               placeholder="2.5"
             />
             <Input
-              label="Valeur estimée (€)"
+              label={t("postParcel.value")}
               value={estimatedValue}
               onChangeText={setEstimatedValue}
               keyboardType="numeric"
@@ -227,18 +230,18 @@ export default function PostParcelScreen() {
             />
             <View className="flex-row gap-stack-gap">
               <View className="flex-1">
-                <Input label="L (cm)" value={lengthCm} onChangeText={setLengthCm} keyboardType="numeric" />
+                <Input label={t("postParcel.length")} value={lengthCm} onChangeText={setLengthCm} keyboardType="numeric" />
               </View>
               <View className="flex-1">
-                <Input label="l (cm)" value={widthCm} onChangeText={setWidthCm} keyboardType="numeric" />
+                <Input label={t("postParcel.width")} value={widthCm} onChangeText={setWidthCm} keyboardType="numeric" />
               </View>
               <View className="flex-1">
-                <Input label="h (cm)" value={heightCm} onChangeText={setHeightCm} keyboardType="numeric" />
+                <Input label={t("postParcel.height")} value={heightCm} onChangeText={setHeightCm} keyboardType="numeric" />
               </View>
             </View>
 
             <View className="gap-1 mt-sm">
-              <Text className="font-mono text-meta uppercase text-text-secondary">Photos (optionnel, max 5)</Text>
+              <Text className="font-mono text-meta uppercase text-text-secondary">{t("postParcel.photos")}</Text>
               <View className="flex-row flex-wrap gap-stack-gap">
                 {photos.map((p, i) => (
                   <View key={p.objectUrl}>
@@ -265,7 +268,7 @@ export default function PostParcelScreen() {
             </View>
 
             <PhotoPicker
-              label="Facture (optionnel)"
+              label={t("postParcel.invoice")}
               purpose="invoice"
               onUploaded={setInvoiceUrl}
               onClear={() => setInvoiceUrl(null)}
@@ -275,29 +278,29 @@ export default function PostParcelScreen() {
 
         {step === 1 ? (
           <View className="gap-stack-gap">
-            <Text className="font-mono text-meta text-text-secondary ml-1">Départ (Europe)</Text>
-            <Select label="Pays d'origine" value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
+            <Text className="font-mono text-meta text-text-secondary ml-1">{t("route.departure")}</Text>
+            <Select label={t("route.originCountry")} value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
             <Select
-              label="Ville de départ"
+              label={t("route.originCity")}
               value={originCity}
               options={cities}
               onSelect={setOriginCity}
-              placeholder="Choisir une ville"
+              placeholder={t("route.chooseCity")}
             />
-            <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">Arrivée (Algérie)</Text>
+            <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">{t("route.arrival")}</Text>
             <Select
-              label="Wilaya de destination"
+              label={t("route.destWilaya")}
               value={destinationWilaya}
               options={WILAYAS_1_58}
               onSelect={setDestinationWilaya}
             />
             <Input
-              label="Nom du destinataire (optionnel)"
+              label={t("postParcel.recipientName")}
               value={recipientName}
               onChangeText={setRecipientName}
             />
             <Input
-              label="Téléphone du destinataire (optionnel, +213…)"
+              label={t("postParcel.recipientPhone")}
               value={recipientPhone}
               onChangeText={setRecipientPhone}
               keyboardType="phone-pad"
@@ -308,28 +311,28 @@ export default function PostParcelScreen() {
         {step === 2 ? (
           <View className="gap-stack-gap">
             <Select
-              label="Urgence"
+              label={t("postParcel.urgency")}
               value={urgency}
-              options={URGENCIES}
+              options={urgencies}
               onSelect={(v) => setUrgency(v as UrgencyLevel)}
             />
             <Input
-              label="Prix proposé (€, optionnel)"
+              label={t("postParcel.offeredPrice")}
               value={offeredPrice}
               onChangeText={setOfferedPrice}
               keyboardType="numeric"
               placeholder="30"
             />
             <Card raised className="gap-2 mt-sm">
-              <Text className="font-mono text-meta uppercase text-text-secondary">Récapitulatif</Text>
-              <Row k="Colis" v={`${weightKg || "—"} kg · ${CATEGORY_LABEL[category]}`} />
+              <Text className="font-mono text-meta uppercase text-text-secondary">{t("postParcel.summary")}</Text>
+              <Row k={t("postParcel.stepParcel")} v={`${weightKg || "—"} kg · ${t(CATEGORY_KEY[category])}`} />
               <Row
-                k="Itinéraire"
+                k={t("postParcel.stepItinerary")}
                 v={`${originCity} → ${destinationWilaya}`}
               />
-              <Row k="Urgence" v={URGENCY_LABEL[urgency]} />
+              <Row k={t("postParcel.urgency")} v={t(URGENCY_KEY[urgency])} />
               {offeredPrice ? (
-                <Row k="Prix proposé" v={eur(parseFloat(offeredPrice))} />
+                <Row k={t("postParcel.summaryPrice")} v={eur(parseFloat(offeredPrice))} />
               ) : null}
             </Card>
           </View>
@@ -338,14 +341,14 @@ export default function PostParcelScreen() {
         <View className="flex-row gap-stack-gap mt-section-gap">
           {step > 0 ? (
             <View className="flex-1">
-              <Button label="Retour" variant="secondary" onPress={() => setStep((s) => s - 1)} />
+              <Button label={t("postParcel.back")} variant="secondary" onPress={() => setStep((s) => s - 1)} />
             </View>
           ) : null}
           <View className="flex-1">
-            {step < STEPS.length - 1 ? (
-              <Button label="Continuer" onPress={next} />
+            {step < steps.length - 1 ? (
+              <Button label={t("postParcel.continue")} onPress={next} />
             ) : (
-              <Button label="Publier" onPress={submit} loading={submitting} />
+              <Button label={t("postParcel.publish")} onPress={submit} loading={submitting} />
             )}
           </View>
         </View>

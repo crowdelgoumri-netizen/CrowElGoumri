@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Avatar } from "../../src/components/Avatar";
 import { AuthWall } from "../../src/components/AuthWall";
@@ -31,6 +32,7 @@ import type { ChatMessage } from "../../src/lib/chat";
 
 export default function ChatScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const user = useAuth((s) => s.user);
   const myId = user?.id;
@@ -71,7 +73,7 @@ export default function ChatScreen() {
 
   // Chat is party-only — guests get the login wall (after all hooks).
   if (!user) {
-    return <AuthWall headerTitle="Discussion" />;
+    return <AuthWall headerTitle={t("chat.title")} />;
   }
 
   return (
@@ -82,7 +84,7 @@ export default function ChatScreen() {
         keyboardVerticalOffset={0}
       >
         <ScreenHeader
-          title={counterpartyName ?? "Discussion"}
+          title={counterpartyName ?? t("chat.title")}
           subtitle={parcel?.description}
         />
 
@@ -101,10 +103,10 @@ export default function ChatScreen() {
             <View className="items-center py-xl">
               <Avatar name={counterpartyName} size="lg" />
               <Text className="text-text-primary font-heading font-bold mt-section-gap">
-                {counterpartyName ?? "Nouvelle conversation"}
+                {counterpartyName ?? t("messages.newThread")}
               </Text>
               <Text className="text-text-muted font-body text-sm mt-1 text-center max-w-[260px]">
-                Envoyez votre premier message. La discussion est liée à ce colis.
+                {t("chat.emptyBody")}
               </Text>
             </View>
           }
@@ -116,7 +118,7 @@ export default function ChatScreen() {
             <TextInput
               value={draft}
               onChangeText={setDraft}
-              placeholder="Message…"
+              placeholder={t("chat.placeholder")}
               placeholderTextColor={colors.placeholder}
               className="flex-1 text-text-primary font-body text-base py-3"
               multiline
@@ -146,6 +148,7 @@ function Bubble({
   message: ChatMessage;
   showRead: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <View className={mine ? "items-end" : "items-start"}>
       <View
@@ -160,7 +163,7 @@ function Bubble({
       </View>
       <Text className="text-text-muted text-[10px] font-body mt-0.5 mr-1">
         {timeAgo(message.createdAt)}
-        {showRead && message.readAt ? " · Lu" : ""}
+        {showRead && message.readAt ? " · " + t("chat.read") : ""}
       </Text>
     </View>
   );

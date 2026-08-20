@@ -32,6 +32,7 @@ export const STORAGE_KEYS = {
   pushEnabled: "@crowdshipping/push-enabled",
   pushToken: "@crowdshipping/push-token",
   themeMode: "@crowdshipping/theme-mode",
+  lang: "@crowdshipping/lang",
 } as const;
 
 // ── GET cache helpers ───────────────────────────────────────────────

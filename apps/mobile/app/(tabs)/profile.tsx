@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { Card } from "../../src/components/Card";
 import { Avatar } from "../../src/components/Avatar";
@@ -32,6 +33,7 @@ const BADGE_EMOJI: Record<string, string> = {
 
 export default function ProfileScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const { user, tokens, logout } = useAuth();
   // Guests get the sign-in wall (profile + wallet are per-account); skip
   // the Connect status call instead of eating a 401.
@@ -47,8 +49,8 @@ export default function ProfileScreen() {
   if (!tokens) {
     return (
       <AuthWall
-        title="Votre profil"
-        subtitle="Connectez-vous pour suivre vos livraisons, vos gains et votre vérification d'identité."
+        title={t("profile.guestTitle")}
+        subtitle={t("profile.guestSubtitle")}
       />
     );
   }
@@ -65,8 +67,8 @@ export default function ProfileScreen() {
       connect.refresh();
     } catch (e) {
       Alert.alert(
-        "Impossible",
-        e instanceof ApiError ? e.message : "Réessayez plus tard.",
+        t("common.impossible"),
+        e instanceof ApiError ? e.message : t("common.retryLater"),
       );
     } finally {
       setOnboarding(false);
@@ -91,9 +93,9 @@ export default function ProfileScreen() {
             </Text>
             <Text className="text-text-muted font-body text-sm">{user?.email}</Text>
             <View className="flex-row items-center gap-2 mt-1.5">
-              {kyc ? <StatusPill label={kyc.label} tone={kyc.tone} /> : null}
+              {kyc ? <StatusPill label={t(kyc.key)} tone={kyc.tone} /> : null}
               <Text className="text-text-secondary font-body text-xs">
-                {badge} Score {user?.trustScore ?? 0}
+                {t("profile.trustScore", { badge, score: user?.trustScore ?? 0 })}
               </Text>
             </View>
           </View>
@@ -101,24 +103,24 @@ export default function ProfileScreen() {
 
         {/* Activity stats */}
         <View className="flex-row justify-between mt-section-gap">
-          <Stat label="Livraisons" value={user?.completedDeliveries ?? 0} />
-          <Stat label="Trajets" value={user?.completedTrips ?? 0} />
+          <Stat label={t("profile.statDeliveries")} value={user?.completedDeliveries ?? 0} />
+          <Stat label={t("profile.statTrips")} value={user?.completedTrips ?? 0} />
           <Stat
-            label="Note"
+            label={t("profile.statRating")}
             value={user?.averageRating ? user.averageRating.toFixed(1) : "—"}
           />
         </View>
 
         {/* Wallet / earnings (traveler payouts) */}
         <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mt-section-gap mb-2">
-          Portefeuille
+          {t("profile.wallet")}
         </Text>
         <Card raised className="gap-2">
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="font-mono text-meta text-text-secondary">Statut paiements</Text>
+              <Text className="font-mono text-meta text-text-secondary">{t("profile.paymentsStatus")}</Text>
               <Text className="text-text-primary font-heading text-lg font-semibold">
-                {connect.data?.payoutsEnabled ? "Activé" : "Non configuré"}
+                {connect.data?.payoutsEnabled ? t("profile.paymentsEnabled") : t("profile.paymentsDisabled")}
               </Text>
             </View>
             <Ionicons
@@ -129,11 +131,11 @@ export default function ProfileScreen() {
           </View>
           <Text className="text-text-muted font-body text-xs">
             {connect.data?.payoutsEnabled
-              ? "Vos gains seront versés automatiquement à chaque livraison confirmée."
-              : "Complétez l'onboarding Stripe pour recevoir vos paiements."}
+              ? t("profile.paymentsEnabledHint")
+              : t("profile.paymentsDisabledHint")}
           </Text>
           <Button
-            label={connect.data?.payoutsEnabled ? "Voir le statut" : "Configurer mes paiements"}
+            label={connect.data?.payoutsEnabled ? t("profile.viewStatus") : t("profile.setupPayments")}
             variant="secondary"
             loading={onboarding}
             onPress={startOnboarding}
@@ -142,43 +144,43 @@ export default function ProfileScreen() {
 
         {/* Menu */}
         <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mt-section-gap mb-2">
-          Compte
+          {t("profile.account")}
         </Text>
         <Card className="gap-1">
           <MenuRow
             icon="shield-checkmark-outline"
-            label="Vérification d'identité"
-            value={kyc?.label}
+            label={t("profile.kyc")}
+            value={kyc ? t(kyc.key) : undefined}
             onPress={() => router.push("/kyc")}
           />
           <Divider />
           <MenuRow
             icon="airplane-outline"
-            label="Mes trajets"
+            label={t("profile.myTrips")}
             onPress={() => router.push("/my-trips")}
           />
           <Divider />
           <MenuRow
             icon="cube-outline"
-            label="Mes colis"
+            label={t("profile.myParcels")}
             onPress={() => router.replace("/(tabs)")}
           />
           <Divider />
           <MenuRow
             icon="notifications-outline"
-            label="Notifications"
+            label={t("profile.notifications")}
             onPress={() => router.push("/notifications")}
           />
           <Divider />
           <MenuRow
             icon="settings-outline"
-            label="Paramètres"
+            label={t("profile.settings")}
             onPress={() => router.push("/settings")}
           />
         </Card>
 
         <View className="mt-section-gap">
-          <Button label="Se déconnecter" variant="secondary" onPress={() => logout()} />
+          <Button label={t("common.logout")} variant="secondary" onPress={() => logout()} />
         </View>
       </ScrollView>
     </Screen>

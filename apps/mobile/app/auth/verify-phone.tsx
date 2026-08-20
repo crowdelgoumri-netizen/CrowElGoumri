@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../src/components/Button";
 import { Input } from "../../src/components/Input";
 import { Screen } from "../../src/components/Screen";
@@ -17,6 +18,7 @@ import * as authApi from "../../src/lib/auth";
 import { useAuth } from "../../src/store/auth";
 
 export default function VerifyPhoneScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ phone?: string }>();
   const setSession = useAuth((s) => s.setSession);
 
@@ -37,8 +39,8 @@ export default function VerifyPhoneScreen() {
       );
       router.replace("/(tabs)");
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Code invalide";
-      Alert.alert("Vérification impossible", msg);
+      const msg = e instanceof ApiError ? e.message : t("verify.errorFallback");
+      Alert.alert(t("verify.errorTitle"), msg);
     } finally {
       setLoading(false);
     }
@@ -48,23 +50,23 @@ export default function VerifyPhoneScreen() {
     <Screen>
       <View className="mt-xl">
         <Text className="text-text-primary font-heading text-screen-title font-bold">
-          Vérifiez votre téléphone
+          {t("verify.title")}
         </Text>
         <Text className="text-text-muted font-body text-base mt-1">
-          Entrez le code à 6 chiffres reçu par SMS.
+          {t("verify.subtitle")}
         </Text>
       </View>
 
       <View className="mt-xl gap-stack-gap">
         <Input
-          label="Téléphone (E.164)"
+          label={t("field.phone")}
           value={phone}
           onChangeText={setPhone}
           autoCapitalize="none"
           keyboardType="phone-pad"
         />
         <Input
-          label="Code (6 chiffres)"
+          label={t("field.code")}
           value={code}
           onChangeText={setCode}
           autoCapitalize="none"
@@ -75,11 +77,11 @@ export default function VerifyPhoneScreen() {
 
         {isDevOtpMode() ? (
           <Text className="text-text-muted font-body text-xs ml-1">
-            📱 Dev mode : utilisez le code 000000
+            {t("verify.devHint")}
           </Text>
         ) : null}
 
-        <Button label="Vérifier" onPress={submit} loading={loading} />
+        <Button label={t("verify.submit")} onPress={submit} loading={loading} />
       </View>
     </Screen>
   );

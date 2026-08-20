@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
@@ -21,7 +22,7 @@ import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { getDispute, openDispute, type Dispute } from "../../src/lib/disputes";
 import { ApiError } from "../../src/lib/api";
-import { DISPUTE_REASON_LABEL, DISPUTE_STATUS, formatDateTime } from "../../src/lib/format";
+import { DISPUTE_REASON_KEY, DISPUTE_STATUS, formatDateTime } from "../../src/lib/format";
 import type { DisputeReason } from "../../src/lib/types";
 
 const SHARED_REASONS: DisputeReason[] = [
@@ -33,15 +34,16 @@ const SHARED_REASONS: DisputeReason[] = [
   "OTHER",
 ];
 
-function reasonsFor(role: "sender" | "traveler"): SelectOption[] {
+function reasonsFor(role: "sender" | "traveler", t: (key: string) => string): SelectOption[] {
   const roleSpecific: DisputeReason = role === "sender" ? "TRAVELER_NO_SHOW" : "SENDER_NO_SHOW";
   return [...SHARED_REASONS, roleSpecific].map((value) => ({
     value,
-    label: DISPUTE_REASON_LABEL[value],
+    label: t(DISPUTE_REASON_KEY[value]),
   }));
 }
 
 export default function ReportScreen() {
+  const { t } = useTranslation();
   const { parcelId, role } = useLocalSearchParams<{
     parcelId: string;
     role: "sender" | "traveler";
@@ -54,18 +56,18 @@ export default function ReportScreen() {
 
   // Disputes are between the two parties — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Signaler un problème" />;
+    return <AuthWall headerTitle={t("parcelDetail.reportProblem")} />;
   }
 
   const existing = data?.dispute ?? null;
 
   async function submit() {
     if (!reason) {
-      Alert.alert("Champ manquant", "Choisissez un motif.");
+      Alert.alert(t("common.missingTitle"), t("report.errReason"));
       return;
     }
     if (!description.trim()) {
-      Alert.alert("Champ manquant", "Décrivez ce qui s'est passé.");
+      Alert.alert(t("common.missingTitle"), t("report.errDescription"));
       return;
     }
     setSubmitting(true);
@@ -73,16 +75,16 @@ export default function ReportScreen() {
       const { dispute } = await openDispute({ parcelId, reason, description });
       setData({ dispute });
       Alert.alert(
-        "Signalement envoyé",
-        "Merci. Notre équipe examine votre signalement. Pour les urgences, contactez le support.",
-        [{ text: "OK", onPress: () => router.back() }],
+        t("report.sentTitle"),
+        t("report.sentBody"),
+        [{ text: t("common.ok"), onPress: () => router.back() }],
       );
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
         const { dispute } = await getDispute(parcelId);
         setData({ dispute });
       } else {
-        Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+        Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
       }
     } finally {
       setSubmitting(false);
@@ -91,9 +93,9 @@ export default function ReportScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Signaler un problème" />
+      <ScreenHeader title={t("parcelDetail.reportProblem")} />
 
-      {loading ? <Text className="text-text-muted">Chargement…</Text> : null}
+      {loading ? <Text className="text-text-muted">{t("common.loading")}</Text> : null}
       {error ? <Text className="text-danger">{error}</Text> : null}
 
       {!loading && !error && existing ? (
@@ -103,21 +105,21 @@ export default function ReportScreen() {
       {!loading && !error && !existing ? (
         <View className="gap-stack-gap">
           <Select
-            label="Motif"
+            label={t("report.reason")}
             value={reason || null}
-            options={reasonsFor(role)}
+            options={reasonsFor(role, t)}
             onSelect={(v) => setReason(v as DisputeReason)}
-            placeholder="Choisir un motif"
+            placeholder={t("report.chooseReason")}
           />
           <Input
-            label="Détails"
+            label={t("report.details")}
             value={description}
             onChangeText={setDescription}
-            placeholder="Décrivez ce qui s'est passé…"
+            placeholder={t("report.detailsPlaceholder")}
             multiline
             className="h-28"
           />
-          <Button label="Envoyer le signalement" onPress={submit} loading={submitting} />
+          <Button label={t("report.submit")} onPress={submit} loading={submitting} />
         </View>
       ) : null}
     </Screen>
@@ -125,16 +127,17 @@ export default function ReportScreen() {
 }
 
 function DisputeReadOnly({ dispute }: { dispute: Dispute }) {
+  const { t } = useTranslation();
   const st = DISPUTE_STATUS[dispute.status];
   return (
     <Card className="gap-2">
-      <StatusPill label={st.label} tone={st.tone} />
+      <StatusPill label={t(st.key)} tone={st.tone} />
       <Text className="text-text-primary font-body font-semibold mt-1">
-        {DISPUTE_REASON_LABEL[dispute.reason]}
+        {t(DISPUTE_REASON_KEY[dispute.reason])}
       </Text>
       <Text className="text-text-muted font-body text-sm">{dispute.description}</Text>
       <Text className="text-text-muted/50 font-body text-xs mt-2">
-        Signalé le {formatDateTime(dispute.createdAt)}
+        {t("report.reportedOn", { date: formatDateTime(dispute.createdAt) })}
       </Text>
     </Card>
   );

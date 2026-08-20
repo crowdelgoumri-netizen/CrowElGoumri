@@ -20,6 +20,7 @@ import { View } from "react-native";
 import { StripeProvider } from "../src/lib/stripe-compat";
 import { useAuth } from "../src/store/auth";
 import { useTheme } from "../src/store/theme";
+import { useLang } from "../src/store/lang";
 import { ThemeProvider } from "../src/theme/ThemeProvider";
 import { useThemeColors } from "../src/hooks/useThemeColors";
 import { loadFonts } from "../src/lib/fonts";
@@ -76,13 +77,15 @@ export default function RootLayout() {
   const tokens = useAuth((s) => s.tokens);
   const initTheme = useTheme((s) => s.init);
   const themeHydrated = useTheme((s) => s.hydrated);
+  const initLang = useLang((s) => s.init);
   const [fontsReady, setFontsReady] = useState(false);
 
-  // Boot the auth + theme stores once.
+  // Boot the auth + theme + language stores once.
   useEffect(() => {
     initAuth();
     initTheme();
-  }, [initAuth, initTheme]);
+    initLang();
+  }, [initAuth, initTheme, initLang]);
 
   // Load fonts once (idempotent).
   useEffect(() => {

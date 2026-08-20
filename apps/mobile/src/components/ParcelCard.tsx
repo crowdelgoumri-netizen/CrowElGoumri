@@ -4,10 +4,11 @@
  */
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Card } from "./Card";
 import { StatusPill } from "./StatusPill";
 import {
-  CATEGORY_LABEL,
+  CATEGORY_KEY,
   cityOf,
   eur,
   PARCEL_STATUS,
@@ -23,14 +24,15 @@ interface ParcelCardProps {
 
 export function ParcelCard({ parcel, onPress }: ParcelCardProps) {
   const colors = useThemeColors();
-  const st = PARCEL_STATUS[parcel.status] ?? { label: parcel.status, tone: "muted" as const };
-  const cat = CATEGORY_LABEL[parcel.category as ParcelCategory] ?? parcel.category;
+  const { t } = useTranslation();
+  const st = PARCEL_STATUS[parcel.status] ?? { key: parcel.status, tone: "muted" as const };
+  const cat = t(CATEGORY_KEY[parcel.category as ParcelCategory] ?? parcel.category);
 
   return (
     <Pressable onPress={() => onPress?.(parcel)} className="active:opacity-80">
       <Card className="gap-stack-gap">
         <View className="flex-row items-center justify-between">
-          <StatusPill label={st.label} tone={st.tone} />
+          <StatusPill label={t(st.key)} tone={st.tone} />
           <Text className="text-text-muted text-xs font-mono font-medium">{cat}</Text>
         </View>
 

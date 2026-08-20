@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { Alert, Pressable, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../src/components/Button";
 import { Input } from "../../src/components/Input";
 import { Screen } from "../../src/components/Screen";
@@ -16,6 +17,7 @@ import * as authApi from "../../src/lib/auth";
 import { useAuth } from "../../src/store/auth";
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const setSession = useAuth((s) => s.setSession);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,9 +45,9 @@ export default function LoginScreen() {
         router.replace({ pathname: "/auth/verify-phone", params: phone ? { phone } : {} });
         return;
       }
-      const msg = e instanceof Error ? e.message : "Login failed";
+      const msg = e instanceof Error ? e.message : t("login.errorFallback");
       setError(msg);
-      Alert.alert("Connexion impossible", msg);
+      Alert.alert(t("login.errorTitle"), msg);
     } finally {
       setLoading(false);
     }
@@ -55,16 +57,16 @@ export default function LoginScreen() {
     <Screen>
       <View className="mt-xl">
         <Text className="text-text-primary font-heading text-screen-title font-bold">
-          Bonjour 👋
+          {t("login.title")}
         </Text>
         <Text className="text-text-muted font-body text-base mt-1">
-          Connectez-vous pour envoyer ou transporter.
+          {t("login.subtitle")}
         </Text>
       </View>
 
       <View className="mt-xl gap-stack-gap">
         <Input
-          label="Adresse e-mail"
+          label={t("field.email")}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -73,20 +75,20 @@ export default function LoginScreen() {
           textContentType="emailAddress"
         />
         <Input
-          label="Mot de passe"
+          label={t("field.password")}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           textContentType="password"
           error={error}
         />
-        <Button label="Se connecter" onPress={submit} loading={loading} />
+        <Button label={t("common.login")} onPress={submit} loading={loading} />
       </View>
 
       <View className="mt-section-gap flex-row justify-center gap-1">
-        <Text className="text-text-muted font-body">Pas encore de compte ?</Text>
+        <Text className="text-text-muted font-body">{t("login.noAccount")}</Text>
         <Link href="/auth/signup" className="text-accent font-body font-semibold">
-          Créer un compte
+          {t("common.signup")}
         </Link>
       </View>
 
@@ -96,7 +98,7 @@ export default function LoginScreen() {
         className="mt-stack-gap items-center py-sm"
       >
         <Text className="text-text-secondary font-body text-sm">
-          Explorer sans compte
+          {t("login.explore")}
         </Text>
       </Pressable>
     </Screen>

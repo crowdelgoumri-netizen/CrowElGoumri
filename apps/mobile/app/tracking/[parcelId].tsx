@@ -9,6 +9,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
@@ -30,17 +31,18 @@ const CK_ICON: Record<CheckpointType, keyof typeof Ionicons.glyphMap> = {
   ARRIVAL: "flag",
   DELIVERY: "checkmark-done",
 };
-const CK_LABEL: Record<CheckpointType, string> = {
-  DEPARTURE: "Départ",
-  PICKUP: "Ramassage",
-  TRANSIT: "En transit",
-  CUSTOMS: "Douane",
-  ARRIVAL: "Arrivée",
-  DELIVERY: "Livré",
+const CK_KEY: Record<CheckpointType, string> = {
+  DEPARTURE: "tracking.ckDeparture",
+  PICKUP: "tracking.ckPickup",
+  TRANSIT: "tracking.ckTransit",
+  CUSTOMS: "tracking.ckCustoms",
+  ARRIVAL: "tracking.ckArrival",
+  DELIVERY: "tracking.ckDelivery",
 };
 
 export default function TrackingScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const { parcelId } = useLocalSearchParams<{ parcelId: string }>();
   const tokens = useAuth((s) => s.tokens);
   const parcelReq = useAsync(() => getParcel(parcelId), [parcelId]);
@@ -55,13 +57,13 @@ export default function TrackingScreen() {
 
   // Checkpoints are party-only — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Suivi" />;
+    return <AuthWall headerTitle={t("tracking.title")} />;
   }
 
   if (parcelReq.loading && !parcel) {
     return (
       <Screen scroll={false}>
-        <ScreenHeader title="Suivi" />
+        <ScreenHeader title={t("tracking.title")} />
         <ActivityIndicator color={colors.accent} />
       </Screen>
     );
@@ -69,29 +71,29 @@ export default function TrackingScreen() {
   if (parcelReq.error || !parcel) {
     return (
       <Screen scroll={false}>
-        <ScreenHeader title="Suivi" />
-        <Text className="text-danger">{parcelReq.error ?? "Colis introuvable."}</Text>
+        <ScreenHeader title={t("tracking.title")} />
+        <Text className="text-danger">{parcelReq.error ?? t("parcelDetail.notFound")}</Text>
         <View className="mt-section-gap">
-          <Button label="Réessayer" variant="secondary" onPress={parcelReq.refresh} />
+          <Button label={t("common.retry")} variant="secondary" onPress={parcelReq.refresh} />
         </View>
       </Screen>
     );
   }
 
-  const st = PARCEL_STATUS[parcel.status] ?? { label: parcel.status, tone: "muted" as const };
+  const st = PARCEL_STATUS[parcel.status] ?? { key: parcel.status, tone: "muted" as const };
 
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-xl">
         <ScreenHeader
-          title="Suivi du colis"
+          title={t("tracking.fullTitle")}
           subtitle={`${cityOf(parcel.pickupAddress)} → ${cityOf(parcel.deliveryAddress)}`}
         />
-        <StatusPill label={st.label} tone={st.tone} />
+        <StatusPill label={t(st.key)} tone={st.tone} />
 
         {parcel.deliveredAt ? (
           <Card className="mt-section-gap bg-success/10 border-success/30">
-            <Text className="text-success font-heading font-bold">Livré ✓</Text>
+            <Text className="text-success font-heading font-bold">{t("tracking.delivered")}</Text>
             <Text className="text-text-secondary font-body text-xs mt-1">
               {formatDateTime(parcel.deliveredAt)}
             </Text>
@@ -99,14 +101,13 @@ export default function TrackingScreen() {
         ) : null}
 
         <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">
-          Chronologie
+          {t("tracking.timeline")}
         </Text>
 
         {checkpoints.length === 0 && !ckReq.loading ? (
           <Card>
             <Text className="text-text-muted font-body text-sm">
-              Aucun point de suivi pour l'instant. Le voyageur mettra à jour le
-              statut au fil du trajet.
+              {t("tracking.empty")}
             </Text>
           </Card>
         ) : null}
@@ -122,7 +123,7 @@ export default function TrackingScreen() {
 
         <View className="mt-section-gap">
           <Button
-            label="Discuter avec le voyageur"
+            label={t("tracking.chatTraveler")}
             variant="secondary"
             onPress={() => router.push(`/chat/${parcel.id}`)}
           />
@@ -134,6 +135,7 @@ export default function TrackingScreen() {
 
 function TimelineRow({ ck, last }: { ck: Checkpoint; last: boolean }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const icon = CK_ICON[ck.type] ?? "ellipse";
   return (
     <View className="flex-row">
@@ -145,7 +147,7 @@ function TimelineRow({ ck, last }: { ck: Checkpoint; last: boolean }) {
       </View>
       <View className="flex-1 pb-stack-gap">
         <Text className="text-text-primary font-body font-semibold">
-          {CK_LABEL[ck.type] ?? ck.type}
+          {t(CK_KEY[ck.type] ?? ck.type)}
         </Text>
         <Text className="text-text-muted text-xs font-body">
           {formatDateTime(ck.createdAt)}

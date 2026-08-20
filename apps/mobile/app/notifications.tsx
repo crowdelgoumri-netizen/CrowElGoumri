@@ -7,6 +7,7 @@
  */
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { EmptyState } from "../src/components/EmptyState";
@@ -32,6 +33,7 @@ const ICON_FOR: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 export default function NotificationsScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh, setData } = useAsync(
     () =>
@@ -44,7 +46,7 @@ export default function NotificationsScreen() {
 
   // Notifications are per-account — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Notifications" />;
+    return <AuthWall headerTitle={t("notifications.title")} />;
   }
 
   async function markAllRead() {
@@ -67,11 +69,11 @@ export default function NotificationsScreen() {
   return (
     <Screen>
       <ScreenHeader
-        title="Notifications"
+        title={t("notifications.title")}
         right={
           data && data.unreadCount > 0 ? (
             <Pressable onPress={markAllRead} className="px-2 py-1">
-              <Text className="text-accent font-body text-sm font-semibold">Tout lu</Text>
+              <Text className="text-accent font-body text-sm font-semibold">{t("notifications.markAllRead")}</Text>
             </Pressable>
           ) : undefined
         }
@@ -79,7 +81,7 @@ export default function NotificationsScreen() {
 
       {data && data.unreadCount > 0 ? (
         <Text className="text-text-muted font-body text-xs mb-2">
-          {data.unreadCount} non lue{data.unreadCount > 1 ? "s" : ""}
+          {t("notifications.unread", { count: data.unreadCount })}
         </Text>
       ) : null}
 
@@ -92,16 +94,16 @@ export default function NotificationsScreen() {
           loading ? null : error ? (
             <EmptyState
               icon="cloud-offline-outline"
-              title="Connexion impossible"
+              title={t("common.errorTitle")}
               subtitle={error}
-              ctaLabel="Réessayer"
+              ctaLabel={t("common.retry")}
               onCta={refresh}
             />
           ) : (
             <EmptyState
               icon="notifications-off-outline"
-              title="Aucune notification"
-              subtitle="Vos matchs, paiements et messages importants apparaîtront ici."
+              title={t("notifications.emptyTitle")}
+              subtitle={t("notifications.emptySubtitle")}
             />
           )
         }

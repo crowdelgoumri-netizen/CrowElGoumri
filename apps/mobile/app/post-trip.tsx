@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { router } from "expo-router";
 import { Alert, KeyboardAvoidingView, Platform, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Input } from "../src/components/Input";
@@ -18,16 +19,17 @@ import { AuthWall } from "../src/components/AuthWall";
 import { useAuth } from "../src/store/auth";
 import { createTrip, type CreateTripInput } from "../src/lib/trips";
 import { ApiError } from "../src/lib/api";
-import { MODE_LABEL } from "../src/lib/format";
+import { MODE_KEY } from "../src/lib/format";
 import { ORIGIN_COUNTRIES, WILAYAS_1_58 } from "../src/config/corridors";
 import type { TransportMode } from "../src/lib/types";
 
 const COUNTRIES = ORIGIN_COUNTRIES.map((c) => ({ value: c.code, label: c.name }));
-const MODES = Object.entries(MODE_LABEL).map(([value, label]) => ({ value, label }));
 
 export default function PostTripScreen() {
+  const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const [submitting, setSubmitting] = useState(false);
+  const modes = Object.entries(MODE_KEY).map(([value, key]) => ({ value, label: t(key) }));
 
   const [originCountry, setOriginCountry] = useState("FR");
   const [originCity, setOriginCity] = useState("Paris");
@@ -44,30 +46,30 @@ export default function PostTripScreen() {
 
   // Publishing requires an account — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Proposer un trajet" />;
+    return <AuthWall headerTitle={t("postTrip.title")} />;
   }
 
   async function submit() {
     if (!originCity || !destinationWilaya) {
-      Alert.alert("Champ manquant", "Itinéraire incomplet.");
+      Alert.alert(t("common.missingTitle"), t("postTrip.errItinerary"));
       return;
     }
     if (!date || !time) {
-      Alert.alert("Champ manquant", "Date et heure de départ requises.");
+      Alert.alert(t("common.missingTitle"), t("postTrip.errDateTime"));
       return;
     }
     if (!parseFloat(maxWeightKg)) {
-      Alert.alert("Champ manquant", "Capacité (kg) requise.");
+      Alert.alert(t("common.missingTitle"), t("postTrip.errCapacity"));
       return;
     }
 
     const departure = new Date(`${date}T${time}:00`);
     if (isNaN(departure.getTime())) {
-      Alert.alert("Date invalide", "Format attendu : AAAA-MM-JJ et HH:MM.");
+      Alert.alert(t("postTrip.invalidDateTitle"), t("postTrip.errDateFormat"));
       return;
     }
     if (departure <= new Date()) {
-      Alert.alert("Date invalide", "Le départ doit être dans le futur.");
+      Alert.alert(t("postTrip.invalidDateTitle"), t("postTrip.errDateFuture"));
       return;
     }
 
@@ -98,8 +100,8 @@ export default function PostTripScreen() {
       router.replace(`/trip/${trip.id}`);
     } catch (e) {
       Alert.alert(
-        "Publication impossible",
-        e instanceof ApiError ? e.message : "Réessayez plus tard.",
+        t("common.publishError"),
+        e instanceof ApiError ? e.message : t("common.retryLater"),
       );
     } finally {
       setSubmitting(false);
@@ -109,41 +111,41 @@ export default function PostTripScreen() {
   return (
     <Screen>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScreenHeader title="Proposer un trajet" />
+        <ScreenHeader title={t("postTrip.title")} />
 
         <View className="gap-stack-gap">
-          <Text className="font-mono text-meta text-text-secondary ml-1">Départ (Europe)</Text>
-          <Select label="Pays d'origine" value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
-          <Select label="Ville de départ" value={originCity} options={cities} onSelect={setOriginCity} placeholder="Choisir une ville" />
+          <Text className="font-mono text-meta text-text-secondary ml-1">{t("route.departure")}</Text>
+          <Select label={t("route.originCountry")} value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
+          <Select label={t("route.originCity")} value={originCity} options={cities} onSelect={setOriginCity} placeholder={t("route.chooseCity")} />
 
-          <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">Arrivée (Algérie)</Text>
-          <Select label="Wilaya d'arrivée" value={destinationWilaya} options={WILAYAS_1_58} onSelect={setDestinationWilaya} />
-
-          <View className="flex-row gap-stack-gap">
-            <View className="flex-1">
-              <Input label="Date (AAAA-MM-JJ)" value={date} onChangeText={setDate} placeholder="2026-09-01" />
-            </View>
-            <View className="flex-1">
-              <Input label="Heure (HH:MM)" value={time} onChangeText={setTime} placeholder="14:30" />
-            </View>
-          </View>
-
-          <Select label="Mode de transport" value={mode} options={MODES} onSelect={(v) => setMode(v as TransportMode)} />
+          <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">{t("route.arrival")}</Text>
+          <Select label={t("route.arrivalWilaya")} value={destinationWilaya} options={WILAYAS_1_58} onSelect={setDestinationWilaya} />
 
           <View className="flex-row gap-stack-gap">
             <View className="flex-1">
-              <Input label="Capacité (kg)" value={maxWeightKg} onChangeText={setMaxWeightKg} keyboardType="numeric" placeholder="20" />
+              <Input label={t("postTrip.date")} value={date} onChangeText={setDate} placeholder="2026-09-01" />
             </View>
             <View className="flex-1">
-              <Input label="Prix/kg (€)" value={pricePerKg} onChangeText={setPricePerKg} keyboardType="numeric" placeholder="8" />
+              <Input label={t("postTrip.time")} value={time} onChangeText={setTime} placeholder="14:30" />
             </View>
           </View>
 
-          <Input label="Distance estimée (km)" value={distanceKm} onChangeText={setDistanceKm} keyboardType="numeric" placeholder="1500" />
-          <Input label="Notes (optionnel)" value={notes} onChangeText={setNotes} placeholder="Climatisé, accepts fragile…" multiline className="h-20" />
+          <Select label={t("postTrip.transportMode")} value={mode} options={modes} onSelect={(v) => setMode(v as TransportMode)} />
+
+          <View className="flex-row gap-stack-gap">
+            <View className="flex-1">
+              <Input label={t("postTrip.capacity")} value={maxWeightKg} onChangeText={setMaxWeightKg} keyboardType="numeric" placeholder="20" />
+            </View>
+            <View className="flex-1">
+              <Input label={t("postTrip.pricePerKg")} value={pricePerKg} onChangeText={setPricePerKg} keyboardType="numeric" placeholder="8" />
+            </View>
+          </View>
+
+          <Input label={t("postTrip.distance")} value={distanceKm} onChangeText={setDistanceKm} keyboardType="numeric" placeholder="1500" />
+          <Input label={t("postTrip.notes")} value={notes} onChangeText={setNotes} placeholder={t("postTrip.notesPlaceholder")} multiline className="h-20" />
 
           <View className="mt-section-gap">
-            <Button label="Publier le trajet" onPress={submit} loading={submitting} />
+            <Button label={t("postTrip.publish")} onPress={submit} loading={submitting} />
           </View>
         </View>
       </KeyboardAvoidingView>

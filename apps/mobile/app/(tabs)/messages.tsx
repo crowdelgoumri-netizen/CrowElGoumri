@@ -7,6 +7,7 @@
  */
 import { router } from "expo-router";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { Avatar } from "../../src/components/Avatar";
 import { EmptyState } from "../../src/components/EmptyState";
@@ -19,6 +20,7 @@ import { PARCEL_STATUS, timeAgo } from "../../src/lib/format";
 
 export default function MessagesScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const { data, loading, error, refresh } = useAsync(
     () =>
@@ -33,8 +35,8 @@ export default function MessagesScreen() {
   if (!tokens) {
     return (
       <AuthWall
-        title="Vos messages"
-        subtitle="Connectez-vous pour discuter avec vos voyageurs et expéditeurs."
+        title={t("messages.guestTitle")}
+        subtitle={t("messages.guestSubtitle")}
       />
     );
   }
@@ -42,7 +44,7 @@ export default function MessagesScreen() {
   return (
     <Screen>
       <Text className="text-text-primary font-heading text-screen-title font-bold mt-md">
-        Messages
+        {t("messages.title")}
       </Text>
 
       <FlatList
@@ -57,16 +59,16 @@ export default function MessagesScreen() {
           loading ? null : error ? (
             <EmptyState
               icon="cloud-offline-outline"
-              title="Connexion impossible"
+              title={t("common.errorTitle")}
               subtitle={error}
-              ctaLabel="Réessayer"
+              ctaLabel={t("common.retry")}
               onCta={refresh}
             />
           ) : (
             <EmptyState
               icon="chatbubbles-outline"
-              title="Aucun message"
-              subtitle="Vos conversations avec les voyageurs et expéditeurs apparaîtront ici, dès qu'un match est accepté."
+              title={t("messages.emptyTitle")}
+              subtitle={t("messages.emptySubtitle")}
             />
           )
         }
@@ -79,6 +81,7 @@ export default function MessagesScreen() {
 }
 
 function ThreadRow({ thread }: { thread: ChatThread }) {
+  const { t } = useTranslation();
   const st = PARCEL_STATUS[thread.status];
   return (
     <Pressable
@@ -96,7 +99,8 @@ function ThreadRow({ thread }: { thread: ChatThread }) {
           </Text>
         </View>
         <Text className="text-text-secondary font-body text-sm" numberOfLines={1}>
-          {thread.lastMessage?.body ?? "Nouvelle conversation · " + (st?.label ?? thread.status)}
+          {thread.lastMessage?.body ??
+            t("messages.newThread") + " · " + (st ? t(st.key) : thread.status)}
         </Text>
         <Text className="text-text-muted/50 text-xs font-body mt-0.5" numberOfLines={1}>
           {thread.description}

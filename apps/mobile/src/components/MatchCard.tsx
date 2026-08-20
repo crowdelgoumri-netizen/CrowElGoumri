@@ -5,6 +5,7 @@
  */
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Card } from "./Card";
 import { eur, formatDate } from "../lib/format";
 import { useThemeColors } from "../hooks/useThemeColors";
@@ -19,6 +20,7 @@ interface MatchCardProps {
 
 export function MatchCard({ match, index = 0, ctaLabel, onPress }: MatchCardProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const score = Math.round(match.score ?? 0);
   const reasons = (match.reasons ?? []).slice(0, 3);
   const isBest = index === 0;
@@ -36,18 +38,18 @@ export function MatchCard({ match, index = 0, ctaLabel, onPress }: MatchCardProp
             </View>
             <View>
               <Text className="text-oncard font-body font-semibold">
-                Voyageur #{match.travelerId.slice(-5)}
+                {t("matchCard.travelerRef", { id: match.travelerId.slice(-5) })}
               </Text>
               {match.estimatedArrival ? (
                 <Text className="text-text-muted text-xs font-body">
-                  Arrivée {formatDate(match.estimatedArrival)}
+                  {t("matchCard.arrival", { date: formatDate(match.estimatedArrival) })}
                 </Text>
               ) : null}
             </View>
           </View>
           {isBest ? (
             <View className="rounded-chip bg-success/20 px-2 py-0.5">
-              <Text className="text-success text-xs font-mono font-semibold">BEST MATCH</Text>
+              <Text className="text-success text-xs font-mono font-semibold">{t("matchCard.bestMatch")}</Text>
             </View>
           ) : null}
         </View>

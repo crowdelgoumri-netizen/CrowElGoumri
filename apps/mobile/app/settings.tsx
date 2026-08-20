@@ -1,11 +1,9 @@
 /**
  * Settings (board 18) — account preferences + danger zone.
  *
- * Push notification toggle, help/guide (onboarding), and logout.
- * i18n is wired (this screen is migrated via useTranslation); the language
- * selector lands once broader coverage exists (no fake button — see
- * docs/superpowers/specs/2026-08-11-settings-push-toggle-design.md). Payment
- * methods still need a saved-card API.
+ * Push notification toggle, help/guide (onboarding), appearance (theme mode)
+ * + language selectors, and logout. Payment methods still need a saved-card
+ * API.
  */
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
@@ -18,15 +16,10 @@ import { Button } from "../src/components/Button";
 import { AuthWall } from "../src/components/AuthWall";
 import { useAuth } from "../src/store/auth";
 import { useTheme, type ThemeMode } from "../src/store/theme";
+import { useLang, type Lang } from "../src/store/lang";
 import { useThemeColors } from "../src/hooks/useThemeColors";
 import { isPushEnabled, registerForPush, setPushEnabled } from "../src/lib/push";
 import { useTranslation } from "react-i18next";
-
-const MODE_OPTIONS: { value: ThemeMode; label: string }[] = [
-  { value: "system", label: "Système" },
-  { value: "dark", label: "Sombre" },
-  { value: "bright", label: "Clair" },
-];
 
 export default function SettingsScreen() {
   const colors = useThemeColors();
@@ -34,7 +27,19 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const themeMode = useTheme((s) => s.mode);
   const setThemeMode = useTheme((s) => s.setMode);
+  const lang = useLang((s) => s.lang);
+  const setLang = useLang((s) => s.setLang);
   const [pushOn, setPushOn] = useState(true);
+  const modeOptions: { value: ThemeMode; label: string }[] = [
+    { value: "system", label: t("settings.themeSystem") },
+    { value: "dark", label: t("settings.themeDark") },
+    { value: "bright", label: t("settings.themeBright") },
+  ];
+  // Native names — each language shown in itself (iOS convention).
+  const langOptions: { value: Lang; label: string }[] = [
+    { value: "fr", label: "Français" },
+    { value: "en", label: "English" },
+  ];
 
   useEffect(() => {
     isPushEnabled().then(setPushOn);
@@ -42,7 +47,7 @@ export default function SettingsScreen() {
 
   // Settings manage an account — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Paramètres" />;
+    return <AuthWall headerTitle={t("settings.title")} />;
   }
 
   async function onTogglePush(next: boolean) {
@@ -80,9 +85,9 @@ export default function SettingsScreen() {
         <PressableRow icon="help-circle-outline" label={t("settings.howItWorks")} onPress={() => router.push("/onboarding")} />
       </Card>
 
-      <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">Apparence</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">{t("settings.appearance")}</Text>
       <View className="flex-row bg-glass rounded-chip p-1 gap-1">
-        {MODE_OPTIONS.map((opt) => (
+        {modeOptions.map((opt) => (
           <Pressable
             key={opt.value}
             onPress={() => setThemeMode(opt.value)}
@@ -103,6 +108,29 @@ export default function SettingsScreen() {
         ))}
       </View>
 
+      <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">{t("settings.language")}</Text>
+      <View className="flex-row bg-glass rounded-chip p-1 gap-1">
+        {langOptions.map((opt) => (
+          <Pressable
+            key={opt.value}
+            onPress={() => setLang(opt.value)}
+            className={
+              "flex-1 items-center py-2.5 rounded-chip " +
+              (lang === opt.value ? "bg-accent" : "bg-transparent")
+            }
+          >
+            <Text
+              className={
+                "font-body font-semibold text-sm " +
+                (lang === opt.value ? "text-accent-on" : "text-text-muted")
+              }
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
       <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">{t("settings.about")}</Text>
       <Card>
         <Text className="text-text-primary font-heading font-bold">{t("settings.appName")}</Text>
@@ -112,7 +140,7 @@ export default function SettingsScreen() {
       </Card>
 
       <View className="mt-section-gap">
-        <Button label={t("settings.logout")} variant="secondary" onPress={() => logout()} />
+        <Button label={t("common.logout")} variant="secondary" onPress={() => logout()} />
       </View>
     </Screen>
   );

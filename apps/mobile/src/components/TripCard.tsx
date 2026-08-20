@@ -8,9 +8,10 @@
  */
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Card } from "./Card";
 import { Avatar } from "./Avatar";
-import { cityOf, eur, formatDateTime, MODE_ICON, MODE_LABEL } from "../lib/format";
+import { cityOf, eur, formatDateTime, MODE_ICON, MODE_KEY } from "../lib/format";
 import { useThemeColors } from "../hooks/useThemeColors";
 import type { Trip } from "../lib/trips";
 import type { TransportMode } from "../lib/types";
@@ -22,6 +23,7 @@ interface TripCardProps {
 
 export function TripCard({ trip, onPress }: TripCardProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const remaining = Math.max(0, trip.maxWeightKg - (trip.currentWeightKg ?? 0));
   const icon = MODE_ICON[trip.mode as TransportMode] ?? "navigate";
 
@@ -33,10 +35,10 @@ export function TripCard({ trip, onPress }: TripCardProps) {
           <Avatar name={trip.traveler?.firstName} size="sm" />
           <View className="flex-1">
             <Text className="text-oncard font-body text-[15px] font-semibold" numberOfLines={1}>
-              {trip.traveler?.firstName ?? "Voyageur"}
+              {trip.traveler?.firstName ?? t("tripCard.traveler")}
             </Text>
             <Text className="text-text-secondary font-mono text-meta font-medium uppercase">
-              {trip.traveler?.averageRating ?? "—"} · {(trip.traveler?.completedTrips ?? 0)} trajets
+              {trip.traveler?.averageRating ?? "—"} · {t("tripCard.trips", { n: trip.traveler?.completedTrips ?? 0 })}
             </Text>
           </View>
           <View className="flex-row items-center gap-1 rounded-chip bg-accent/15 px-2 py-0.5">
@@ -54,7 +56,7 @@ export function TripCard({ trip, onPress }: TripCardProps) {
             {cityOf(trip.origin)} → {cityOf(trip.destination)}
           </Text>
           <Text className="text-text-muted text-xs font-body">
-            {MODE_LABEL[trip.mode as TransportMode] ?? trip.mode}
+            {t(MODE_KEY[trip.mode as TransportMode] ?? trip.mode)}
           </Text>
         </View>
 
@@ -66,7 +68,7 @@ export function TripCard({ trip, onPress }: TripCardProps) {
           {trip.pricePerKg != null ? (
             <Text className="font-heading font-bold text-numeral">
               <Text className="text-accent">{eur(trip.pricePerKg)}</Text>
-              <Text className="text-text-muted text-xs font-body">/kg</Text>
+              <Text className="text-text-muted text-xs font-body">{t("tripCard.perKg")}</Text>
             </Text>
           ) : null}
         </View>

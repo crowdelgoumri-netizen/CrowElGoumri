@@ -9,6 +9,7 @@ import { useState } from "react";
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { Button } from "../src/components/Button";
 import { useThemeColors } from "../src/hooks/useThemeColors";
@@ -16,23 +17,24 @@ import { useThemeColors } from "../src/hooks/useThemeColors";
 const STEPS = [
   {
     icon: "cube-outline" as const,
-    title: "Envoyez votre colis",
-    body: "Décrivez ce que vous voulez envoyer, l'origine en Europe et la wilaya de destination. Fixez votre prix ou laissez les voyageurs proposer.",
+    titleKey: "onboarding.step1Title",
+    bodyKey: "onboarding.step1Body",
   },
   {
     icon: "people-outline" as const,
-    title: "Trouvez un voyageur",
-    body: "Notre moteur classe les voyageurs de confiance pour votre corridor. Dès qu'un voyageur accepte, vous êtes notifié.",
+    titleKey: "onboarding.step2Title",
+    bodyKey: "onboarding.step2Body",
   },
   {
     icon: "shield-checkmark-outline" as const,
-    title: "Payez en toute sécurité",
-    body: "Le paiement est bloqué en escrow et libéré au voyageur à la livraison, confirmée par un code à 6 chiffres.",
+    titleKey: "onboarding.step3Title",
+    bodyKey: "onboarding.step3Body",
   },
 ];
 
 export default function OnboardingScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [i, setI] = useState(0);
   const step = STEPS[i];
   const last = i === STEPS.length - 1;
@@ -45,10 +47,10 @@ export default function OnboardingScreen() {
             <Ionicons name={step.icon} size={44} color={colors.accent} />
           </View>
           <Text className="text-text-primary font-heading text-2xl font-bold text-center">
-            {step.title}
+            {t(step.titleKey)}
           </Text>
           <Text className="text-text-muted font-body text-base text-center mt-2 max-w-[300px]">
-            {step.body}
+            {t(step.bodyKey)}
           </Text>
         </View>
 
@@ -68,20 +70,20 @@ export default function OnboardingScreen() {
       <View className="flex-row gap-stack-gap">
         {i > 0 ? (
           <View className="flex-1">
-            <Button label="Précédent" variant="secondary" onPress={() => setI((x) => x - 1)} />
+            <Button label={t("onboarding.prev")} variant="secondary" onPress={() => setI((x) => x - 1)} />
           </View>
         ) : null}
         <View className="flex-1">
           {last ? (
-            <Button label="Commencer" onPress={() => router.replace("/(tabs)")} />
+            <Button label={t("onboarding.start")} onPress={() => router.replace("/(tabs)")} />
           ) : (
-            <Button label="Suivant" onPress={() => setI((x) => x + 1)} />
+            <Button label={t("onboarding.next")} onPress={() => setI((x) => x + 1)} />
           )}
         </View>
       </View>
 
       <Pressable onPress={() => router.back()} className="items-center mt-section-gap">
-        <Text className="text-text-muted font-body text-sm">Passer</Text>
+        <Text className="text-text-muted font-body text-sm">{t("onboarding.skip")}</Text>
       </Pressable>
     </Screen>
   );

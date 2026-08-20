@@ -13,6 +13,7 @@ import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Card } from "../../src/components/Card";
@@ -36,7 +37,7 @@ import {
   eur,
   formatDate,
   MODE_ICON,
-  MODE_LABEL,
+  MODE_KEY,
   PARCEL_STATUS,
   TRIP_STATUS,
 } from "../../src/lib/format";
@@ -44,6 +45,7 @@ import type { TransportMode } from "../../src/lib/types";
 
 export default function TripDetailScreen() {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user);
   const { data, loading, error, refresh } = useAsync(() => getTrip(id), [id]);
@@ -54,18 +56,18 @@ export default function TripDetailScreen() {
   if (loading && !trip) {
     return (
       <Screen scroll={false}>
-        <ScreenHeader title="Trajet" />
-        <Text className="text-text-muted">Chargement…</Text>
+        <ScreenHeader title={t("tripDetail.title")} />
+        <Text className="text-text-muted">{t("common.loading")}</Text>
       </Screen>
     );
   }
   if (error || !trip) {
     return (
       <Screen scroll={false}>
-        <ScreenHeader title="Trajet" />
-        <Text className="text-danger">{error ?? "Trajet introuvable."}</Text>
+        <ScreenHeader title={t("tripDetail.title")} />
+        <Text className="text-danger">{error ?? t("tripDetail.notFound")}</Text>
         <View className="mt-section-gap">
-          <Button label="Réessayer" variant="secondary" onPress={refresh} />
+          <Button label={t("common.retry")} variant="secondary" onPress={refresh} />
         </View>
       </Screen>
     );
@@ -77,8 +79,8 @@ export default function TripDetailScreen() {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-xl">
-        <ScreenHeader title="Trajet" subtitle={`${cityOf(trip.origin)} → ${cityOf(trip.destination)}`} />
-        <StatusPill label={st.label} tone={st.tone} />
+        <ScreenHeader title={t("tripDetail.title")} subtitle={`${cityOf(trip.origin)} → ${cityOf(trip.destination)}`} />
+        <StatusPill label={t(st.key)} tone={st.tone} />
 
         {/* Trip info */}
         <Card className="mt-section-gap gap-2">
@@ -88,11 +90,11 @@ export default function TripDetailScreen() {
               {cityOf(trip.origin)} → {cityOf(trip.destination)}
             </Text>
           </View>
-          <Row k="Départ" v={formatDate(trip.departureTime)} />
-          <Row k="Mode" v={MODE_LABEL[trip.mode as TransportMode] ?? trip.mode} />
-          <Row k="Capacité restante" v={`${remaining.toFixed(1)} / ${trip.maxWeightKg} kg`} />
-          {trip.pricePerKg != null ? <Row k="Prix" v={`${eur(trip.pricePerKg)}/kg`} /> : null}
-          {trip.notes ? <Row k="Notes" v={trip.notes} /> : null}
+          <Row k={t("tripDetail.departure")} v={formatDate(trip.departureTime)} />
+          <Row k={t("tripDetail.mode")} v={t(MODE_KEY[trip.mode as TransportMode] ?? trip.mode)} />
+          <Row k={t("tripDetail.capacityLeft")} v={`${remaining.toFixed(1)} / ${trip.maxWeightKg} kg`} />
+          {trip.pricePerKg != null ? <Row k={t("tripDetail.price")} v={`${eur(trip.pricePerKg)}${t("tripCard.perKg")}`} /> : null}
+          {trip.notes ? <Row k={t("tripDetail.notes")} v={trip.notes} /> : null}
         </Card>
 
         {/* Traveler */}
@@ -104,7 +106,7 @@ export default function TripDetailScreen() {
                 {trip.traveler?.firstName} {trip.traveler?.lastName ?? ""}
               </Text>
               <Text className="text-text-muted text-xs font-body">
-                {trip.traveler?.completedTrips ?? 0} trajets · {trip.traveler?.trustBadge ?? "—"}
+                {t("tripCard.trips", { n: trip.traveler?.completedTrips ?? 0 })} · {trip.traveler?.trustBadge ?? "—"}
               </Text>
             </View>
           </View>
@@ -114,7 +116,7 @@ export default function TripDetailScreen() {
         {trip.parcels && trip.parcels.length > 0 ? (
           <View className="mt-section-gap">
             <Text className="font-mono text-meta uppercase text-text-secondary mb-2">
-              Colis transportés ({trip.parcels.length})
+              {t("tripDetail.carriedParcels", { n: trip.parcels.length })}
             </Text>
             {trip.parcels.map((p) => {
               const ps = PARCEL_STATUS[p.status];
@@ -130,7 +132,7 @@ export default function TripDetailScreen() {
                     </Text>
                     <Text className="text-text-muted text-xs font-body">{p.weightKg} kg</Text>
                   </View>
-                  {ps ? <StatusPill label={ps.label} tone={ps.tone} /> : null}
+                  {ps ? <StatusPill label={t(ps.key)} tone={ps.tone} /> : null}
                 </Pressable>
               );
             })}
@@ -153,6 +155,7 @@ export default function TripDetailScreen() {
 }
 
 function TravelerMatches({ tripId, onAccepted }: { tripId: string; onAccepted: () => void }) {
+  const { t } = useTranslation();
   const [busyId, setBusyId] = useState<string | null>(null);
   const { data, loading, error, refresh } = useAsync(() => getMatchesForTrip(tripId), [tripId]);
   const matches = data?.matches ?? [];
@@ -161,11 +164,11 @@ function TravelerMatches({ tripId, onAccepted }: { tripId: string; onAccepted: (
     setBusyId(parcelId);
     try {
       await acceptParcel(tripId, parcelId);
-      Alert.alert("Colis accepté 🎉", "Le colis est désormais sur votre trajet. L'expéditeur a été notifié.");
+      Alert.alert(t("tripDetail.acceptedTitle"), t("tripDetail.acceptedBody"));
       onAccepted();
       refresh();
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
     } finally {
       setBusyId(null);
     }
@@ -173,9 +176,9 @@ function TravelerMatches({ tripId, onAccepted }: { tripId: string; onAccepted: (
 
   return (
     <View>
-      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">Colis recommandés</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">{t("tripDetail.recommended")}</Text>
       {loading && matches.length === 0 ? (
-        <Text className="text-text-muted">Recherche de colis…</Text>
+        <Text className="text-text-muted">{t("tripDetail.searching")}</Text>
       ) : null}
       {error ? (
         <Text className="text-danger text-sm">{error}</Text>
@@ -183,8 +186,8 @@ function TravelerMatches({ tripId, onAccepted }: { tripId: string; onAccepted: (
       {matches.length === 0 && !loading && !error ? (
         <EmptyState
           icon="cube-outline"
-          title="Aucun colis pour l'instant"
-          subtitle="Les colis compatibles apparaîtront ici. Vous serez notifié quand un expéditeur publie sur votre corridor."
+          title={t("tripDetail.noMatchesTitle")}
+          subtitle={t("tripDetail.noMatchesSubtitle")}
         />
       ) : null}
       {matches.map((m: Match, i) => (
@@ -213,6 +216,7 @@ function ParcelMatchCard({
   onAccept: () => void;
 }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const score = Math.round(match.score ?? 0);
   return (
     <Card raised={top} className={top ? "border-accent gap-2 mb-3" : "gap-2 mb-3"}>
@@ -220,12 +224,12 @@ function ParcelMatchCard({
         <View className="flex-row items-center gap-2">
           <Ionicons name="cube" size={18} color={colors.accent} />
           <Text className="text-text-primary font-body font-semibold">
-            Colis #{match.parcelId?.slice(-5) ?? "—"}
+            {t("tripDetail.parcelRef", { id: match.parcelId?.slice(-5) ?? "—" })}
           </Text>
         </View>
         {top ? (
           <View className="rounded-chip bg-success px-2 py-0.5">
-            <Text className="text-white text-xs font-bold">Top</Text>
+            <Text className="text-white text-xs font-bold">{t("tripDetail.top")}</Text>
           </View>
         ) : null}
       </View>
@@ -258,7 +262,7 @@ function ParcelMatchCard({
           className="rounded-field bg-accent px-3 py-1.5 ml-2"
         >
           <Text className="text-white text-xs font-bold">
-            {accepting ? "…" : "Accepter"}
+            {accepting ? "…" : t("tripDetail.accept")}
           </Text>
         </Pressable>
       </View>
@@ -266,15 +270,16 @@ function ParcelMatchCard({
   );
 }
 
-const CHECKPOINTS: { type: CheckpointType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { type: "DEPARTURE", label: "Départ", icon: "airplane-outline" },
-  { type: "TRANSIT", label: "Transit", icon: "navigate-outline" },
-  { type: "CUSTOMS", label: "Douane", icon: "shield-outline" },
-  { type: "ARRIVAL", label: "Arrivée", icon: "flag-outline" },
+const CHECKPOINTS: { type: CheckpointType; key: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { type: "DEPARTURE", key: "tripDetail.checkpointDeparture", icon: "airplane-outline" },
+  { type: "TRANSIT", key: "tripDetail.checkpointTransit", icon: "navigate-outline" },
+  { type: "CUSTOMS", key: "tripDetail.checkpointCustoms", icon: "shield-outline" },
+  { type: "ARRIVAL", key: "tripDetail.checkpointArrival", icon: "flag-outline" },
 ];
 
 function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [busy, setBusy] = useState<string | null>(null);
 
   async function post(type: CheckpointType, label: string) {
@@ -282,12 +287,14 @@ function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
     try {
       const res = await addCheckpoint(trip.id, { type, location: { address: label } });
       Alert.alert(
-        "Point enregistré",
-        `Statut du trajet : ${TRIP_STATUS[res.tripStatus]?.label ?? res.tripStatus}.`,
+        t("tripDetail.checkpointSaved"),
+        t("tripDetail.tripStatusNow", {
+          status: TRIP_STATUS[res.tripStatus] ? t(TRIP_STATUS[res.tripStatus]!.key) : res.tripStatus,
+        }),
       );
       onPosted();
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
     } finally {
       setBusy(null);
     }
@@ -295,21 +302,21 @@ function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
 
   return (
     <View>
-      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">Avancement du trajet</Text>
+      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">{t("tripDetail.progress")}</Text>
       <View className="flex-row flex-wrap gap-2">
         {CHECKPOINTS.map((c) => (
           <Pressable
             key={c.type}
-            onPress={() => post(c.type, c.label)}
+            onPress={() => post(c.type, t(c.key))}
             disabled={busy !== null}
             className="flex-row items-center gap-1.5 rounded-field bg-glass border border-hairline px-3 py-2 active:opacity-70"
           >
             <Ionicons name={c.icon} size={14} color={colors.accent} />
-            <Text className="text-text-primary font-body text-sm">{c.label}</Text>
+            <Text className="text-text-primary font-body text-sm">{t(c.key)}</Text>
           </Pressable>
         ))}
       </View>
-      {busy ? <Text className="text-text-muted text-xs mt-2">Enregistrement…</Text> : null}
+      {busy ? <Text className="text-text-muted text-xs mt-2">{t("tripDetail.saving")}</Text> : null}
     </View>
   );
 }

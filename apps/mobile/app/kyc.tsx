@@ -9,6 +9,7 @@
  */
 import { useState } from "react";
 import { Alert, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
 import { Card } from "../src/components/Card";
@@ -23,18 +24,8 @@ import { getKycStatus, submitKyc, type DocumentType } from "../src/lib/kyc";
 import { ApiError } from "../src/lib/api";
 import { KYC_LEVEL, formatDateTime } from "../src/lib/format";
 
-const DOC_TYPES: { value: DocumentType; label: string }[] = [
-  { value: "PASSPORT", label: "Passeport" },
-  { value: "NATIONAL_ID", label: "Carte d'identité" },
-  { value: "DRIVERS_LICENSE", label: "Permis de conduire" },
-  { value: "RESIDENCY_PERMIT", label: "Titre de séjour" },
-];
-const TARGET_LEVELS = [
-  { value: "ENHANCED", label: "Vérifié (Enhanced)" },
-  { value: "FULL", label: "Premium (Full)" },
-];
-
 export default function KycScreen() {
+  const { t } = useTranslation();
   const { refreshUser, tokens } = useAuth();
   const { data, loading, error, refresh } = useAsync(() => getKycStatus(), []);
   const [submitting, setSubmitting] = useState(false);
@@ -44,9 +35,20 @@ export default function KycScreen() {
   const [selfieUrl, setSelfieUrl] = useState("");
   const [target, setTarget] = useState<"ENHANCED" | "FULL">("ENHANCED");
 
+  const docTypes: { value: DocumentType; label: string }[] = [
+    { value: "PASSPORT", label: t("kyc.docPassport") },
+    { value: "NATIONAL_ID", label: t("kyc.docNationalId") },
+    { value: "DRIVERS_LICENSE", label: t("kyc.docLicense") },
+    { value: "RESIDENCY_PERMIT", label: t("kyc.docResidency") },
+  ];
+  const targetLevels = [
+    { value: "ENHANCED", label: t("kyc.targetEnhanced") },
+    { value: "FULL", label: t("kyc.targetFull") },
+  ];
+
   // Verification is per-account — guests get the login wall.
   if (!tokens) {
-    return <AuthWall headerTitle="Vérification d'identité" />;
+    return <AuthWall headerTitle={t("profile.kyc")} />;
   }
 
   const level = data ? KYC_LEVEL[data.kycLevel] : null;
@@ -54,7 +56,7 @@ export default function KycScreen() {
 
   async function submit() {
     if (!docUrl.trim() || !selfieUrl.trim()) {
-      Alert.alert("Champ manquant", "Ajoutez la photo du document et du selfie.");
+      Alert.alert(t("common.missingTitle"), t("kyc.missingBody"));
       return;
     }
     setSubmitting(true);
@@ -65,11 +67,11 @@ export default function KycScreen() {
         selfieUrl: selfieUrl.trim(),
         targetLevel: target,
       });
-      Alert.alert("Demande envoyée", "Votre vérification est en attente de revue. Vous serez notifié de la décision.");
+      Alert.alert(t("kyc.sentTitle"), t("kyc.sentBody"));
       refresh();
       refreshUser().catch(() => {});
     } catch (e) {
-      Alert.alert("Impossible", e instanceof ApiError ? e.message : "Réessayez.");
+      Alert.alert(t("common.impossible"), e instanceof ApiError ? e.message : t("common.retryShort"));
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +81,7 @@ export default function KycScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Vérification d'identité" />
+      <ScreenHeader title={t("profile.kyc")} />
 
       {loading ? null : error ? (
         <Text>{error}</Text>
@@ -87,17 +89,17 @@ export default function KycScreen() {
         <View className="gap-stack-gap">
           <Card className="gap-2">
             <View className="flex-row items-center justify-between">
-              <Text className="font-mono text-meta uppercase text-text-secondary">Niveau actuel</Text>
-              {level ? <StatusPill label={level.label} tone={level.tone} /> : null}
+              <Text className="font-mono text-meta uppercase text-text-secondary">{t("kyc.currentLevel")}</Text>
+              {level ? <StatusPill label={t(level.key)} tone={level.tone} /> : null}
             </View>
             {sub ? (
               <View>
                 <Text className="text-text-muted text-xs font-body">
-                  Dernière demande : {sub.status === "PENDING" ? "En revue" : sub.status === "APPROVED" ? "Approuvée" : "Rejetée"}
+                  {t("kyc.lastSubmission")} : {sub.status === "PENDING" ? t("kyc.subPending") : sub.status === "APPROVED" ? t("kyc.subApproved") : t("kyc.subRejected")}
                   {" · "}{formatDateTime(sub.createdAt)}
                 </Text>
                 {sub.status === "REJECTED" && sub.reviewNote ? (
-                  <Text className="text-danger text-xs font-body mt-1">Motif : {sub.reviewNote}</Text>
+                  <Text className="text-danger text-xs font-body mt-1">{t("kyc.reviewNote", { note: sub.reviewNote })}</Text>
                 ) : null}
               </View>
             ) : null}
@@ -106,39 +108,38 @@ export default function KycScreen() {
           {data && data.kycLevel === "FULL" ? (
             <Card className="bg-success/10 border-success/30">
               <Text className="text-success font-body text-sm">
-                Niveau maximum atteint ✓ — votre profil est entièrement vérifié.
+                {t("kyc.maxLevel")}
               </Text>
             </Card>
           ) : pending ? (
             <Card className="bg-info/10 border-info/30">
               <Text className="text-text-secondary font-body text-sm">
-                Votre demande est en cours de revue par notre équipe. Vous
-                serez notifié dès qu'elle sera traitée.
+                {t("kyc.pendingReview")}
               </Text>
             </Card>
           ) : (
             <View className="gap-stack-gap">
-              <Text className="font-mono text-meta uppercase text-text-secondary">Nouvelle demande</Text>
-              <Select label="Type de document" value={docType} options={DOC_TYPES} onSelect={(v) => setDocType(v as DocumentType)} />
+              <Text className="font-mono text-meta uppercase text-text-secondary">{t("kyc.newSubmission")}</Text>
+              <Select label={t("kyc.docType")} value={docType} options={docTypes} onSelect={(v) => setDocType(v as DocumentType)} />
               <PhotoPicker
-                label="Document (recto)"
+                label={t("kyc.docPhoto")}
                 purpose="kyc-doc"
                 onUploaded={setDocUrl}
                 onClear={() => setDocUrl("")}
               />
               <PhotoPicker
-                label="Selfie"
+                label={t("kyc.selfie")}
                 purpose="kyc-selfie"
                 onUploaded={setSelfieUrl}
                 onClear={() => setSelfieUrl("")}
               />
               <Select
-                label="Niveau visé"
+                label={t("kyc.targetLevel")}
                 value={target}
-                options={TARGET_LEVELS}
+                options={targetLevels}
                 onSelect={(v) => setTarget(v as "ENHANCED" | "FULL")}
               />
-              <Button label="Soumettre" onPress={submit} loading={submitting} />
+              <Button label={t("kyc.submit")} onPress={submit} loading={submitting} />
             </View>
           )}
         </View>

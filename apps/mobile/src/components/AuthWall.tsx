@@ -6,6 +6,7 @@
 import { router } from "expo-router";
 import { Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Screen } from "./Screen";
 import { ScreenHeader } from "./ScreenHeader";
 import { Button } from "./Button";
@@ -18,12 +19,9 @@ interface AuthWallProps {
   subtitle?: string;
 }
 
-export function AuthWall({
-  headerTitle,
-  title = "Créez votre compte",
-  subtitle = "Connectez-vous pour envoyer un colis, proposer un trajet ou discuter avec un voyageur.",
-}: AuthWallProps) {
+export function AuthWall({ headerTitle, title, subtitle }: AuthWallProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   return (
     <Screen scroll={false}>
       {headerTitle ? <ScreenHeader title={headerTitle} /> : null}
@@ -32,15 +30,15 @@ export function AuthWall({
           <Ionicons name="person-circle-outline" size={44} color={colors.accent} />
         </View>
         <Text className="text-text-primary font-heading text-2xl font-bold text-center">
-          {title}
+          {title ?? t("authWall.title")}
         </Text>
         <Text className="text-text-muted font-body text-base text-center mt-2 max-w-[300px]">
-          {subtitle}
+          {subtitle ?? t("authWall.subtitle")}
         </Text>
         <View className="gap-stack-gap mt-section-gap w-full max-w-[300px]">
-          <Button label="Se connecter" onPress={() => router.push("/auth/login")} />
+          <Button label={t("common.login")} onPress={() => router.push("/auth/login")} />
           <Button
-            label="Créer un compte"
+            label={t("common.signup")}
             variant="secondary"
             onPress={() => router.push("/auth/signup")}
           />

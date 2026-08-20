@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { Alert, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../src/components/Button";
 import { Input } from "../../src/components/Input";
 import { Screen } from "../../src/components/Screen";
@@ -16,6 +17,7 @@ import { ApiError } from "../../src/lib/api";
 import * as authApi from "../../src/lib/auth";
 
 export default function SignupScreen() {
+  const { t } = useTranslation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,8 +41,8 @@ export default function SignupScreen() {
         params: { phone: res.user.phone },
       });
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Inscription impossible";
-      Alert.alert("Inscription impossible", msg);
+      const msg = e instanceof ApiError ? e.message : t("signup.errorFallback");
+      Alert.alert(t("signup.errorTitle"), msg);
     } finally {
       setLoading(false);
     }
@@ -50,10 +52,10 @@ export default function SignupScreen() {
     <Screen>
       <View className="mt-xl">
         <Text className="text-text-primary font-heading text-screen-title font-bold">
-          Créer un compte
+          {t("common.signup")}
         </Text>
         <Text className="text-text-muted font-body text-base mt-1">
-          Rejoignez le réseau Crowshi — Europe → Algérie.
+          {t("signup.subtitle")}
         </Text>
       </View>
 
@@ -64,14 +66,14 @@ export default function SignupScreen() {
       >
         <View className="flex-row gap-stack-gap">
           <View className="flex-1">
-            <Input label="Prénom" value={firstName} onChangeText={setFirstName} />
+            <Input label={t("field.firstName")} value={firstName} onChangeText={setFirstName} />
           </View>
           <View className="flex-1">
-            <Input label="Nom" value={lastName} onChangeText={setLastName} />
+            <Input label={t("field.lastName")} value={lastName} onChangeText={setLastName} />
           </View>
         </View>
         <Input
-          label="Adresse e-mail"
+          label={t("field.email")}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -80,7 +82,7 @@ export default function SignupScreen() {
           textContentType="emailAddress"
         />
         <Input
-          label="Téléphone (E.164)"
+          label={t("field.phone")}
           value={phone}
           onChangeText={setPhone}
           autoCapitalize="none"
@@ -89,19 +91,19 @@ export default function SignupScreen() {
           textContentType="telephoneNumber"
         />
         <Input
-          label="Mot de passe (≥ 8 caractères)"
+          label={t("field.passwordHint")}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           textContentType="newPassword"
         />
 
-        <Button label="Créer mon compte" onPress={submit} loading={loading} />
+        <Button label={t("signup.submit")} onPress={submit} loading={loading} />
 
         <View className="mt-section-gap flex-row justify-center gap-1">
-          <Text className="text-text-muted font-body">Déjà un compte ?</Text>
+          <Text className="text-text-muted font-body">{t("signup.haveAccount")}</Text>
           <Link href="/auth/login" className="text-accent font-body font-semibold">
-            Se connecter
+            {t("common.login")}
           </Link>
         </View>
       </ScrollView>

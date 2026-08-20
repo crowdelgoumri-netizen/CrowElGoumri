@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { clsx } from "../lib/clsx";
 import { useThemeColors } from "../hooks/useThemeColors";
 
@@ -33,11 +34,12 @@ export function Select({
   label,
   value,
   options,
-  placeholder = "Sélectionner",
+  placeholder,
   onSelect,
   error,
 }: SelectProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const opts: SelectOption[] = (options as (SelectOption | string)[]).map((o) =>
@@ -63,7 +65,7 @@ export function Select({
           )}
           numberOfLines={1}
         >
-          {selected?.label ?? placeholder}
+          {selected?.label ?? placeholder ?? t("select.placeholder")}
         </Text>
         <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
       </Pressable>

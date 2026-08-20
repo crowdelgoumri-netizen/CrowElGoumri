@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#06090F;}
+a{color:#FF8A4F;text-decoration:none;}
+a:hover{color:#FFB08A;}
+</style>
+</helmet>
+
+<div style="position:relative;min-height:100vh;background:radial-gradient(circle at 12% 6%, rgba(255,106,43,0.10), transparent 32%), radial-gradient(circle at 88% 88%, rgba(109,90,166,0.13), transparent 36%), linear-gradient(180deg,#0A0F1A 0%,#06090F 60%);padding:72px 60px 120px;display:flex;flex-direction:column;gap:56px;font-family:'Plus Jakarta Sans',sans-serif;">
+
+  <div style="color:#F5F7FA;max-width:780px;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:36px;letter-spacing:-0.025em;">Aurora — dark &amp; bright</div>
+    <div style="color:#8A94A6;font-size:15px;margin-top:8px;line-height:1.55;">One system, two environments. Same layout, type scale and blur values; only the surface stack and accent tone flip. Dark uses white-on-navy glass at 5–7% fill; bright uses white glass at 62% over a tinted paper base, and the accent shifts <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;">#FF6A2B → #FF5A1F</span> to hold contrast on light.</div>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:44px;">
+
+    <div id="2a" style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;letter-spacing:0.08em;background:#FF6A2B;color:#0B1220;padding:5px 10px;border-radius:6px;">2A</div>
+        <div style="color:#F5F7FA;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;">Dark mode</div>
+        <div style="color:#7C8AA5;font-size:14px;">Aurora bands behind 18px glass · hairline borders at 12–16% white.</div>
+      </div>
+
+      <div style="display:flex;gap:44px;flex-wrap:wrap;align-items:flex-start;">
+
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <div style="color:#7C8AA5;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;">First run</div>
+          <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+            <div style="height:100%;background:linear-gradient(170deg,#0A0F1A 0%,#101A2E 52%,#070B14 100%);position:relative;overflow:hidden;display:flex;flex-direction:column;color:#F7F9FC;font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="position:absolute;top:-120px;left:-90px;width:420px;height:340px;background:linear-gradient(90deg,rgba(255,106,43,0.55),rgba(159,140,255,0.35),transparent);filter:blur(70px);transform:rotate(-18deg);"></div>
+              <div style="position:absolute;top:34%;right:-140px;width:380px;height:260px;background:linear-gradient(90deg,transparent,rgba(159,140,255,0.4),rgba(255,106,43,0.25));filter:blur(64px);transform:rotate(12deg);"></div>
+              <div style="flex:1;display:flex;flex-direction:column;padding:72px 28px 0;position:relative;z-index:1;">
+                <div style="display:flex;align-items:center;gap:9px;">
+                  <div style="width:32px;height:32px;border-radius:10px;background:#FF6A2B;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#0B1220;font-size:16px;">C</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.01em;">Crowshi</div>
+                </div>
+                <div style="margin-top:auto;margin-bottom:26px;display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:inline-flex;align-self:flex-start;gap:8px;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:99px;padding:6px 12px 6px 8px;">
+                    <div style="width:7px;height:7px;border-radius:50%;background:#34D399;"></div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#C6D0E2;">1,204 TRAVELERS FLYING TODAY</div>
+                  </div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:42px;line-height:1.02;letter-spacing:-0.035em;">Send it with<br>someone<br>already going.</div>
+                  <div style="color:#98A5BC;font-size:15px;line-height:1.55;max-width:290px;">Match your parcel to a real traveler's spare kilos. Paid into escrow, released on delivery.</div>
+                </div>
+              </div>
+              <div style="padding:0 28px 30px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;">
+                <button style="background:#FF6A2B;color:#0B1220;border:none;border-radius:16px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.01em;box-shadow:0 10px 30px rgba(255,106,43,0.28);">Send a parcel</button>
+                <button style="background:rgba(255,255,255,0.06);color:#F7F9FC;border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:16px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:16px;">I'm travelling — earn</button>
+                <div style="text-align:center;color:#7C8AA5;font-size:13px;margin-top:6px;">Already with us? <span style="color:#FF8A4F;font-weight:700;">Log in</span></div>
+              </div>
+            </div>
+          </x-import>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <div style="color:#7C8AA5;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;">Browse trips</div>
+          <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+            <div style="height:100%;background:radial-gradient(circle at 88% 4%, rgba(255,106,43,0.16), transparent 44%), radial-gradient(circle at 6% 62%, rgba(159,140,255,0.16), transparent 46%), linear-gradient(180deg,#0A0F1A,#070B14);display:flex;flex-direction:column;color:#F7F9FC;font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="padding:66px 20px 16px;display:flex;flex-direction:column;gap:14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#7C8AA5;">SENDING FROM LAGOS</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;letter-spacing:-0.03em;margin-top:3px;">Where to?</div>
+                  </div>
+                  <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#3B2A5C);border:1px solid rgba(255,255,255,0.18);"></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);">
+                  <div style="width:16px;height:16px;border-radius:50%;border:2px solid #FF6A2B;"></div>
+                  <div style="font-size:15px;color:#98A5BC;">London, Accra, Dubai…</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <div style="background:#FF6A2B;color:#0B1220;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;">All</div>
+                  <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#C6D0E2;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;">Docs</div>
+                  <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#C6D0E2;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;">Tech</div>
+                  <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#C6D0E2;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;">Gifts</div>
+                </div>
+              </div>
+              <div style="flex:1;overflow:hidden;padding:2px 20px 16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="background:rgba(255,255,255,0.065);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 28px rgba(0,0,0,0.32);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#9F8CFF,#0B1220);border:1px solid rgba(255,255,255,0.2);"></div>
+                      <div>
+                        <div style="font-weight:700;font-size:14px;">Sarah B.</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7C8AA5;letter-spacing:0.04em;">5.0 · 118 TRIPS</div>
+                      </div>
+                    </div>
+                    <div style="background:rgba(52,211,153,0.14);border:1px solid rgba(52,211,153,0.3);color:#4CE0AE;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;">8 kg free</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:16px;">
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">LOS</div>
+                    <div style="flex:1;height:1px;background:linear-gradient(90deg,#FF6A2B,rgba(159,140,255,0.5));"></div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">LHR</div>
+                  </div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:12px;">
+                    <div style="font-size:13px;color:#98A5BC;">Departs Sat, Aug 16 · 9:40pm</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:#FF8A4F;">$12<span style="font-size:12px;color:#7C8AA5;font-weight:600;">/kg</span></div>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.10);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.10);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#3B2A5C);border:1px solid rgba(255,255,255,0.16);"></div>
+                      <div>
+                        <div style="font-weight:700;font-size:14px;">Kwame O.</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7C8AA5;letter-spacing:0.04em;">4.9 · 62 TRIPS</div>
+                      </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#C6D0E2;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;">3.2 kg free</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:16px;">
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">LOS</div>
+                    <div style="flex:1;height:1px;background:rgba(255,255,255,0.2);"></div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">ACC</div>
+                  </div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:12px;">
+                    <div style="font-size:13px;color:#98A5BC;">Departs Thu, Aug 14 · 6:15am</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:#F7F9FC;">$9<span style="font-size:12px;color:#7C8AA5;font-weight:600;">/kg</span></div>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.10);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:20px;padding:16px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#34D399,#0B1220);border:1px solid rgba(255,255,255,0.16);"></div>
+                      <div>
+                        <div style="font-weight:700;font-size:14px;">Tunde A.</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7C8AA5;letter-spacing:0.04em;">4.8 · 40 TRIPS</div>
+                      </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#C6D0E2;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;">5 kg free</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-around;padding:12px 8px 10px;background:rgba(10,15,26,0.72);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:#FF6A2B;"></div><div style="font-size:11px;font-weight:800;color:#FF8A4F;">Browse</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,0.14);"></div><div style="font-size:11px;color:#7C8AA5;font-weight:600;">Send</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,0.14);"></div><div style="font-size:11px;color:#7C8AA5;font-weight:600;">Trips</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,0.14);"></div><div style="font-size:11px;color:#7C8AA5;font-weight:600;">You</div></div>
+              </div>
+            </div>
+          </x-import>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <div style="color:#7C8AA5;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;">Match + pay</div>
+          <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+            <div style="height:100%;background:linear-gradient(180deg,#0A0F1A,#070B14);display:flex;flex-direction:column;color:#F7F9FC;font-family:'Plus Jakarta Sans',sans-serif;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:-60px;right:-100px;width:340px;height:280px;background:linear-gradient(90deg,rgba(255,106,43,0.4),rgba(159,140,255,0.3),transparent);filter:blur(64px);"></div>
+              <div style="padding:64px 20px 12px;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.025em;">Confirm &amp; pay</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7C8AA5;letter-spacing:0.06em;">STEP 2 OF 2</div>
+              </div>
+              <div style="flex:1;padding:6px 20px 16px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;">
+                <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.16), 0 12px 30px rgba(0,0,0,0.3);">
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#9F8CFF,#0B1220);border:1px solid rgba(255,255,255,0.2);"></div>
+                    <div style="flex:1;">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="font-weight:700;font-size:16px;">Sarah B.</div>
+                        <div style="background:rgba(52,211,153,0.16);border:1px solid rgba(52,211,153,0.32);color:#4CE0AE;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:0.04em;">ID VERIFIED</div>
+                      </div>
+                      <div style="color:#98A5BC;font-size:13px;margin-top:3px;">LOS → LHR · Sat Aug 16 · BA075</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:11px;">
+                  <div style="display:flex;justify-content:space-between;font-size:14px;color:#C6D0E2;"><div>Delivery fee · 2.5 kg</div><div style="font-weight:600;">$30.00</div></div>
+                  <div style="display:flex;justify-content:space-between;font-size:14px;color:#C6D0E2;"><div>Service fee</div><div style="font-weight:600;">$3.10</div></div>
+                  <div style="height:1px;background:rgba(255,255,255,0.10);"></div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                    <div><div style="font-weight:700;font-size:15px;">Held in escrow</div><div style="color:#7C8AA5;font-size:12px;margin-top:2px;">Released when you confirm delivery</div></div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;color:#FF8A4F;letter-spacing:-0.02em;">$33.10</div>
+                  </div>
+                </div>
+                <div style="background:rgba(159,140,255,0.10);border:1px solid rgba(159,140,255,0.24);border-radius:16px;padding:14px 16px;display:flex;gap:11px;align-items:flex-start;">
+                  <div style="width:20px;height:20px;border-radius:6px;background:#9F8CFF;flex:none;"></div>
+                  <div style="font-size:12.5px;color:#CDC4F0;line-height:1.5;">Sarah never sees your card. If the parcel doesn't arrive, we refund from escrow.</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,106,43,0.4);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:11px;">
+                    <div style="width:34px;height:24px;border-radius:5px;background:linear-gradient(135deg,#FF6A2B,#3B2A5C);"></div>
+                    <div><div style="font-weight:700;font-size:14px;">Crowshi wallet</div><div style="color:#7C8AA5;font-size:12px;">$48.20 available</div></div>
+                  </div>
+                  <div style="width:20px;height:20px;border-radius:50%;border:6px solid #FF6A2B;box-shadow:inset 0 0 0 1px #0B1220;"></div>
+                </div>
+              </div>
+              <div style="padding:14px 20px 30px;background:rgba(10,15,26,0.7);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;z-index:1;">
+                <button style="width:100%;background:#FF6A2B;color:#0B1220;border:none;border-radius:16px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;box-shadow:0 10px 30px rgba(255,106,43,0.26);">Pay $33.10 into escrow</button>
+              </div>
+            </div>
+          </x-import>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="2b" style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;letter-spacing:0.08em;background:#FF6A2B;color:#0B1220;padding:5px 10px;border-radius:6px;">2B</div>
+        <div style="color:#F5F7FA;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;">Bright mode</div>
+        <div style="color:#7C8AA5;font-size:14px;">Same aurora, dimmed to 10% behind white glass at 62% · borders white 90% over a #E9EDF6 hairline.</div>
+      </div>
+
+      <div style="display:flex;gap:44px;flex-wrap:wrap;align-items:flex-start;">
+
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <div style="color:#7C8AA5;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;">First run</div>
+          <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+            <div style="height:100%;background:linear-gradient(170deg,#FBFCFF 0%,#EEF1F9 55%,#F6F7FC 100%);position:relative;overflow:hidden;display:flex;flex-direction:column;color:#0B1220;font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="position:absolute;top:-120px;left:-90px;width:420px;height:340px;background:linear-gradient(90deg,rgba(255,90,31,0.4),rgba(109,90,166,0.26),transparent);filter:blur(74px);transform:rotate(-18deg);"></div>
+              <div style="position:absolute;top:36%;right:-140px;width:380px;height:260px;background:linear-gradient(90deg,transparent,rgba(109,90,166,0.28),rgba(255,90,31,0.18));filter:blur(70px);transform:rotate(12deg);"></div>
+              <div style="flex:1;display:flex;flex-direction:column;padding:72px 28px 0;position:relative;z-index:1;">
+                <div style="display:flex;align-items:center;gap:9px;">
+                  <div style="width:32px;height:32px;border-radius:10px;background:#FF5A1F;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#FFFFFF;font-size:16px;">C</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.01em;">Crowshi</div>
+                </div>
+                <div style="margin-top:auto;margin-bottom:26px;display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:inline-flex;align-self:flex-start;gap:8px;align-items:center;background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:99px;padding:6px 12px 6px 8px;box-shadow:0 4px 14px rgba(11,18,32,0.05);">
+                    <div style="width:7px;height:7px;border-radius:50%;background:#0E9F6E;"></div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;color:#48566B;">1,204 TRAVELERS FLYING TODAY</div>
+                  </div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:42px;line-height:1.02;letter-spacing:-0.035em;">Send it with<br>someone<br>already going.</div>
+                  <div style="color:#5A6779;font-size:15px;line-height:1.55;max-width:290px;">Match your parcel to a real traveler's spare kilos. Paid into escrow, released on delivery.</div>
+                </div>
+              </div>
+              <div style="padding:0 28px 30px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;">
+                <button style="background:#FF5A1F;color:#FFFFFF;border:none;border-radius:16px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.01em;box-shadow:0 10px 26px rgba(255,90,31,0.28);">Send a parcel</button>
+                <button style="background:rgba(255,255,255,0.62);color:#0B1220;border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:16px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:16px;box-shadow:0 6px 18px rgba(11,18,32,0.06);">I'm travelling — earn</button>
+                <div style="text-align:center;color:#6B7789;font-size:13px;margin-top:6px;">Already with us? <span style="color:#FF5A1F;font-weight:700;">Log in</span></div>
+              </div>
+            </div>
+          </x-import>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <div style="color:#7C8AA5;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;">Browse trips</div>
+          <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+            <div style="height:100%;background:radial-gradient(circle at 88% 4%, rgba(255,90,31,0.14), transparent 44%), radial-gradient(circle at 6% 62%, rgba(109,90,166,0.14), transparent 46%), linear-gradient(180deg,#FBFCFF,#EFF2F9);display:flex;flex-direction:column;color:#0B1220;font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="padding:66px 20px 16px;display:flex;flex-direction:column;gap:14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#7A8698;">SENDING FROM LAGOS</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;letter-spacing:-0.03em;margin-top:3px;">Where to?</div>
+                  </div>
+                  <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#FF5A1F,#3B2A5C);border:1px solid rgba(255,255,255,0.8);"></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 18px rgba(11,18,32,0.05);">
+                  <div style="width:16px;height:16px;border-radius:50%;border:2px solid #FF5A1F;"></div>
+                  <div style="font-size:15px;color:#7A8698;">London, Accra, Dubai…</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <div style="background:#FF5A1F;color:#FFFFFF;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;">All</div>
+                  <div style="background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.9);color:#48566B;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;">Docs</div>
+                  <div style="background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.9);color:#48566B;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;">Tech</div>
+                  <div style="background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.9);color:#48566B;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;">Gifts</div>
+                </div>
+              </div>
+              <div style="flex:1;overflow:hidden;padding:2px 20px 16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="background:rgba(255,255,255,0.72);border:1px solid rgba(255,255,255,0.95);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 28px rgba(11,18,32,0.08);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6D5AA6,#0B1220);"></div>
+                      <div>
+                        <div style="font-weight:700;font-size:14px;">Sarah B.</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7A8698;letter-spacing:0.04em;">5.0 · 118 TRIPS</div>
+                      </div>
+                    </div>
+                    <div style="background:#E4F7EE;border:1px solid #BFE9D6;color:#0E9F6E;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;">8 kg free</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:16px;">
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">LOS</div>
+                    <div style="flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,#FF5A1F,rgba(109,90,166,0.45));"></div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">LHR</div>
+                  </div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:12px;">
+                    <div style="font-size:13px;color:#5A6779;">Departs Sat, Aug 16 · 9:40pm</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:#FF5A1F;">$12<span style="font-size:12px;color:#7A8698;font-weight:600;">/kg</span></div>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:16px;box-shadow:0 8px 22px rgba(11,18,32,0.06);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FF5A1F,#3B2A5C);"></div>
+                      <div>
+                        <div style="font-weight:700;font-size:14px;">Kwame O.</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7A8698;letter-spacing:0.04em;">4.9 · 62 TRIPS</div>
+                      </div>
+                    </div>
+                    <div style="background:rgba(11,18,32,0.05);border:1px solid #E4E9F2;color:#48566B;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;">3.2 kg free</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:16px;">
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">LOS</div>
+                    <div style="flex:1;height:2px;border-radius:2px;background:#DCE2ED;"></div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;">ACC</div>
+                  </div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:12px;">
+                    <div style="font-size:13px;color:#5A6779;">Departs Thu, Aug 14 · 6:15am</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:#0B1220;">$9<span style="font-size:12px;color:#7A8698;font-weight:600;">/kg</span></div>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:20px;padding:16px;box-shadow:0 8px 22px rgba(11,18,32,0.05);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#34D399,#0B1220);"></div>
+                      <div>
+                        <div style="font-weight:700;font-size:14px;">Tunde A.</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7A8698;letter-spacing:0.04em;">4.8 · 40 TRIPS</div>
+                      </div>
+                    </div>
+                    <div style="background:rgba(11,18,32,0.05);border:1px solid #E4E9F2;color:#48566B;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;">5 kg free</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-around;padding:12px 8px 10px;background:rgba(255,255,255,0.75);border-top:1px solid #E4E9F2;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:#FF5A1F;"></div><div style="font-size:11px;font-weight:800;color:#FF5A1F;">Browse</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:#DCE2ED;"></div><div style="font-size:11px;color:#7A8698;font-weight:600;">Send</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:#DCE2ED;"></div><div style="font-size:11px;color:#7A8698;font-weight:600;">Trips</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:7px;background:#DCE2ED;"></div><div style="font-size:11px;color:#7A8698;font-weight:600;">You</div></div>
+              </div>
+            </div>
+          </x-import>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <div style="color:#7C8AA5;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;">Match + pay</div>
+          <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+            <div style="height:100%;background:linear-gradient(180deg,#FBFCFF,#EFF2F9);display:flex;flex-direction:column;color:#0B1220;font-family:'Plus Jakarta Sans',sans-serif;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:-60px;right:-100px;width:340px;height:280px;background:linear-gradient(90deg,rgba(255,90,31,0.28),rgba(109,90,166,0.22),transparent);filter:blur(70px);"></div>
+              <div style="padding:64px 20px 12px;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.025em;">Confirm &amp; pay</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7A8698;letter-spacing:0.06em;">STEP 2 OF 2</div>
+              </div>
+              <div style="flex:1;padding:6px 20px 16px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;">
+                <div style="background:rgba(255,255,255,0.72);border:1px solid rgba(255,255,255,0.95);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 28px rgba(11,18,32,0.08);">
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#6D5AA6,#0B1220);"></div>
+                    <div style="flex:1;">
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="font-weight:700;font-size:16px;">Sarah B.</div>
+                        <div style="background:#E4F7EE;border:1px solid #BFE9D6;color:#0E9F6E;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:0.04em;">ID VERIFIED</div>
+                      </div>
+                      <div style="color:#5A6779;font-size:13px;margin-top:3px;">LOS → LHR · Sat Aug 16 · BA075</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:11px;box-shadow:0 8px 22px rgba(11,18,32,0.06);">
+                  <div style="display:flex;justify-content:space-between;font-size:14px;color:#48566B;"><div>Delivery fee · 2.5 kg</div><div style="font-weight:700;color:#0B1220;">$30.00</div></div>
+                  <div style="display:flex;justify-content:space-between;font-size:14px;color:#48566B;"><div>Service fee</div><div style="font-weight:700;color:#0B1220;">$3.10</div></div>
+                  <div style="height:1px;background:#E4E9F2;"></div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                    <div><div style="font-weight:700;font-size:15px;">Held in escrow</div><div style="color:#7A8698;font-size:12px;margin-top:2px;">Released when you confirm delivery</div></div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;color:#FF5A1F;letter-spacing:-0.02em;">$33.10</div>
+                  </div>
+                </div>
+                <div style="background:rgba(109,90,166,0.10);border:1px solid rgba(109,90,166,0.22);border-radius:16px;padding:14px 16px;display:flex;gap:11px;align-items:flex-start;">
+                  <div style="width:20px;height:20px;border-radius:6px;background:#6D5AA6;flex:none;"></div>
+                  <div style="font-size:12.5px;color:#54468A;line-height:1.5;">Sarah never sees your card. If the parcel doesn't arrive, we refund from escrow.</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.72);border:1.5px solid #FF5A1F;border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:11px;">
+                    <div style="width:34px;height:24px;border-radius:5px;background:linear-gradient(135deg,#FF5A1F,#3B2A5C);"></div>
+                    <div><div style="font-weight:700;font-size:14px;">Crowshi wallet</div><div style="color:#7A8698;font-size:12px;">$48.20 available</div></div>
+                  </div>
+                  <div style="width:20px;height:20px;border-radius:50%;border:6px solid #FF5A1F;box-shadow:inset 0 0 0 1px #FFFFFF;"></div>
+                </div>
+              </div>
+              <div style="padding:14px 20px 30px;background:rgba(255,255,255,0.8);border-top:1px solid #E4E9F2;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;z-index:1;">
+                <button style="width:100%;background:#FF5A1F;color:#FFFFFF;border:none;border-radius:16px;padding:17px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;box-shadow:0 10px 26px rgba(255,90,31,0.26);">Pay $33.10 into escrow</button>
+              </div>
+            </div>
+          </x-import>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+</div>
+</x-dc>
+</body>
+</html>

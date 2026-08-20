@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B1220;}
+</style>
+</helmet>
+<div style="position:relative;min-height:100vh;background:radial-gradient(circle at 15% 8%, rgba(255,106,43,0.10), transparent 30%), radial-gradient(circle at 85% 85%, rgba(109,90,166,0.14), transparent 35%), radial-gradient(circle at 20% 10%, #16213B 0%, #0B1220 55%);padding:80px 60px;display:flex;flex-direction:column;gap:40px;font-family:'Plus Jakarta Sans',sans-serif;">
+
+  <div style="color:#F5F7FA;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;letter-spacing:-0.02em;">Crowshi — app screens</div>
+    <div style="color:#8A94A6;font-size:15px;margin-top:6px;">Crowdshipping marketplace · onboarding through delivery</div>
+  </div>
+
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:0;">
+    <div style="position:absolute;width:1400px;height:320px;top:2%;left:-15%;background:linear-gradient(90deg,transparent,rgba(255,106,43,0.55),rgba(109,90,166,0.5),rgba(109,90,166,0.2),transparent);filter:blur(70px);transform:rotate(-14deg);"></div>
+    <div style="position:absolute;width:1300px;height:300px;top:32%;right:-20%;background:linear-gradient(90deg,transparent,rgba(109,90,166,0.5),rgba(255,106,43,0.45),transparent);filter:blur(70px);transform:rotate(10deg);"></div>
+    <div style="position:absolute;width:1300px;height:300px;top:62%;left:-15%;background:linear-gradient(90deg,transparent,rgba(255,106,43,0.5),rgba(109,90,166,0.45),transparent);filter:blur(70px);transform:rotate(-10deg);"></div>
+    <div style="position:absolute;width:1300px;height:300px;top:92%;right:-15%;background:linear-gradient(90deg,transparent,rgba(109,90,166,0.5),rgba(255,106,43,0.4),transparent);filter:blur(70px);transform:rotate(12deg);"></div>
+  </div>
+
+  <div style="display:flex;gap:56px;flex-wrap:wrap;align-items:flex-start;position:relative;z-index:1;">
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">00 · Interactive walkthrough</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Ship it" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Lagos → London</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Step-through: request → match → pay → track</div>
+          </div>
+
+          <sc-if value="{{ isRequest }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:14px;">
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="font-size:12px;color:#8A94A6;">Package</div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-top:2px;">2.5 kg · Gift</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="font-size:12px;color:#8A94A6;">Your budget</div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;margin-top:2px;color:#FF6A2B;">$30</div>
+              </div>
+              <div style="margin-top:auto;color:#8A94A6;font-size:13px;text-align:center;">Tap Next to find a traveler</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+              <div style="background:linear-gradient(120deg,#fff,#FFF6EF);border:1.5px solid #FF6A2B;border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(255,106,43,0.12);">
+                <div style="display:flex;justify-content:space-between;"><div style="font-weight:700;font-size:15px;">Sarah B.</div><div style="background:#34D399;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">Best match</div></div>
+                <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Aug 16 · 5.0★ · 118 trips</div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#FF6A2B;margin-top:10px;">$28 total</div>
+              </div>
+              <div style="color:#8A94A6;font-size:13px;text-align:center;margin-top:auto;">Tap Next to confirm & pay</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPay }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:14px;">
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="display:flex;justify-content:space-between;font-size:16px;"><div style="font-weight:700;">Total held in escrow</div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#FF6A2B;">$30.10</div></div>
+              </div>
+              <div style="background:#F3EEFB;border-radius:14px;padding:14px 16px;font-size:12px;color:#6D5AA6;line-height:1.5;">Funds release to Sarah once you confirm delivery.</div>
+              <div style="color:#8A94A6;font-size:13px;text-align:center;margin-top:auto;">Tap Next to track your parcel</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isTrack }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;">
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#3B2A5C);"></div>
+                <div><div style="font-weight:700;font-size:15px;">Sarah B.</div><div style="color:#8A94A6;font-size:12px;">In transit · Flight BA075</div></div>
+              </div>
+              <div style="color:#8A94A6;font-size:13px;text-align:center;margin-top:auto;">Delivered by 6:00 PM · you're done!</div>
+            </div>
+          </sc-if>
+
+          <div style="padding:0 20px 26px;display:flex;gap:10px;">
+            <button onClick="{{ back }}" disabled="{{ !canBack }}" style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(10px);border:1px solid #E3E7EE;color:#0B1220;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Back</button>
+            <button onClick="{{ next }}" disabled="{{ !canNext }}" style="flex:1;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Next</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">01 · Onboarding</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+        <div style="height:100%;background:linear-gradient(160deg,#0B1220 0%,#1A2540 60%,#0B1220 100%);display:flex;flex-direction:column;color:#F5F7FA;padding:0;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-60px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,43,0.35),transparent 70%);"></div>
+          <div style="position:absolute;bottom:120px;left:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,176,32,0.18),transparent 70%);"></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:32px 28px 0;position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:auto;margin-top:24px;">
+              <div style="width:34px;height:34px;border-radius:9px;background:#FF6A2B;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#0B1220;font-size:16px;">C</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Crowshi</div>
+            </div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:36px;line-height:1.08;letter-spacing:-0.02em;margin-bottom:14px;">Ship anything.<br>Carried by<br>real travelers.</div>
+            <div style="color:#B8C0D4;font-size:15px;line-height:1.5;margin-bottom:32px;max-width:300px;">Connect with people already heading your way. Cheaper than couriers, faster than freight.</div>
+          </div>
+          <div style="padding:0 28px 28px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;">
+            <button style="background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:16px;">Get started</button>
+            <button style="background:transparent;color:#F5F7FA;border:1px solid rgba(255,255,255,0.25);border-radius:14px;padding:16px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:16px;">I already have an account</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">02 · Home / Browse trips</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Crowshi" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:16px 20px 16px;background:linear-gradient(135deg,#0B1220 0%,#3B2A5C 55%,#FF6A2B 130%);color:#fff;border-radius:0 0 26px 26px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;">Hey Amara 👋</div>
+            <div style="color:#C9BFE3;font-size:14px;margin-top:2px;">Find a traveler heading your way</div>
+            <div style="margin-top:14px;background:rgba(255,255,255,0.12);backdrop-filter:blur(4px);border-radius:12px;padding:12px 14px;color:#E8E4F2;font-size:14px;">Search destination or city</div>
+          </div>
+          <div style="display:flex;gap:8px;padding:14px 20px 6px;overflow:hidden;">
+            <div style="background:#FF6A2B;color:#0B1220;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;white-space:nowrap;">All</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border:1px solid #E3E7EE;color:#4A5568;border-radius:20px;padding:7px 14px;font-size:13px;white-space:nowrap;">Documents</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border:1px solid #E3E7EE;color:#4A5568;border-radius:20px;padding:7px 14px;font-size:13px;white-space:nowrap;">Electronics</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border:1px solid #E3E7EE;color:#4A5568;border-radius:20px;padding:7px 14px;font-size:13px;white-space:nowrap;">Gifts</div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:10px 20px 20px;display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:16px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 16px rgba(59,42,92,0.08);border-left:3px solid #FF6A2B;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;">Lagos → Accra</div>
+                <div style="background:#FFF1E8;color:#FF6A2B;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;">3.2kg free</div>
+              </div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Departs Aug 14 · by Kwame O.</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#3B2A5C);"></div><div style="font-size:13px;color:#4A5568;">4.9 ★ · 62 trips</div></div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#0B1220;">$9/kg</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:16px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 16px rgba(59,42,92,0.08);border-left:3px solid #6D5AA6;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;">Lagos → London</div>
+                <div style="background:#EFEAFB;color:#6D5AA6;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;">8kg free</div>
+              </div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Departs Aug 16 · by Sarah B.</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#6D5AA6,#0B1220);"></div><div style="font-size:13px;color:#4A5568;">5.0 ★ · 118 trips</div></div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#0B1220;">$12/kg</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:16px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 16px rgba(59,42,92,0.08);border-left:3px solid #34D399;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;">Abuja → Dubai</div>
+                <div style="background:#E4F7EE;color:#1FAE7A;font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;">5kg free</div>
+              </div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Departs Aug 19 · by Tunde A.</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#34D399,#0B1220);"></div><div style="font-size:13px;color:#4A5568;">4.8 ★ · 40 trips</div></div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#0B1220;">$11/kg</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;padding:12px 0 8px;border-top:1px solid #ECEFF3;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#FF6A2B;"><div style="width:20px;height:20px;border-radius:5px;background:#FF6A2B;"></div><div style="font-size:11px;font-weight:700;">Browse</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#B8C0D4;"><div style="width:20px;height:20px;border-radius:5px;background:#E3E7EE;"></div><div style="font-size:11px;">Post</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#B8C0D4;"><div style="width:20px;height:20px;border-radius:5px;background:#E3E7EE;"></div><div style="font-size:11px;">Trips</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#B8C0D4;"><div style="width:20px;height:20px;border-radius:5px;background:#E3E7EE;"></div><div style="font-size:11px;">Profile</div></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">03 · Post a shipment</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="New request" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:22px 20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 140%);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;border-radius:0 0 22px 22px;">New shipment request</div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;overflow:hidden;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Route</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:4px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 10px;border-bottom:1px solid #ECEFF3;"><div style="width:8px;height:8px;border-radius:50%;background:#FF6A2B;"></div><div style="font-size:14px;">Lagos, Nigeria</div></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 10px;"><div style="width:8px;height:8px;border-radius:2px;background:#6D5AA6;"></div><div style="font-size:14px;color:#8A94A6;">Where is it going?</div></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Package</div>
+              <div style="display:flex;gap:10px;">
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-top:3px solid #FF6A2B;">
+                  <div style="font-size:12px;color:#8A94A6;">Weight</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-top:2px;">2.5 kg</div>
+                </div>
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-top:3px solid #6D5AA6;">
+                  <div style="font-size:12px;color:#8A94A6;">Category</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-top:2px;">Gift</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:linear-gradient(135deg,#FFF6EF,#F3EEFB);border-radius:14px;border:1.5px dashed #E3B69A;padding:22px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#8A6A55;">
+              <div style="width:34px;height:34px;border-radius:8px;background:#FF6A2B;"></div>
+              <div style="font-size:13px;font-weight:600;">Add photos of the item</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Your budget</div>
+              <div style="background:linear-gradient(120deg,#0B1220,#3B2A5C);color:#fff;border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:#FF6A2B;">$30</div>
+                <div style="color:#C9BFE3;font-size:13px;">≈ $12/kg · fair rate</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:16px 20px 26px;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-top:1px solid #ECEFF3;">
+            <button style="width:100%;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:16px;">Find a traveler</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">04 · Tracking</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Track shipment" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="height:220px;background:linear-gradient(135deg,#DCE3EE,#EDF0F5);position:relative;overflow:hidden;">
+            <div style="position:absolute;inset:0;background-image:radial-gradient(circle,#C7D0DE 1px,transparent 1px);background-size:16px 16px;"></div>
+            <div style="position:absolute;left:30%;top:60%;width:14px;height:14px;border-radius:50%;background:#FF6A2B;box-shadow:0 0 0 6px rgba(255,106,43,0.2);"></div>
+            <div style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 2px 8px rgba(0,0,0,0.08);">Lagos → London</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:18px;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-left:3px solid #FF6A2B;">
+              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#3B2A5C);"></div>
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:15px;">Sarah B.</div>
+                <div style="color:#8A94A6;font-size:12px;">Your traveler · 5.0 ★</div>
+              </div>
+              <div style="width:36px;height:36px;border-radius:10px;background:#0B1220;"></div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px;">Status</div>
+              <div style="display:flex;flex-direction:column;gap:0;">
+                <div style="display:flex;gap:12px;">
+                  <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:12px;height:12px;border-radius:50%;background:#FF6A2B;"></div><div style="width:2px;flex:1;background:#FF6A2B;min-height:28px;"></div></div>
+                  <div style="padding-bottom:20px;"><div style="font-size:14px;font-weight:600;">Picked up</div><div style="font-size:12px;color:#8A94A6;">Aug 16, 9:40 AM</div></div>
+                </div>
+                <div style="display:flex;gap:12px;">
+                  <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:12px;height:12px;border-radius:50%;background:#FF6A2B;"></div><div style="width:2px;flex:1;background:#E3E7EE;min-height:28px;"></div></div>
+                  <div style="padding-bottom:20px;"><div style="font-size:14px;font-weight:600;">In transit</div><div style="font-size:12px;color:#8A94A6;">Flight BA075 · in the air</div></div>
+                </div>
+                <div style="display:flex;gap:12px;">
+                  <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:12px;height:12px;border-radius:50%;background:#E3E7EE;"></div></div>
+                  <div><div style="font-size:14px;font-weight:600;color:#B8C0D4;">Delivered</div><div style="font-size:12px;color:#B8C0D4;">Est. Aug 16, 6:00 PM</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;display:flex;gap:10px;">
+            <button style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border:1px solid #E3E7EE;color:#0B1220;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Message</button>
+            <button style="flex:1;background:#0B1220;color:#fff;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Call</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">05 · Profile & wallet</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Profile" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="background:linear-gradient(135deg,#0B1220,#3B2A5C 60%,#FF6A2B 140%);padding:20px 20px 26px;color:#fff;border-radius:0 0 24px 24px;">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div style="width:56px;height:56px;border-radius:50%;background:#FF6A2B;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;">A</div>
+              <div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Amara Nwosu</div><div style="color:#8A94A6;font-size:13px;">4.9 ★ · Sender & traveler</div></div>
+            </div>
+          </div>
+          <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="background:linear-gradient(120deg,#fff,#FFF6EF);border-radius:16px;padding:18px;display:flex;justify-content:space-between;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+              <div><div style="font-size:12px;color:#8A94A6;">Wallet balance</div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;margin-top:2px;color:#0B1220;">$142.50</div></div>
+              <button style="background:#FF6A2B;color:#0B1220;border:none;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;">Top up</button>
+            </div>
+            <div style="display:flex;flex-direction:column;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 4px;border-bottom:1px solid #ECEFF3;"><div style="font-size:14px;font-weight:600;">Shipment history</div><div style="color:#B8C0D4;">›</div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 4px;border-bottom:1px solid #ECEFF3;"><div style="font-size:14px;font-weight:600;">Saved addresses</div><div style="color:#B8C0D4;">›</div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 4px;border-bottom:1px solid #ECEFF3;"><div style="font-size:14px;font-weight:600;">Verification &amp; ID</div><div style="color:#34D399;font-size:12px;font-weight:700;">Verified</div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 4px;"><div style="font-size:14px;font-weight:600;">Settings</div><div style="color:#B8C0D4;">›</div></div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">06 · Sign up</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Sign up" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:16px 20px 24px;background:linear-gradient(135deg,#0B1220,#3B2A5C 60%,#FF6A2B 150%);color:#fff;border-radius:0 0 26px 26px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;">Create your account</div>
+            <div style="color:#C9BFE3;font-size:14px;margin-top:6px;">Send parcels or earn as a traveler</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;color:#8A94A6;">Full name</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;color:#8A94A6;">Email address</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;color:#8A94A6;">Phone number</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;color:#8A94A6;">Password</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+              <div style="width:18px;height:18px;border-radius:5px;background:#FF6A2B;"></div>
+              <div style="font-size:12px;color:#4A5568;">I agree to the Terms &amp; Privacy Policy</div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;display:flex;flex-direction:column;gap:12px;">
+            <button style="background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Create account</button>
+            <div style="text-align:center;font-size:13px;color:#8A94A6;">Already have an account? <span style="color:#0B1220;font-weight:700;">Log in</span></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">07 · Matches found</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="3 matches" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">3 travelers match your route</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:2px;">Lagos → London · 2.5kg · $30 budget</div>
+          </div>
+          <div style="flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+            <div style="background:linear-gradient(120deg,#fff,#FFF6EF);border:1.5px solid #FF6A2B;border-radius:16px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(255,106,43,0.12);">
+              <div style="display:flex;justify-content:space-between;"><div style="font-weight:700;font-size:15px;">Sarah B.</div><div style="background:#34D399;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">Best match</div></div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Aug 16 · 5.0★ · 118 trips</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;"><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#FF6A2B;">$28 total</div><button style="background:#0B1220;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;">Request</button></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:16px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);border-left:3px solid #6D5AA6;">
+              <div style="font-weight:700;font-size:15px;">Kwame O.</div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Aug 17 · 4.9★ · 62 trips</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;"><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;">$30 total</div><button style="background:rgba(255,255,255,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.6);color:#0B1220;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;">Request</button></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:16px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);border-left:3px solid #34D399;">
+              <div style="font-weight:700;font-size:15px;">Tunde A.</div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:4px;">Aug 18 · 4.8★ · 40 trips</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;"><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;">$25 total</div><button style="background:rgba(255,255,255,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.6);color:#0B1220;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;">Request</button></div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">08 · Chat</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Sarah B." hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:14px 20px;background:linear-gradient(120deg,#0B1220,#3B2A5C);color:#fff;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#6D5AA6);"></div>
+            <div><div style="font-weight:700;font-size:15px;">Sarah B.</div><div style="color:#5FE0AE;font-size:12px;">Online</div></div>
+          </div>
+          <div style="flex:1;padding:20px;background:linear-gradient(180deg,#F3EEFB,#F5F7FA);display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+            <div style="align-self:flex-start;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;max-width:75%;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 2px 8px rgba(59,42,92,0.06);">Hi! I saw your request for Lagos → London, happy to carry it 🙂</div>
+            <div style="align-self:flex-end;background:#FF6A2B;color:#0B1220;border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:14px;max-width:75%;">Great! It's a small gift box, 2.5kg</div>
+            <div style="align-self:flex-start;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;max-width:75%;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 2px 8px rgba(59,42,92,0.06);">Perfect, that fits easily. Can we meet at the airport Thursday?</div>
+            <div style="align-self:flex-end;background:#FF6A2B;color:#0B1220;border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:14px;max-width:75%;">Works for me 👍</div>
+          </div>
+          <div style="padding:12px 16px 26px;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-top:1px solid #ECEFF3;display:flex;gap:10px;align-items:center;">
+            <div style="flex:1;background:rgba(255,255,255,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.6);border-radius:20px;padding:10px 16px;color:#8A94A6;font-size:14px;">Message</div>
+            <div style="width:38px;height:38px;border-radius:50%;background:#0B1220;"></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">09 · Verification</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Verify identity" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:22px 20px;background:linear-gradient(135deg,#0B1220,#3B2A5C 60%,#FF6A2B 150%);color:#fff;border-radius:0 0 26px 26px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;">Verify your identity</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:6px;">Required before you can send or carry parcels</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-left:3px solid #34D399;">
+              <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;color:#1FAE7A;font-weight:700;">✓</div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Phone number</div><div style="color:#8A94A6;font-size:12px;">Verified</div></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-left:3px solid #34D399;">
+              <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;color:#1FAE7A;font-weight:700;">✓</div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Email address</div><div style="color:#8A94A6;font-size:12px;">Verified</div></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(255,106,43,0.15);border-left:3px solid #FF6A2B;">
+              <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;color:#FF6A2B;font-weight:700;">!</div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Government ID</div><div style="color:#8A94A6;font-size:12px;">Upload passport or national ID</div></div>
+              <div style="color:#B8C0D4;">›</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);border-left:3px solid #E3E7EE;">
+              <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;color:#8A94A6;font-weight:700;">3</div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#8A94A6;">Selfie match</div><div style="color:#B8C0D4;font-size:12px;">Complete ID step first</div></div>
+              <div style="color:#D8DEE8;">›</div>
+            </div>
+            <div style="margin-top:auto;background:#F3EEFB;border-radius:12px;padding:12px 14px;color:#6D5AA6;font-size:12px;line-height:1.5;">Verified members get priority matches and lower fees.</div>
+          </div>
+          <div style="padding:0 20px 26px;">
+            <button style="width:100%;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Continue verification</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">10 · Escrow checkout</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Confirm & pay" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Confirm & pay</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Sarah B. · Lagos → London · Aug 16</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+              <div style="display:flex;justify-content:space-between;font-size:14px;color:#4A5568;"><div>Delivery fee</div><div style="font-weight:700;color:#0B1220;">$28.00</div></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;color:#4A5568;margin-top:10px;"><div>Service fee</div><div style="font-weight:700;color:#0B1220;">$2.10</div></div>
+              <div style="height:1px;background:#ECEFF3;margin:14px 0;"></div>
+              <div style="display:flex;justify-content:space-between;font-size:16px;"><div style="font-weight:700;">Total held in escrow</div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#FF6A2B;">$30.10</div></div>
+            </div>
+            <div style="background:#F3EEFB;border-radius:14px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+              <div style="width:20px;height:20px;border-radius:6px;background:#6D5AA6;flex-shrink:0;margin-top:1px;"></div>
+              <div style="font-size:12px;color:#6D5AA6;line-height:1.5;">Funds are held securely and only released to Sarah once you confirm delivery.</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Pay with</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border:1.5px solid #FF6A2B;">
+                <div style="width:32px;height:22px;border-radius:5px;background:linear-gradient(135deg,#FF6A2B,#6D5AA6);"></div>
+                <div style="flex:1;font-size:14px;font-weight:600;">Wallet balance · $142.50</div>
+                <div style="width:16px;height:16px;border-radius:50%;background:#FF6A2B;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;">
+            <button style="width:100%;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Pay & lock in escrow</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">11 · Notifications</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Notifications" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Notifications</div>
+          </div>
+          <div style="flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-left:3px solid #FF6A2B;">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;color:#FF6A2B;font-weight:700;flex-shrink:0;">↑</div>
+              <div><div style="font-weight:700;font-size:14px;">Sarah picked up your parcel</div><div style="color:#8A94A6;font-size:12px;margin-top:2px;">Lagos → London · 2 min ago</div></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);border-left:3px solid #6D5AA6;">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;color:#6D5AA6;font-weight:700;flex-shrink:0;">3</div>
+              <div><div style="font-weight:700;font-size:14px;">3 new matches for your route</div><div style="color:#8A94A6;font-size:12px;margin-top:2px;">Lagos → London · 1 hr ago</div></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);border-left:3px solid #34D399;">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;color:#1FAE7A;font-weight:700;flex-shrink:0;">$</div>
+              <div><div style="font-weight:700;font-size:14px;">Payment released to Kwame O.</div><div style="color:#8A94A6;font-size:12px;margin-top:2px;">Delivery confirmed · Yesterday</div></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;gap:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.04);opacity:0.7;">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;color:#8A94A6;font-weight:700;flex-shrink:0;">✓</div>
+              <div><div style="font-weight:700;font-size:14px;">Identity verified</div><div style="color:#8A94A6;font-size:12px;margin-top:2px;">2 days ago</div></div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">12 · No matches (empty state)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Searching" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Searching for travelers</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Abuja → Nairobi · 1.5kg</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px;">
+            <div style="width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 1px rgba(255,255,255,0.9), 0 4px 10px rgba(120,130,160,0.18);display:flex;align-items:center;justify-content:center;">
+              <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#FF6A2B,#6D5AA6);"></div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;">No matches yet</div>
+              <div style="color:#8A94A6;font-size:13px;margin-top:6px;max-width:240px;line-height:1.5;">We'll notify you the moment a traveler heads your way. Try widening your dates.</div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;display:flex;flex-direction:column;gap:10px;">
+            <button style="background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Widen search dates</button>
+            <button style="background:transparent;border:1.5px solid #E3E7EE;color:#0B1220;border-radius:14px;padding:16px;font-weight:600;font-size:15px;">Notify me instead</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">13 · Report an issue</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Get help" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Report an issue</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Lagos → London · Sarah B.</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">What went wrong?</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);border-left:3px solid #E25555;">Item damaged or missing</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Traveler never showed up</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Delivery is late</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Payment or refund issue</div>
+            <div style="margin-top:10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;color:#8A94A6;font-size:13px;min-height:70px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Add details to help us resolve this faster…</div>
+          </div>
+          <div style="padding:0 20px 26px;">
+            <button style="width:100%;background:#0B1220;color:#fff;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Submit report</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">14 · Post a trip (traveler)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="New trip" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:22px 20px;background:linear-gradient(135deg,#0B1220,#6D5AA6 60%,#FF6A2B 150%);color:#fff;border-radius:0 0 26px 26px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;">Post your trip</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:6px;">Earn by carrying parcels along your route</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Route & date</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:4px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 10px;border-bottom:1px solid #ECEFF3;"><div style="width:8px;height:8px;border-radius:50%;background:#6D5AA6;"></div><div style="font-size:14px;">Lagos, Nigeria</div></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 10px;border-bottom:1px solid #ECEFF3;"><div style="width:8px;height:8px;border-radius:2px;background:#FF6A2B;"></div><div style="font-size:14px;">Nairobi, Kenya</div></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 10px;"><div style="width:8px;height:8px;border-radius:2px;background:#0B1220;"></div><div style="font-size:14px;color:#8A94A6;">Departure · Aug 22</div></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Available space</div>
+              <div style="display:flex;gap:10px;">
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-top:3px solid #6D5AA6;">
+                  <div style="font-size:12px;color:#8A94A6;">Free capacity</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-top:2px;">6 kg</div>
+                </div>
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);border-top:3px solid #FF6A2B;">
+                  <div style="font-size:12px;color:#8A94A6;">Rate</div>
+                  <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-top:2px;">$10/kg</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Accepts</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <div style="background:#FF6A2B;color:#0B1220;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;">Documents</div>
+                <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border:1px solid #E3E7EE;color:#4A5568;border-radius:20px;padding:7px 14px;font-size:13px;">Electronics</div>
+                <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border:1px solid #E3E7EE;color:#4A5568;border-radius:20px;padding:7px 14px;font-size:13px;">Gifts</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;">
+            <button style="width:100%;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Publish trip</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">15 · Traveler earnings</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Earnings" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:22px 20px 28px;background:linear-gradient(135deg,#0B1220,#6D5AA6 60%,#FF6A2B 150%);color:#fff;border-radius:0 0 26px 26px;">
+            <div style="color:#C9BFE3;font-size:13px;">Total earnings</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:32px;margin-top:4px;">$1,284.00</div>
+            <div style="display:flex;gap:20px;margin-top:14px;">
+              <div><div style="font-size:11px;color:#C9BFE3;">This month</div><div style="font-weight:700;font-size:15px;">$312</div></div>
+              <div><div style="font-size:11px;color:#C9BFE3;">Trips</div><div style="font-weight:700;font-size:15px;">47</div></div>
+              <div><div style="font-size:11px;color:#C9BFE3;">Rating</div><div style="font-weight:700;font-size:15px;">4.9 ★</div></div>
+            </div>
+          </div>
+          <div style="flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+            <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;">Recent payouts</div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">
+              <div><div style="font-weight:700;font-size:14px;">Lagos → London</div><div style="color:#8A94A6;font-size:12px;">Amara N. · Aug 16</div></div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1FAE7A;">+$28.00</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">
+              <div><div style="font-weight:700;font-size:14px;">Accra → Lagos</div><div style="color:#8A94A6;font-size:12px;">David K. · Aug 12</div></div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1FAE7A;">+$19.50</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">
+              <div><div style="font-weight:700;font-size:14px;">Nairobi → Lagos</div><div style="color:#8A94A6;font-size:12px;">Fatima S. · Aug 8</div></div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1FAE7A;">+$34.00</div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;">
+            <button style="width:100%;background:#0B1220;color:#fff;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Withdraw to bank</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">16 · Delivery confirmation</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Confirm delivery" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Confirm delivery</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Lagos → London · Sarah B.</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;">
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;border:1.5px dashed #E3B69A;padding:26px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+              <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#FF6A2B,#6D5AA6);"></div>
+              <div style="font-size:13px;font-weight:600;color:#8A6A55;">Proof-of-delivery photo received</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Rate your traveler</div>
+              <div style="display:flex;gap:8px;justify-content:center;">
+                <div style="font-size:28px;color:#FF6A2B;">★</div><div style="font-size:28px;color:#FF6A2B;">★</div><div style="font-size:28px;color:#FF6A2B;">★</div><div style="font-size:28px;color:#FF6A2B;">★</div><div style="font-size:28px;color:#FF6A2B;">★</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:14px 16px;color:#8A94A6;font-size:13px;min-height:60px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Leave a note for Sarah (optional)…</div>
+          </div>
+          <div style="padding:0 20px 26px;">
+            <button style="width:100%;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Confirm & release payment</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">17 · Filter results</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Filters" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Filter trips</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Lagos → anywhere</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:18px;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Departure window</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;background:#FF6A2B;color:#0B1220;text-align:center;border-radius:12px;padding:10px;font-size:13px;font-weight:700;">This week</div>
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);text-align:center;border-radius:12px;padding:10px;font-size:13px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">This month</div>
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);text-align:center;border-radius:12px;padding:10px;font-size:13px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Flexible</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Max price per kg</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.08);">
+                <div style="display:flex;justify-content:space-between;font-size:14px;"><div style="color:#8A94A6;">Up to</div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#FF6A2B;">$15/kg</div></div>
+                <div style="height:6px;border-radius:3px;background:#E3E7EE;margin-top:12px;position:relative;"><div style="position:absolute;left:0;top:0;height:6px;width:60%;border-radius:3px;background:#FF6A2B;"></div><div style="position:absolute;left:60%;top:-5px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #FF6A2B;"></div></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Traveler rating</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;background:#FF6A2B;color:#0B1220;text-align:center;border-radius:12px;padding:10px;font-size:13px;font-weight:700;">4.5+ ★</div>
+                <div style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);text-align:center;border-radius:12px;padding:10px;font-size:13px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">Any rating</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;display:flex;gap:10px;">
+            <button style="flex:1;background:rgba(255,255,255,0.55);backdrop-filter:blur(10px);border:1px solid #E3E7EE;color:#0B1220;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Reset</button>
+            <button style="flex:2;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Show 12 trips</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">18 · Settings</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Settings" hint-size="390,844">
+        <div style="height:100%;background:radial-gradient(circle at 12% 15%, rgba(255,106,43,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(109,90,166,0.18), transparent 48%), linear-gradient(165deg,#E9ECF4 0%,#DDE2EE 55%,#E6E9F2 100%);display:flex;flex-direction:column;color:#0B1220;">
+          <div style="padding:20px;background:linear-gradient(120deg,#0B1220,#3B2A5C 70%,#FF6A2B 150%);color:#fff;border-radius:0 0 22px 22px;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Settings</div>
+          </div>
+          <div style="flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:16px;overflow:hidden;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Account</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #ECEFF3;"><div style="font-size:14px;font-weight:600;">Payment methods</div><div style="color:#B8C0D4;">›</div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;"><div style="font-size:14px;font-weight:600;">Language</div><div style="color:#8A94A6;font-size:13px;">English</div></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Notifications</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #ECEFF3;"><div style="font-size:14px;font-weight:600;">Push notifications</div><div style="width:40px;height:22px;border-radius:11px;background:#FF6A2B;position:relative;"><div style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;"><div style="font-size:14px;font-weight:600;">Email updates</div><div style="width:40px;height:22px;border-radius:11px;background:#E3E7EE;position:relative;"><div style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8A94A6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Support</div>
+              <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,0.7);border-radius:14px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.7), 0 4px 14px rgba(59,42,92,0.06);">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #ECEFF3;"><div style="font-size:14px;font-weight:600;">Help center</div><div style="color:#B8C0D4;">›</div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#E25555;">Log out</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">19 · Notification permission</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+        <div style="height:100%;background:linear-gradient(160deg,#0B1220 0%,#1A2540 60%,#0B1220 100%);display:flex;flex-direction:column;color:#F5F7FA;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-60px;left:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(109,90,166,0.3),transparent 70%);"></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:20px;position:relative;z-index:1;">
+            <div style="width:84px;height:84px;border-radius:24px;background:rgba(255,255,255,0.1);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.3), 0 8px 24px rgba(0,0,0,0.3);">
+              <div style="width:36px;height:36px;border-radius:10px;background:#FF6A2B;"></div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;">Stay in the loop</div>
+              <div style="color:#B8C0D4;font-size:14px;margin-top:8px;line-height:1.5;max-width:260px;">Get notified when a traveler matches your route or your parcel status changes.</div>
+            </div>
+          </div>
+          <div style="padding:0 28px 28px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;">
+            <button style="background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:16px;">Allow notifications</button>
+            <button style="background:transparent;color:#B8C0D4;border:none;padding:8px;font-weight:600;font-size:14px;">Not now</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="color:#8A94A6;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">20 · Full-glass tracking (deep variant)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+        <div style="height:100%;background:rgba(11,18,32,0.35);backdrop-filter:blur(2px) saturate(140%);-webkit-backdrop-filter:blur(2px) saturate(140%);display:flex;flex-direction:column;color:#fff;position:relative;overflow:hidden;">
+          <div style="padding:20px;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid rgba(255,255,255,0.12);">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">Track shipment</div>
+            <div style="color:#C9BFE3;font-size:13px;margin-top:4px;">Lagos → London · Sarah B.</div>
+          </div>
+          <div style="flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;">
+            <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.25);border-radius:18px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.3), 0 8px 24px rgba(0,0,0,0.25);">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FF6A2B,#6D5AA6);"></div>
+                <div><div style="font-weight:700;font-size:15px;">Sarah B.</div><div style="color:#C9BFE3;font-size:12px;">In transit · Flight BA075</div></div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.25);border-radius:18px;padding:16px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.3), 0 8px 24px rgba(0,0,0,0.25);">
+              <div style="font-size:12px;color:#C9BFE3;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Current status</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:#FF9E6B;">On the way</div>
+              <div style="color:#B8C0D4;font-size:13px;margin-top:4px;">Estimated delivery Today, 6:00 PM</div>
+            </div>
+          </div>
+          <div style="padding:0 20px 26px;display:flex;gap:10px;">
+            <button style="flex:1;background:rgba(255,255,255,0.1);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Message</button>
+            <button style="flex:1;background:#FF6A2B;color:#0B1220;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:15px;">Call</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { step: 0 };
+  renderVals() {
+    return {
+      isRequest: this.state.step === 0,
+      isMatches: this.state.step === 1,
+      isPay: this.state.step === 2,
+      isTrack: this.state.step === 3,
+      canBack: this.state.step > 0,
+      canNext: this.state.step < 3,
+      next: () => this.setState(s => ({ step: Math.min(s.step + 1, 3) })),
+      back: () => this.setState(s => ({ step: Math.max(s.step - 1, 0) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

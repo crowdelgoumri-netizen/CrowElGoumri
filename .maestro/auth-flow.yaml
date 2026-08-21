@@ -1,35 +1,45 @@
 appId: host.exp.exponent
 ---
-# Auth flow smoke test: signup, verify phone, land on home screen
+# Auth flow smoke test: signup, verify phone, land on home screen.
+# Precondition: a LOGGED-OUT app (the session persists across runs —
+# clear Expo Go's app data or log out first, or the flow fails at
+# the "Bonjour" login-screen assertion).
 - launchApp
 
-# Expo Go opens to its home screen. Navigate into the CrowdShipping project
-# by tapping the "Enter URL manually" field and entering the dev server URL.
-- tapOn: "Enter URL manually"
-- inputText: "exp://localhost:8081"
-- tapOn: "Go"
+# Dismiss system ANR dialog + Expo Go first-launch dialogs
+- evalScript:
+    script: |
+      if (await isVisible('Wait')) { await tapOn('Wait'); await sleep(1000); }
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
+
+# Open the dev server directly. Expo Go's home screen differs by version
+# (recent-servers list vs "Enter URL manually" button), so don't navigate
+# its UI — deep-link instead. localhost works because the runner sets up
+# `adb reverse tcp:8081 tcp:8081`.
+- openLink: "exp://localhost:8081"
 - waitForAnimationToEnd:
-    timeout: 15000
+    timeout: 30000
 
-# Dismiss Android compatibility dialog if it appears (first launch only)
+# Dismiss Android compatibility dialog / dev-menu intro if it appears
 - evalScript:
     script: |
-      if (await isVisible('OK')) {
-        await tapOn("Don't Show Again");
-        await sleep(1000);
-      }
-
-# Dismiss Expo developer menu intro if it appears
-- evalScript:
-    script: |
-      if (await isVisible('Continue')) {
-        await tapOn('Continue');
-        await sleep(500);
-      }
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
 
 # Wait for JS bundle to load
 - waitForAnimationToEnd:
     timeout: 15000
+
+# The emulated device can starve while Metro compiles the first bundle and
+# throw a "System UI isn't responding" ANR over the app — keep dismissing
+# until it stops coming back.
+- evalScript:
+    script: |
+      for (let i = 0; i < 5; i++) {
+        if (await isVisible('Wait')) { await tapOn('Wait'); await sleep(2000); }
+        else break;
+      }
 
 # Should be on login screen
 - assertVisible: "Bonjour"

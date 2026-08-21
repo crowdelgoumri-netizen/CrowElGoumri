@@ -1,0 +1,65 @@
+appId: host.exp.exponent
+---
+# i18n smoke: boot the app, verify FR renders, then flip to EN and back.
+# Navigation uses expo-router deep links throughout (exp://host/--/route):
+# Expo Go's home screen differs by version, and `back` from a deep-linked
+# screen exits the app, so don't rely on either. localhost works because
+# the runner sets up `adb reverse tcp:8081 tcp:8081` first.
+# Needs a logged-in session (the language selector is behind the auth wall)
+# — run auth-flow.yaml first or reuse an existing one.
+- launchApp
+
+# Dismiss system ANR dialog + Expo Go first-launch dialogs
+- evalScript:
+    script: |
+      if (await isVisible('Wait')) { await tapOn('Wait'); await sleep(1000); }
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
+
+- openLink: "exp://localhost:8081/--/settings"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+- evalScript:
+    script: |
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
+- waitForAnimationToEnd
+
+- takeScreenshot: boot-state
+
+# The app PERSISTS the language choice, so a previous run may have left it
+# in EN. Normalize to FR before asserting anything. (The selector options
+# always show native names: Français / English.)
+- tapOn: "Français"
+- waitForAnimationToEnd
+- assertVisible: "Paramètres"
+- assertVisible: "Préférences"
+- takeScreenshot: fr-settings
+
+# --- Flip to EN: settings content switches live ---
+- tapOn: "English"
+- waitForAnimationToEnd
+- assertVisible: "Settings"
+- assertVisible: "Preferences"
+- takeScreenshot: en-settings
+
+# --- Tab bar + profile screen in EN ((tabs) group is URL-stripped) ---
+- openLink: "exp://localhost:8081/--/profile"
+- waitForAnimationToEnd
+- assertVisible: "Wallet"
+- assertVisible: "Home"
+- takeScreenshot: en-profile
+
+# --- Flip back to FR and close the loop ---
+- openLink: "exp://localhost:8081/--/settings"
+- waitForAnimationToEnd
+- tapOn: "Français"
+- waitForAnimationToEnd
+- assertVisible: "Paramètres"
+- assertVisible: "Préférences"
+- openLink: "exp://localhost:8081/--/profile"
+- waitForAnimationToEnd
+- assertVisible: "Portefeuille"
+- assertVisible: "Accueil"
+- takeScreenshot: fr-restored

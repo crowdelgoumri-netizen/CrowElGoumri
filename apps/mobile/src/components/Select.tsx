@@ -1,13 +1,15 @@
 /**
- * Select — a label + tap-to-open bottom-sheet picker.
+ * Select — a label + tap-to-open inline dropdown.
  *
- * Aurora glass surface matching Input. Modal uses chrome background.
+ * Options expand right under the field (no modal/bottom sheet — simpler and
+ * stays in flow on small screens). List height is fixed, not maxHeight:
+ * maxHeight is ignored on Android inside these unbounded containers, which
+ * let long option lists (58 wilayas) grow unbounded.
  */
 import { useState } from "react";
 import {
-  FlatList,
-  Modal,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -30,6 +32,9 @@ interface SelectProps {
   error?: string | null;
 }
 
+const ROW_HEIGHT = 56;
+const LIST_MAX = 264;
+
 export function Select({
   label,
   value,
@@ -51,7 +56,7 @@ export function Select({
     <View className="w-full">
       <Text className="text-text-secondary text-xs font-body mb-1.5 ml-1">{label}</Text>
       <Pressable
-        onPress={() => setOpen(true)}
+        onPress={() => setOpen((o) => !o)}
         className={clsx(
           "h-14 rounded-field px-card-padding flex-row items-center justify-between",
           "bg-glass border",
@@ -67,54 +72,43 @@ export function Select({
         >
           {selected?.label ?? placeholder ?? t("select.placeholder")}
         </Text>
-        <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+        <Ionicons
+          name={open ? "chevron-up" : "chevron-down"}
+          size={18}
+          color={colors.textMuted}
+        />
       </Pressable>
       {error ? (
         <Text className="text-danger text-xs font-body mt-1 ml-1">{error}</Text>
       ) : null}
 
-      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
-        <Pressable className="flex-1 justify-end" onPress={() => setOpen(false)}>
-          <View className="flex-1 bg-black/50" />
-          <View
-            className="bg-glass-strong border-t border-hairline rounded-t-card pb-xl"
-            onStartShouldSetResponder={() => true}
+      {open ? (
+        <View className="mt-2 rounded-field bg-glass-strong border border-hairline overflow-hidden">
+          <ScrollView
+            nestedScrollEnabled
+            style={{ height: Math.min(opts.length * ROW_HEIGHT, LIST_MAX) }}
           >
-            <View className="items-center py-3">
-              <View className="h-1 w-10 rounded-full bg-divider" />
-            </View>
-            {/* Padding on a wrapper View — padding on <Text> is ignored on
-                Android, which left this title flush against the edge. */}
-            <View className="px-card-padding pb-sm">
-              <Text className="text-text-primary font-heading font-bold text-lg">
-                {label}
-              </Text>
-            </View>
-            <FlatList
-              data={opts}
-              keyExtractor={(o) => o.value}
-              renderItem={({ item }) => {
-                const active = item.value === value;
-                return (
-                  <Pressable
-                    onPress={() => {
-                      onSelect(item.value);
-                      setOpen(false);
-                    }}
-                    className="flex-row items-center justify-between px-lg py-md"
-                  >
-                    <Text className="text-oncard font-body text-base">{item.label}</Text>
-                    {active ? (
-                      <Ionicons name="checkmark" size={20} color={colors.accent} />
-                    ) : null}
-                  </Pressable>
-                );
-              }}
-              style={{ maxHeight: 420 }}
-            />
-          </View>
-        </Pressable>
-      </Modal>
+            {opts.map((o) => {
+              const active = o.value === value;
+              return (
+                <Pressable
+                  key={o.value}
+                  onPress={() => {
+                    onSelect(o.value);
+                    setOpen(false);
+                  }}
+                  className="flex-row items-center justify-between px-card-padding py-3"
+                >
+                  <Text className="text-oncard font-body text-base">{o.label}</Text>
+                  {active ? (
+                    <Ionicons name="checkmark" size={20} color={colors.accent} />
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      ) : null}
     </View>
   );
 }

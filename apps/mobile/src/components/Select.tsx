@@ -83,9 +83,13 @@ export function Select({
             <View className="items-center py-3">
               <View className="h-1 w-10 rounded-full bg-divider" />
             </View>
-            <Text className="text-text-primary font-heading font-bold text-lg px-card-padding pb-sm">
-              {label}
-            </Text>
+            {/* Padding on a wrapper View — padding on <Text> is ignored on
+                Android, which left this title flush against the edge. */}
+            <View className="px-card-padding pb-sm">
+              <Text className="text-text-primary font-heading font-bold text-lg">
+                {label}
+              </Text>
+            </View>
             <FlatList
               data={opts}
               keyExtractor={(o) => o.value}

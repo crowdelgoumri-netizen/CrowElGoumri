@@ -79,6 +79,13 @@ export default {
         "card-padding": "16px",
         "stack-gap": "12px",
         "section-gap": "14px",
+        // Classic step scale — components already write p-lg/px-md/etc.
+        // (~30 usages); without these keys those utilities silently match
+        // nothing and the padding never renders.
+        sm: "8px",
+        md: "12px",
+        lg: "18px",
+        xl: "28px",
       },
       fontSize: {
         hero: ["42px", { lineHeight: "1.02", letterSpacing: "-0.035em" }],

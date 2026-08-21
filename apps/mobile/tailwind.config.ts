@@ -37,6 +37,13 @@ export default {
         "text-secondary": "var(--color-text-secondary)",
         "text-muted": "var(--color-text-muted)",
         "text-oncard": "var(--color-text-oncard)",
+        // Short-form aliases. Components use the intuitive short classes
+        // (text-oncard, bg-success/20, text-info…) rather than the doubled
+        // forms the *-text/*-bg keys above would generate — map them to the
+        // text-grade vars; the /opacity modifier handles tint backgrounds.
+        oncard: "var(--color-text-oncard)",
+        success: "var(--color-success-text)",
+        info: "var(--color-info-text)",
         // Accent
         accent: "var(--color-accent)",
         "accent-on": "var(--color-accent-on)",

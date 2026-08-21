@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../src/store/auth";
 import { listNotifications } from "../../src/lib/notifications-api";
 import { useAsync } from "../../src/hooks/useAsync";
@@ -24,6 +25,9 @@ import { useThemeColors } from "../../src/hooks/useThemeColors";
 export default function TabsLayout() {
   const colors = useThemeColors();
   const { t } = useTranslation();
+  // Lift the tab bar above the Android gesture/3-button nav bar — without
+  // this, the system bar overlays the tabs on physical devices.
+  const insets = useSafeAreaInsets();
   const tokens = useAuth((s) => s.tokens);
   const [fabOpen, setFabOpen] = useState(false);
 
@@ -56,8 +60,8 @@ export default function TabsLayout() {
           tabBarStyle: {
             backgroundColor: colors.chromeBar,
             borderTopColor: colors.chromeBorder,
-            height: 64,
-            paddingBottom: 8,
+            height: 64 + insets.bottom,
+            paddingBottom: 8 + insets.bottom,
             paddingTop: 8,
           },
           tabBarActiveTintColor: colors.accent,
@@ -101,7 +105,7 @@ export default function TabsLayout() {
         onPress={openFab}
         className="absolute rounded-full bg-accent items-center justify-center active:opacity-80"
         style={{
-          bottom: 38,
+          bottom: 38 + insets.bottom,
           alignSelf: "center",
           width: 60,
           height: 60,

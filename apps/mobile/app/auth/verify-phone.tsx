@@ -73,6 +73,7 @@ export default function VerifyPhoneScreen() {
           autoCorrect={false}
           keyboardType="number-pad"
           maxLength={6}
+          testID="verify-code"
         />
 
         {isDevOtpMode() ? (

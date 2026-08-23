@@ -207,6 +207,7 @@ export default function PostParcelScreen() {
               placeholder={t("postParcel.descriptionPlaceholder")}
               multiline
               className="h-24"
+              testID="parcel-description"
             />
             <Select
               label={t("postParcel.category")}
@@ -220,6 +221,7 @@ export default function PostParcelScreen() {
               onChangeText={setWeightKg}
               keyboardType="numeric"
               placeholder="2.5"
+              testID="parcel-weight"
             />
             <Input
               label={t("postParcel.value")}
@@ -227,16 +229,17 @@ export default function PostParcelScreen() {
               onChangeText={setEstimatedValue}
               keyboardType="numeric"
               placeholder="350"
+              testID="parcel-value"
             />
             <View className="flex-row gap-stack-gap">
               <View className="flex-1">
-                <Input label={t("postParcel.length")} value={lengthCm} onChangeText={setLengthCm} keyboardType="numeric" />
+                <Input label={t("postParcel.length")} value={lengthCm} onChangeText={setLengthCm} keyboardType="numeric" testID="parcel-length" />
               </View>
               <View className="flex-1">
-                <Input label={t("postParcel.width")} value={widthCm} onChangeText={setWidthCm} keyboardType="numeric" />
+                <Input label={t("postParcel.width")} value={widthCm} onChangeText={setWidthCm} keyboardType="numeric" testID="parcel-width" />
               </View>
               <View className="flex-1">
-                <Input label={t("postParcel.height")} value={heightCm} onChangeText={setHeightCm} keyboardType="numeric" />
+                <Input label={t("postParcel.height")} value={heightCm} onChangeText={setHeightCm} keyboardType="numeric" testID="parcel-height" />
               </View>
             </View>
 
@@ -298,12 +301,14 @@ export default function PostParcelScreen() {
               label={t("postParcel.recipientName")}
               value={recipientName}
               onChangeText={setRecipientName}
+              testID="parcel-recipient-name"
             />
             <Input
               label={t("postParcel.recipientPhone")}
               value={recipientPhone}
               onChangeText={setRecipientPhone}
               keyboardType="phone-pad"
+              testID="parcel-recipient-phone"
             />
           </View>
         ) : null}
@@ -322,6 +327,7 @@ export default function PostParcelScreen() {
               onChangeText={setOfferedPrice}
               keyboardType="numeric"
               placeholder="30"
+              testID="parcel-price"
             />
             <Card raised className="gap-2 mt-sm">
               <Text className="font-mono text-meta uppercase text-text-secondary">{t("postParcel.summary")}</Text>

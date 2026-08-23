@@ -4,8 +4,8 @@
  * Glass surface + hairline border per Aurora design. Focus border = accent.
  * Label sits above and the error below, so layout never jumps when validation fires.
  */
-import { useState } from "react";
-import { Text, TextInput, type TextInputProps, View } from "react-native";
+import { useRef, useState } from "react";
+import { Pressable, Text, TextInput, View, type TextInputProps } from "react-native";
 import { clsx } from "../lib/clsx";
 import { useThemeColors } from "../hooks/useThemeColors";
 
@@ -16,11 +16,16 @@ interface InputProps extends TextInputProps {
 
 export function Input({ label, error, className, ...rest }: InputProps) {
   const colors = useThemeColors();
+  const inputRef = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
   return (
     <View className="w-full">
-      <Text className="text-text-secondary text-xs font-body mb-1.5 ml-1">{label}</Text>
+      {/* Tapping the label focuses the field (bigger touch target). */}
+      <Pressable onPress={() => inputRef.current?.focus()}>
+        <Text className="text-text-secondary text-xs font-body mb-1.5 ml-1">{label}</Text>
+      </Pressable>
       <TextInput
+        ref={inputRef}
         placeholderTextColor={colors.placeholder}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

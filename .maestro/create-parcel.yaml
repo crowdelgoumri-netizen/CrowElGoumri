@@ -2,30 +2,41 @@ appId: host.exp.exponent
 ---
 # Create parcel smoke test: opens FAB, fills wizard, asserts parcel detail
 # Run this AFTER auth-flow.yaml (which authenticates the user)
-- launchApp
+#
+# Notes:
+# - Maestro's text matching anchors on the FULL label — use "Europe.*", not
+#   "Europe".
+# - No hideKeyboard here: it sends BACK, which closes the wizard modal.
+#   Instead swipe up between inputs — the drag dismisses the keyboard
+#   (Screen sets keyboardDismissMode="on-drag") and reveals lower fields.
+- launchApp:
+    appId: host.exp.exponent
 
-# Navigate into CrowdShipping project via Expo Go URL entry
-- tapOn: "Enter URL manually"
-- inputText: "exp://localhost:8081"
-- tapOn: "Go"
-- waitForAnimationToEnd:
-    timeout: 15000
-
-# Dismiss any startup dialogs
+# Dismiss system ANR dialog + Expo Go first-launch dialogs
 - evalScript:
     script: |
-      if (await isVisible('OK')) {
-        await tapOn("Don't Show Again");
-        await sleep(1000);
-      }
-      if (await isVisible('Continue')) {
-        await tapOn('Continue');
-        await sleep(500);
-      }
+      if (await isVisible('Wait')) { await tapOn('Wait'); await sleep(1000); }
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
+
+# Open the dev server by deep link (Expo Go's home screen differs by
+# version; localhost works via `adb reverse tcp:8081 tcp:8081`).
+- openLink: "exp://10.0.2.2:8081"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Dismiss Android compatibility dialog / dev-menu intro if it appears
+- evalScript:
+    script: |
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
 - waitForAnimationToEnd
 
-# Wait for home screen
-- assertVisible: "Europe"
+# Wait for home screen (bundle may still be downloading after a Metro
+# restart — give it up to 90s)
+- extendedWaitUntil:
+    visible: "Europe.*"
+    timeout: 900000
 
 # Open the FAB chooser
 - tapOn:
@@ -37,25 +48,49 @@ appId: host.exp.exponent
 - assertVisible: "Envoyer un colis"
 - assertVisible: "Colis"
 
-# Step 1: Colis details
-- tapOn: "Description"
-- inputText: "Téléphone pour mon frère"
+# Step 1: Colis details — typed strings avoid the letter "r" (Expo Go
+# dev reload shortcut; see auth-flow.yaml).
+# Text inputs are tapped by testID (locale-independent, no regex traps);
+# Selects by their visible label text.
+# scrollUntilVisible (not fixed swipes) between fields: the scroll reveals
+# the next field deterministically, and Screen's keyboardDismissMode="on-drag"
+# dismisses the keyboard during the drag.
+- tapOn:
+    id: "parcel-description"
+- inputText: "Colis test e2e"
+- scrollUntilVisible:
+    element:
+      id: "parcel-weight"
 - tapOn: "Catégorie"
 - tapOn: "Électronique"
-- tapOn: "Poids (kg)"
+- tapOn:
+    id: "parcel-weight"
 - inputText: "1.5"
-- tapOn: "Valeur estimée"
+- scrollUntilVisible:
+    element:
+      id: "parcel-value"
+- tapOn:
+    id: "parcel-value"
 - inputText: "250"
-- tapOn: "L (cm)"
+- scrollUntilVisible:
+    element:
+      id: "parcel-length"
+- tapOn:
+    id: "parcel-length"
 - inputText: "15"
-- tapOn: "l (cm)"
+- tapOn:
+    id: "parcel-width"
 - inputText: "10"
-- tapOn: "h (cm)"
+- tapOn:
+    id: "parcel-height"
 - inputText: "5"
 
 # Next to step 2
+- scrollUntilVisible:
+    element:
+      text: "Continuer.*"
 - tapOn: "Continuer"
-- assertVisible: "Itinéraire"
+- assertVisible: "Itinéraire.*"
 
 # Step 2: Route
 - tapOn: "Pays d'origine"
@@ -64,18 +99,30 @@ appId: host.exp.exponent
 - tapOn: "Paris"
 - tapOn: "Wilaya de destination"
 - tapOn: "Alger"
-- tapOn: "Nom du destinataire"
-- inputText: "Karim"
-- tapOn: "Téléphone du destinataire"
-- inputText: "+213550000002"
+- tapOn:
+    id: "parcel-recipient-name"
+- inputText: "Kamil"
+- scrollUntilVisible:
+    element:
+      id: "parcel-recipient-phone"
+- tapOn:
+    id: "parcel-recipient-phone"
+- inputText: "550000002"
 
 # Next to step 3
+- scrollUntilVisible:
+    element:
+      text: "Continuer.*"
 - tapOn: "Continuer"
-- assertVisible: "Prix"
+- assertVisible: "Prix.*"
 
 # Step 3: Pricing and submit
 - tapOn: "Urgence"
 - tapOn: "Modéré"
-- tapOn: "Prix proposé"
+- tapOn:
+    id: "parcel-price"
 - inputText: "15"
+- scrollUntilVisible:
+    element:
+      text: "Publier.*"
 - tapOn: "Publier"

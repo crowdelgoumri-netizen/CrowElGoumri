@@ -7,7 +7,8 @@ appId: host.exp.exponent
 # the runner sets up `adb reverse tcp:8081 tcp:8081` first.
 # Needs a logged-in session (the language selector is behind the auth wall)
 # — run auth-flow.yaml first or reuse an existing one.
-- launchApp
+- launchApp:
+    appId: host.exp.exponent
 
 # Dismiss system ANR dialog + Expo Go first-launch dialogs
 - evalScript:
@@ -16,7 +17,7 @@ appId: host.exp.exponent
       if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
       if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
 
-- openLink: "exp://localhost:8081/--/settings"
+- openLink: "exp://10.0.2.2:8081/--/settings"
 - waitForAnimationToEnd:
     timeout: 30000
 
@@ -25,6 +26,12 @@ appId: host.exp.exponent
       if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
       if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
 - waitForAnimationToEnd
+
+# If the app was killed between flows this openLink cold-starts it —
+# wait out the "Loading…" screen before touching the language selector.
+- extendedWaitUntil:
+    visible: "Français"
+    timeout: 900000
 
 - takeScreenshot: boot-state
 
@@ -45,20 +52,20 @@ appId: host.exp.exponent
 - takeScreenshot: en-settings
 
 # --- Tab bar + profile screen in EN ((tabs) group is URL-stripped) ---
-- openLink: "exp://localhost:8081/--/profile"
+- openLink: "exp://10.0.2.2:8081/--/profile"
 - waitForAnimationToEnd
 - assertVisible: "Wallet"
 - assertVisible: "Home"
 - takeScreenshot: en-profile
 
 # --- Flip back to FR and close the loop ---
-- openLink: "exp://localhost:8081/--/settings"
+- openLink: "exp://10.0.2.2:8081/--/settings"
 - waitForAnimationToEnd
 - tapOn: "Français"
 - waitForAnimationToEnd
 - assertVisible: "Paramètres"
 - assertVisible: "Préférences"
-- openLink: "exp://localhost:8081/--/profile"
+- openLink: "exp://10.0.2.2:8081/--/profile"
 - waitForAnimationToEnd
 - assertVisible: "Portefeuille"
 - assertVisible: "Accueil"

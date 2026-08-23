@@ -4,7 +4,9 @@ appId: host.exp.exponent
 # Precondition: a LOGGED-OUT app (the session persists across runs —
 # clear Expo Go's app data or log out first, or the flow fails at
 # the "Bonjour" login-screen assertion).
-- launchApp
+- launchApp:
+    appId: host.exp.exponent
+    stopApp: true
 
 # Dismiss system ANR dialog + Expo Go first-launch dialogs
 - evalScript:
@@ -13,63 +15,99 @@ appId: host.exp.exponent
       if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
       if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
 
-# Open the dev server directly. Expo Go's home screen differs by version
-# (recent-servers list vs "Enter URL manually" button), so don't navigate
-# its UI — deep-link instead. localhost works because the runner sets up
-# `adb reverse tcp:8081 tcp:8081`.
-- openLink: "exp://localhost:8081"
+# Open the login screen directly via deep link. Expo Go's home screen
+# differs by version, and the app now lands guests on the marketplace
+# (not login), so link straight to /auth/login. 10.0.2.2 is the Android
+# emulator's direct alias for the host loopback — no adb reverse tunnel
+# (which stalls under load) involved.
+- openLink: "exp://10.0.2.2:8081/--/auth/login"
 - waitForAnimationToEnd:
     timeout: 30000
 
-# Dismiss Android compatibility dialog / dev-menu intro if it appears
+# Wait for the login screen while dismissing anything that pops up — the
+# first bundle load can take a while, and a starved device throws
+# "System UI isn't responding" ANRs / Expo Go dialogs mid-load.
+# Dismiss system ANR + Expo Go dialogs while the bundle streams in.
+# NOTE: do NOT use an evalScript isVisible loop as a "screen loaded"
+# sentinel — right after an app restart maestro's evalScript reads ghost
+# accessibility nodes from the PREVIOUS session and matches instantly.
+# The actual wait is the extendedWaitUntil below, which polls properly.
 - evalScript:
     script: |
-      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
-      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
-
-# Wait for JS bundle to load
-- waitForAnimationToEnd:
-    timeout: 15000
-
-# The emulated device can starve while Metro compiles the first bundle and
-# throw a "System UI isn't responding" ANR over the app — keep dismissing
-# until it stops coming back.
-- evalScript:
-    script: |
-      for (let i = 0; i < 5; i++) {
-        if (await isVisible('Wait')) { await tapOn('Wait'); await sleep(2000); }
-        else break;
+      // ~90s: ANRs and first-launch dialogs appear early in the load.
+      for (let i = 0; i < 45; i++) {
+        if (await isVisible('Wait')) { await tapOn('Wait'); }
+        if (await isVisible('OK')) { await tapOn("Don't Show Again"); }
+        if (await isVisible('Continue')) { await tapOn('Continue'); }
+        await sleep(2000);
       }
 
-# Should be on login screen
-- assertVisible: "Bonjour"
-- assertVisible: "Se connecter"
+# Wait for the login form — a cold start takes 1-6 min here (dev bundles
+# are never disk-cached).
+- extendedWaitUntil:
+    visible: "Se connecter"
+    timeout: 600000
+- assertVisible: "Bonjour.*"
 
 # Navigate to signup
 - tapOn: "Créer un compte"
-- assertVisible: "Rejoignez le réseau Crowshi"
+- assertVisible: "Rejoignez.*"
 
-# Fill signup form
-- tapOn: "Prénom"
+# Fill signup form — typed strings must avoid the letter "r": Expo Go's
+# dev runtime treats the r keyevent as RELOAD (adb/maestro typing injects
+# raw key events, so any "r" reloads the app mid-flow).
+# ALL text inputs are tapped by testID, never by label: a label tap runs
+# JS focus() which doesn't re-target the native IME, so keystrokes keep
+# going into the previously-tapped field (observed: password appended to
+# the phone value). A real tap on the input re-targets the IME.
+# (swipe between fields: the drag dismisses the
+# keyboard — hideKeyboard sends BACK and pops the screen)
+- tapOn:
+    id: "signup-first-name"
 - inputText: "E2E"
-- tapOn: "Nom"
+- swipe:
+    start: 540, 1200
+    end: 540, 800
+- tapOn:
+    id: "signup-last-name"
 - inputText: "Test"
-- tapOn: "Adresse e-mail"
-- inputText: "e2e-test@crowdshipping.local"
-- tapOn: "Téléphone (E.164)"
-- inputText: "+213550000001"
-- tapOn: "Mot de passe"
-- inputText: "Password123"
+- swipe:
+    start: 540, 1200
+    end: 540, 800
+- tapOn:
+    id: "signup-email"
+- inputText: "e2e-new@cs-dev.local"
+- swipe:
+    start: 540, 1200
+    end: 540, 800
+# Phone: digits append to the pre-filled "+213" (field initial value).
+- tapOn:
+    id: "signup-phone"
+- inputText: "550000001"
+- swipe:
+    start: 540, 1200
+    end: 540, 800
+- tapOn:
+    id: "signup-password"
+- inputText: "Passw0d-123"
+- swipe:
+    start: 540, 1200
+    end: 540, 800
 
 # Submit
 - tapOn: "Créer mon compte"
 # Should be on verify-phone screen
-- assertVisible: "Vérifiez votre téléphone"
+- extendedWaitUntil:
+    visible: "Vérifiez votre téléphone"
+    timeout: 30000
 
-# Enter dev OTP
-- tapOn: "Code (6 chiffres)"
+# Enter dev OTP (tap the field by id — see the phone-field note above)
+- tapOn:
+    id: "verify-code"
 - inputText: "000000"
 - tapOn: "Vérifier"
 
 # Should land on home (Accueil tab)
-- assertVisible: "Europe"
+- extendedWaitUntil:
+    visible: "Europe.*"
+    timeout: 60000

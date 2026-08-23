@@ -54,7 +54,10 @@ export function Select({
 
   return (
     <View className="w-full">
-      <Text className="text-text-secondary text-xs font-body mb-1.5 ml-1">{label}</Text>
+      {/* Tapping the label toggles the dropdown (bigger touch target). */}
+      <Pressable onPress={() => setOpen((o) => !o)}>
+        <Text className="text-text-secondary text-xs font-body mb-1.5 ml-1">{label}</Text>
+      </Pressable>
       <Pressable
         onPress={() => setOpen((o) => !o)}
         className={clsx(

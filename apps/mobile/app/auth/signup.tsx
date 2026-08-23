@@ -66,10 +66,10 @@ export default function SignupScreen() {
       >
         <View className="flex-row gap-stack-gap">
           <View className="flex-1">
-            <Input label={t("field.firstName")} value={firstName} onChangeText={setFirstName} />
+            <Input label={t("field.firstName")} value={firstName} onChangeText={setFirstName} testID="signup-first-name" />
           </View>
           <View className="flex-1">
-            <Input label={t("field.lastName")} value={lastName} onChangeText={setLastName} />
+            <Input label={t("field.lastName")} value={lastName} onChangeText={setLastName} testID="signup-last-name" />
           </View>
         </View>
         <Input
@@ -80,6 +80,7 @@ export default function SignupScreen() {
           autoCorrect={false}
           keyboardType="email-address"
           textContentType="emailAddress"
+          testID="signup-email"
         />
         <Input
           label={t("field.phone")}
@@ -89,6 +90,7 @@ export default function SignupScreen() {
           autoCorrect={false}
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
+          testID="signup-phone"
         />
         <Input
           label={t("field.passwordHint")}
@@ -96,6 +98,7 @@ export default function SignupScreen() {
           onChangeText={setPassword}
           secureTextEntry
           textContentType="newPassword"
+          testID="signup-password"
         />
 
         <Button label={t("signup.submit")} onPress={submit} loading={loading} />

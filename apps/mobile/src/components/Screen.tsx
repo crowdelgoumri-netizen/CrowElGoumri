@@ -21,6 +21,7 @@ export function Screen({
     <ScrollView
       contentContainerClassName={`px-[20px] pb-xl ${className ?? ""}`}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
       {...rest}
     >

@@ -123,10 +123,10 @@ export default function PostTripScreen() {
 
           <View className="flex-row gap-stack-gap">
             <View className="flex-1">
-              <Input label={t("postTrip.date")} value={date} onChangeText={setDate} placeholder="2026-09-01" />
+              <Input label={t("postTrip.date")} value={date} onChangeText={setDate} placeholder="2026-09-01" testID="trip-date" />
             </View>
             <View className="flex-1">
-              <Input label={t("postTrip.time")} value={time} onChangeText={setTime} placeholder="14:30" />
+              <Input label={t("postTrip.time")} value={time} onChangeText={setTime} placeholder="14:30" testID="trip-time" />
             </View>
           </View>
 
@@ -134,15 +134,15 @@ export default function PostTripScreen() {
 
           <View className="flex-row gap-stack-gap">
             <View className="flex-1">
-              <Input label={t("postTrip.capacity")} value={maxWeightKg} onChangeText={setMaxWeightKg} keyboardType="numeric" placeholder="20" />
+              <Input label={t("postTrip.capacity")} value={maxWeightKg} onChangeText={setMaxWeightKg} keyboardType="numeric" placeholder="20" testID="trip-capacity" />
             </View>
             <View className="flex-1">
-              <Input label={t("postTrip.pricePerKg")} value={pricePerKg} onChangeText={setPricePerKg} keyboardType="numeric" placeholder="8" />
+              <Input label={t("postTrip.pricePerKg")} value={pricePerKg} onChangeText={setPricePerKg} keyboardType="numeric" placeholder="8" testID="trip-price" />
             </View>
           </View>
 
-          <Input label={t("postTrip.distance")} value={distanceKm} onChangeText={setDistanceKm} keyboardType="numeric" placeholder="1500" />
-          <Input label={t("postTrip.notes")} value={notes} onChangeText={setNotes} placeholder={t("postTrip.notesPlaceholder")} multiline className="h-20" />
+          <Input label={t("postTrip.distance")} value={distanceKm} onChangeText={setDistanceKm} keyboardType="numeric" placeholder="1500" testID="trip-distance" />
+          <Input label={t("postTrip.notes")} value={notes} onChangeText={setNotes} placeholder={t("postTrip.notesPlaceholder")} multiline className="h-20" testID="trip-notes" />
 
           <View className="mt-section-gap">
             <Button label={t("postTrip.publish")} onPress={submit} loading={submitting} />

@@ -16,7 +16,14 @@ import "../src/lib/i18n"; // boot i18next + react-i18next before any screen rend
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { LogBox, View } from "react-native";
+
+// Dev warnings (Expo Go push, require cycles, SafeAreaView deprecation…)
+// each spawn a LogBox toast over the bottom of the screen — right where the
+// FAB sits — swallowing taps during dev and e2e runs. Warnings still print
+// to the Metro terminal; blocking errors still red-box. In production builds
+// LogBox is a no-op anyway.
+if (__DEV__) LogBox.ignoreAllLogs();
 import { StripeProvider } from "../src/lib/stripe-compat";
 import { useAuth } from "../src/store/auth";
 import { useTheme } from "../src/store/theme";

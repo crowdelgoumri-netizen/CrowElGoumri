@@ -2,30 +2,34 @@ appId: host.exp.exponent
 ---
 # Create trip smoke test: opens FAB, fills trip form, submits
 # Run this AFTER auth-flow.yaml (which authenticates the user)
-- launchApp
+- launchApp:
+    appId: host.exp.exponent
 
-# Navigate into CrowdShipping project via Expo Go URL entry
-- tapOn: "Enter URL manually"
-- inputText: "exp://localhost:8081"
-- tapOn: "Go"
-- waitForAnimationToEnd:
-    timeout: 15000
-
-# Dismiss any startup dialogs
+# Dismiss system ANR dialog + Expo Go first-launch dialogs
 - evalScript:
     script: |
-      if (await isVisible('OK')) {
-        await tapOn("Don't Show Again");
-        await sleep(1000);
-      }
-      if (await isVisible('Continue')) {
-        await tapOn('Continue');
-        await sleep(500);
-      }
+      if (await isVisible('Wait')) { await tapOn('Wait'); await sleep(1000); }
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
+
+# Open the dev server by deep link (Expo Go's home screen differs by
+# version; localhost works via `adb reverse tcp:8081 tcp:8081`).
+- openLink: "exp://10.0.2.2:8081"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Dismiss Android compatibility dialog / dev-menu intro if it appears
+- evalScript:
+    script: |
+      if (await isVisible('OK')) { await tapOn("Don't Show Again"); await sleep(1000); }
+      if (await isVisible('Continue')) { await tapOn('Continue'); await sleep(500); }
 - waitForAnimationToEnd
 
-# Wait for home screen
-- assertVisible: "Europe"
+# Wait for home screen (bundle may still be downloading after a Metro
+# restart — give it up to 90s)
+- extendedWaitUntil:
+    visible: "Europe.*"
+    timeout: 900000
 
 # Open the FAB chooser
 - tapOn:
@@ -36,27 +40,34 @@ appId: host.exp.exponent
 - tapOn: "Proposer un trajet"
 - assertVisible: "Proposer un trajet"
 
-# Fill trip form
+# Fill trip form (text inputs tapped by testID — see auth-flow.yaml;
+# Selects by their visible label text)
 - tapOn: "Pays d'origine"
 - tapOn: "France"
 - tapOn: "Ville de départ"
 - tapOn: "Paris"
 - tapOn: "Wilaya d'arrivée"
 - tapOn: "Alger"
-- tapOn: "Date (AAAA-MM-JJ)"
+- tapOn:
+    id: "trip-date"
 - inputText: "2026-09-15"
-- tapOn: "Heure (HH:MM)"
+- tapOn:
+    id: "trip-time"
 - inputText: "14:30"
 - tapOn: "Mode de transport"
 - tapOn: "Avion"
-- tapOn: "Capacité (kg)"
+- tapOn:
+    id: "trip-capacity"
 - inputText: "20"
-- tapOn: "Prix/kg"
+- tapOn:
+    id: "trip-price"
 - inputText: "8"
-- tapOn: "Distance estimée"
+- tapOn:
+    id: "trip-distance"
 - inputText: "1400"
-- tapOn: "Notes"
-- inputText: "Accepte les colis fragiles"
+- tapOn:
+    id: "trip-notes"
+- inputText: "Bagage main, colis ok"
 
 # Submit
 - tapOn: "Publier le trajet"

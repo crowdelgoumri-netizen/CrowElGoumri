@@ -33,6 +33,7 @@ import {
   computePayoutBreakdown,
 } from "../lib/stripe.js";
 import { releaseEscrowForParcel } from "../lib/escrow-service.js";
+import { findReferralCredit, consumeReferralCredit } from "../lib/referral-service.js";
 import { notify } from "../lib/notifications.js";
 
 // ── Escrow state machine ─────────────────────────────────────────────
@@ -126,7 +127,13 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
       }
 
       const travelerPrice = resolveTravelerPrice(ctx);
-      const breakdown = computePayoutBreakdown(travelerPrice);
+      const referralCredit = await findReferralCredit(ctx.senderId);
+      const breakdown = computePayoutBreakdown(
+        travelerPrice,
+        undefined,
+        undefined,
+        referralCredit?.discountPct,
+      );
 
       // Idempotent: if an escrow + PaymentIntent already exists, return its
       // client_secret instead of creating a second charge.
@@ -194,6 +201,14 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
           refundedAt: null,
         },
       });
+
+      if (referralCredit) {
+        // Consumed once the escrow row backing this charge exists. The
+        // idempotent early-return path above (an existing non-final intent)
+        // returns before this point, so a retry of an already-in-flight
+        // payment never double-consumes a credit.
+        await consumeReferralCredit(referralCredit.id, escrow.id);
+      }
 
       return reply.code(201).send({
         escrowId: escrow.id,

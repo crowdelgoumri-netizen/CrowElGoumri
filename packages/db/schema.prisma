@@ -167,7 +167,7 @@ model User {
   updatedAt       DateTime   @updatedAt
   lastLoginAt     DateTime?
   deviceTokens    String[]   // Expo Push tokens
-  referralCode    String     @unique @db.VarChar(8)
+  referralCode    String?    @unique @db.VarChar(8)
 
   // Relations
   sentParcels     Parcel[]   @relation("SenderParcels")

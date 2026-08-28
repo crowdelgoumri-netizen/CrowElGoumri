@@ -48,19 +48,6 @@ const refreshSchema = z.object({
 const DEV_OTP = "000000";
 const isDevMode = () => !process.env.TWILIO_VERIFY_SERVICE_SID;
 
-// ── Referral code generation ─────────────────────────────────────────
-const REFERRAL_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // excludes 0/O/1/I
-
-function generateReferralCode(): string {
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    code += REFERRAL_CODE_ALPHABET[
-      Math.floor(Math.random() * REFERRAL_CODE_ALPHABET.length)
-    ];
-  }
-  return code;
-}
-
 // ── Routes ───────────────────────────────────────────────────────────
 export const authRoutes: FastifyPluginAsync = async (app) => {
   // POST /auth/signup — create account (unverified phone)
@@ -85,23 +72,6 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const passwordHash = await hashPassword(password);
-
-    // Generate unique referral code (retry on collision, though unlikely with 33^8 space)
-    let referralCode: string;
-    let retries = 0;
-    const maxRetries = 10;
-    while (retries < maxRetries) {
-      referralCode = generateReferralCode();
-      const existing = await prisma.user.findUnique({
-        where: { referralCode },
-      });
-      if (!existing) break;
-      retries++;
-    }
-    if (retries === maxRetries) {
-      return reply.code(500).send({ error: "Failed to generate unique referral code" });
-    }
-
     const user = await prisma.user.create({
       data: {
         email,
@@ -111,7 +81,6 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
         lastName,
         displayName: `${firstName} ${lastName.charAt(0)}.`,
         kycLevel: "NONE",
-        referralCode: referralCode!,
       },
       select: { id: true, email: true, phone: true, firstName: true },
     });

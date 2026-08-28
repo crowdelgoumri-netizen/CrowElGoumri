@@ -25,6 +25,7 @@ import type { EscrowLedger } from "@crowdshipping/db";
 import { prisma } from "@crowdshipping/db";
 import { getStripe, toCents } from "./stripe.js";
 import { notify } from "./notifications.js";
+import { grantReferralReward } from "./referral-service.js";
 
 type EscrowStatus = EscrowLedger["status"];
 
@@ -122,6 +123,26 @@ export async function releaseEscrowForParcel(
   }).catch(() => {
     /* swallowed: provider errors are logged inside notify() */
   });
+
+  // Referral reward: fires for either party on their first-ever RELEASED
+  // escrow. grantReferralReward() itself no-ops for a user with no PENDING
+  // referral, so it's cheap and safe to attempt for both unconditionally
+  // once their release count is confirmed to be exactly 1.
+  for (const userId of [updated.senderId, updated.travelerId]) {
+    prisma.escrowLedger
+      .count({
+        where: {
+          status: "RELEASED",
+          OR: [{ senderId: userId }, { travelerId: userId }],
+        },
+      })
+      .then((releasedCount) => {
+        if (releasedCount === 1) return grantReferralReward(userId);
+      })
+      .catch((err) => {
+        console.error(`referral reward check failed for user ${userId}:`, err);
+      });
+  }
 
   return { kind: "released", escrow: updated, transferId };
 }

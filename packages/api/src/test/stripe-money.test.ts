@@ -103,6 +103,15 @@ describe("computePayoutBreakdown", () => {
     assert.strictEqual(b.discountPct, 50);
     assert.strictEqual(computePayoutBreakdown(30).discountPct, 0);
   });
+
+  it("rounds the discount amount to avoid floating-point drift (e.g., 33% discount)", () => {
+    // 70 EUR price → 7 EUR raw fee. 33% discount → 7 × 0.33 = 2.31 → fee = 4.69 (clean).
+    // Without rounding, platformFee could be 4.6899999999999995 (dirty float).
+    const b = computePayoutBreakdown(70, 1000, 0, 33);
+    assert.strictEqual(b.platformFee, 4.69);
+    assert.strictEqual(b.travelerPayout, 70, "traveler must still receive the full price");
+    assert.strictEqual(b.totalAmount, 74.69); // 70 + 4.69 discounted fee
+  });
 });
 
 // node:test auto-runs on import; print a marker for the npm script output.

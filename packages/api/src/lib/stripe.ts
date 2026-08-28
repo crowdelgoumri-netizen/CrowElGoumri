@@ -99,7 +99,7 @@ export function computePayoutBreakdown(
   // traveler's payout untouched. Discounting totalAmount alone would
   // silently cut the traveler's payout instead of the platform's cut.
   const discountAmount = rawPlatformFee * (discount / 100);
-  const platformFee = rawPlatformFee - discountAmount;
+  const platformFee = Math.round((rawPlatformFee - discountAmount) * 100) / 100;
 
   const totalAmount = Math.round((price + insurance + platformFee) * 100) / 100;
   const travelerPayout =

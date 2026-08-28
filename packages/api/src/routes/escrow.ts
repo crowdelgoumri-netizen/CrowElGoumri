@@ -168,47 +168,57 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
         },
       });
 
-      // Upsert the ledger row. Status starts at FUNDED; the webhook flips
-      // it to LOCKED once payment_intent.succeeded arrives.
-      const escrow = await prisma.escrowLedger.upsert({
-        where: { parcelId },
-        create: {
-          parcelId,
-          senderId: ctx.senderId,
-          travelerId: ctx.matchedTrip!.travelerId,
-          status: "FUNDED",
-          totalAmount: breakdown.totalAmount,
-          currency: "EUR",
-          platformFee: breakdown.platformFee,
-          insuranceFee: breakdown.insuranceFee || null,
-          travelerPayout: breakdown.travelerPayout,
-          fundingMethod: "CREDIT_CARD_STRIPE",
-          fundedAt: new Date(),
-          stripePaymentIntentId: intent.id,
-        },
-        update: {
-          // Re-funding after a canceled intent: attach the new intent + reset.
-          status: "FUNDED",
-          totalAmount: breakdown.totalAmount,
-          platformFee: breakdown.platformFee,
-          insuranceFee: breakdown.insuranceFee || null,
-          travelerPayout: breakdown.travelerPayout,
-          stripePaymentIntentId: intent.id,
-          stripeTransferId: null,
-          fundedAt: new Date(),
-          lockedAt: null,
-          releasedAt: null,
-          refundedAt: null,
-        },
-      });
+      // Upsert the ledger row and (if applicable) mark the referral credit
+      // consumed in one transaction. Status starts at FUNDED; the webhook
+      // flips it to LOCKED once payment_intent.succeeded arrives.
+      //
+      // The two writes are wrapped together so they succeed or fail as a
+      // unit: if the escrow row is written but the credit-consume update
+      // fails (e.g. a DB blip), the whole transaction rolls back rather
+      // than leaving a funded, discounted escrow whose backing credit is
+      // still unconsumed and spendable again. The idempotent early-return
+      // path above (an existing non-final intent) returns before this
+      // point, so a retry of an already-in-flight payment never re-enters
+      // this transaction and never double-consumes a credit.
+      const escrow = await prisma.$transaction(async (tx) => {
+        const escrowRow = await tx.escrowLedger.upsert({
+          where: { parcelId },
+          create: {
+            parcelId,
+            senderId: ctx.senderId,
+            travelerId: ctx.matchedTrip!.travelerId,
+            status: "FUNDED",
+            totalAmount: breakdown.totalAmount,
+            currency: "EUR",
+            platformFee: breakdown.platformFee,
+            insuranceFee: breakdown.insuranceFee || null,
+            travelerPayout: breakdown.travelerPayout,
+            fundingMethod: "CREDIT_CARD_STRIPE",
+            fundedAt: new Date(),
+            stripePaymentIntentId: intent.id,
+          },
+          update: {
+            // Re-funding after a canceled intent: attach the new intent + reset.
+            status: "FUNDED",
+            totalAmount: breakdown.totalAmount,
+            platformFee: breakdown.platformFee,
+            insuranceFee: breakdown.insuranceFee || null,
+            travelerPayout: breakdown.travelerPayout,
+            stripePaymentIntentId: intent.id,
+            stripeTransferId: null,
+            fundedAt: new Date(),
+            lockedAt: null,
+            releasedAt: null,
+            refundedAt: null,
+          },
+        });
 
-      if (referralCredit) {
-        // Consumed once the escrow row backing this charge exists. The
-        // idempotent early-return path above (an existing non-final intent)
-        // returns before this point, so a retry of an already-in-flight
-        // payment never double-consumes a credit.
-        await consumeReferralCredit(referralCredit.id, escrow.id);
-      }
+        if (referralCredit) {
+          await consumeReferralCredit(referralCredit.id, escrowRow.id, tx);
+        }
+
+        return escrowRow;
+      });
 
       return reply.code(201).send({
         escrowId: escrow.id,

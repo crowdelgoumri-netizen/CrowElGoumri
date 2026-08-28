@@ -23,12 +23,22 @@ export async function findReferralCredit(
   });
 }
 
-/** Marks a credit consumed against a specific escrow. Not reversible. */
+/**
+ * Marks a credit consumed against a specific escrow. Not reversible.
+ *
+ * Accepts an optional transaction client so callers can make this atomic
+ * with the write that creates/updates the escrow row it references (e.g.
+ * escrow.ts wraps the EscrowLedger upsert + this call in one
+ * `prisma.$transaction`, so a mid-flight failure never leaves a funded,
+ * discounted escrow with its backing credit still unconsumed). Defaults to
+ * the shared client for callers that don't need transactional scoping.
+ */
 export async function consumeReferralCredit(
   creditId: string,
   escrowId: string,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
 ): Promise<void> {
-  await prisma.referralCredit.update({
+  await db.referralCredit.update({
     where: { id: creditId },
     data: { consumedAt: new Date(), consumedEscrowId: escrowId },
   });

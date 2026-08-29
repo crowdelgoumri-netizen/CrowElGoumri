@@ -23,6 +23,7 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("+213");
   const [password, setPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function submit() {
@@ -34,6 +35,7 @@ export default function SignupScreen() {
         email: email.trim(),
         phone: phone.trim(),
         password,
+        referralCode: referralCode.trim() || undefined,
       });
       // Backend doesn't auto-log-in; head to verify with the phone prefilled.
       router.replace({
@@ -99,6 +101,14 @@ export default function SignupScreen() {
           secureTextEntry
           textContentType="newPassword"
           testID="signup-password"
+        />
+        <Input
+          label={t("signup.referralCodeLabel")}
+          value={referralCode}
+          onChangeText={setReferralCode}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          testID="signup-referral-code"
         />
 
         <Button label={t("signup.submit")} onPress={submit} loading={loading} />

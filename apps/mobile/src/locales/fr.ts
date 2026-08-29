@@ -118,6 +118,7 @@ export const fr = {
     haveAccount: "Déjà un compte ?",
     errorTitle: "Inscription impossible",
     errorFallback: "Inscription impossible",
+    referralCodeLabel: "Code de parrainage (optionnel)",
   },
   verify: {
     title: "Vérifiez votre téléphone",

@@ -112,6 +112,7 @@ export const en = {
     haveAccount: "Already have an account?",
     errorTitle: "Could not sign up",
     errorFallback: "Sign-up failed",
+    referralCodeLabel: "Referral code (optional)",
   },
   verify: {
     title: "Verify your phone",

@@ -440,6 +440,7 @@ export const fr = {
     stripeMissing: "Configuration Stripe manquante — contactez le support.",
     confirming: "Confirmation en cours…",
     pay: "Payer {{amount}}",
+    referralDiscountApplied: "Réduction de parrainage de {{pct}}% appliquée sur la fee 🎁",
   },
   tracking: {
     title: "Suivi",

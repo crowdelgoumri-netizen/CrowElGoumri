@@ -430,6 +430,7 @@ export const en = {
     stripeMissing: "Stripe configuration missing — contact support.",
     confirming: "Confirming…",
     pay: "Pay {{amount}}",
+    referralDiscountApplied: "{{pct}}% referral discount applied to the fee 🎁",
   },
   tracking: {
     title: "Tracking",

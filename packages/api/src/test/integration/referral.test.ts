@@ -124,4 +124,88 @@ describe("referral signup flow", () => {
   });
 });
 
+describe("GET /referrals/me", () => {
+  let app: FastifyInstance;
+
+  before(async () => {
+    await ensureCleanDB();
+    ({ app } = await buildTestServer());
+  });
+
+  after(async () => { await app.close(); });
+
+  it("returns the caller's own code and an empty list with no referrals", async () => {
+    const phone = "+213559930020";
+    await app.inject({
+      method: "POST",
+      url: "/auth/signup",
+      payload: {
+        email: "me-a@test.local", phone,
+        password: "Password123", firstName: "Me", lastName: "A",
+      },
+    });
+    await app.inject({ method: "POST", url: "/auth/verify-phone", payload: { phone, code: "000000" } });
+    const login = await app.inject({
+      method: "POST", url: "/auth/login",
+      payload: { email: "me-a@test.local", password: "Password123" },
+    });
+    const { accessToken } = login.json();
+
+    const res = await app.inject({
+      method: "GET", url: "/referrals/me",
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+    assert.equal(res.statusCode, 200);
+    const body = res.json();
+    assert.equal(body.referralCode.length, 8);
+    assert.deepStrictEqual(body.referrals, []);
+  });
+
+  it("lists a referee once they sign up with the caller's code", async () => {
+    await app.inject({
+      method: "POST", url: "/auth/signup",
+      payload: {
+        email: "me-referrer@test.local", phone: "+213559930030",
+        password: "Password123", firstName: "Referrer", lastName: "Two",
+      },
+    });
+    await app.inject({
+      method: "POST", url: "/auth/verify-phone",
+      payload: { phone: "+213559930030", code: "000000" },
+    });
+    const login = await app.inject({
+      method: "POST", url: "/auth/login",
+      payload: { email: "me-referrer@test.local", password: "Password123" },
+    });
+    const { accessToken } = login.json();
+
+    const referrer = await prisma.user.findUniqueOrThrow({
+      where: { email: "me-referrer@test.local" }, select: { referralCode: true },
+    });
+    await app.inject({
+      method: "POST", url: "/auth/signup",
+      payload: {
+        email: "me-referee@test.local", phone: "+213559930031",
+        password: "Password123", firstName: "Referee", lastName: "Two",
+        referralCode: referrer.referralCode,
+      },
+    });
+
+    const res = await app.inject({
+      method: "GET", url: "/referrals/me",
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+    assert.equal(res.statusCode, 200);
+    const body = res.json();
+    assert.equal(body.referrals.length, 1);
+    assert.equal(body.referrals[0].refereeFirstName, "Referee");
+    assert.equal(body.referrals[0].status, "PENDING");
+  });
+
+  it("rejects an unauthenticated request with 401", async () => {
+    const res = await app.inject({ method: "GET", url: "/referrals/me" });
+    assert.equal(res.statusCode, 401);
+  });
+});
+
 console.log("referral signup tests: done");

@@ -31,6 +31,7 @@ import {
   getStripe,
   toCents,
   computePayoutBreakdown,
+  type PayoutBreakdown,
 } from "../lib/stripe.js";
 import { releaseEscrowForParcel } from "../lib/escrow-service.js";
 import { findReferralCredit, consumeReferralCredit } from "../lib/referral-service.js";
@@ -144,11 +145,36 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
         );
         // Only return a usable secret while the intent is still confirmable.
         if (!["succeeded", "canceled"].includes(intent.status)) {
+          // This is a retry of an already-in-flight intent. The referral
+          // credit backing the original request may already be consumed, in
+          // which case the fresh `breakdown` computed above (from a new
+          // findReferralCredit lookup) comes back undiscounted — contradicting
+          // both the live PaymentIntent and this persisted ledger row, which
+          // were created together with the discount already applied. Use the
+          // ledger row's own stored amounts instead so the client never sees
+          // a price that disagrees with what it's actually being charged.
+          const undiscountedFee = computePayoutBreakdown(travelerPrice).platformFee;
+          const persistedPlatformFee = Number(ctx.escrow.platformFee);
+          // discountPct isn't itself persisted on EscrowLedger; derive it from
+          // the stored fee vs. the undiscounted fee for the same traveler
+          // price (a pure computation, no fresh credit lookup involved) so
+          // the discount banner doesn't spuriously vanish on a retry.
+          const persistedDiscountPct =
+            undiscountedFee > 0
+              ? Math.round(((undiscountedFee - persistedPlatformFee) / undiscountedFee) * 10000) / 100
+              : 0;
+          const persistedBreakdown: PayoutBreakdown = {
+            totalAmount: Number(ctx.escrow.totalAmount),
+            platformFee: persistedPlatformFee,
+            insuranceFee: ctx.escrow.insuranceFee ? Number(ctx.escrow.insuranceFee) : 0,
+            travelerPayout: Number(ctx.escrow.travelerPayout),
+            discountPct: persistedDiscountPct,
+          };
           return {
             escrowId: ctx.escrow.id,
             clientSecret: intent.client_secret,
             status: ctx.escrow.status,
-            breakdown,
+            breakdown: persistedBreakdown,
           };
         }
       }
@@ -214,7 +240,15 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
         });
 
         if (referralCredit) {
-          await consumeReferralCredit(referralCredit.id, escrowRow.id, tx);
+          const consumed = await consumeReferralCredit(referralCredit.id, escrowRow.id, tx);
+          if (!consumed) {
+            // Lost the race: another concurrent funding request already
+            // consumed this credit. Roll back rather than ship a discount
+            // that isn't actually backed by an unconsumed credit.
+            throw new Error(
+              `Referral credit ${referralCredit.id} was already consumed by another request`,
+            );
+          }
         }
 
         return escrowRow;

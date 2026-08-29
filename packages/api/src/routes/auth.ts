@@ -29,7 +29,10 @@ const signupSchema = z.object({
   password: z.string().min(8, "password must be ≥ 8 chars"),
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
-  referralCode: z.string().length(8).toUpperCase().optional(),
+  // No .length(8): a malformed/mistyped code must never block signup (Global
+  // Constraint). The DB lookup miss below handles any code — right length or
+  // not — that doesn't match a real user, the same as an unknown code.
+  referralCode: z.string().trim().toUpperCase().optional(),
 });
 
 const loginSchema = z.object({

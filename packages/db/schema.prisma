@@ -121,6 +121,11 @@ enum AddressLevel {
   HUMAN_RELAY
 }
 
+enum ReferralStatus {
+  PENDING
+  REWARDED
+}
+
 // ============== MODELS ==============
 
 model User {
@@ -162,6 +167,7 @@ model User {
   updatedAt       DateTime   @updatedAt
   lastLoginAt     DateTime?
   deviceTokens    String[]   // Expo Push tokens
+  referralCode    String     @unique @db.VarChar(8)
 
   // Relations
   sentParcels     Parcel[]   @relation("SenderParcels")
@@ -173,6 +179,9 @@ model User {
   escrowAsTraveler EscrowLedger[] @relation("EscrowTraveler")
   notifications   Notification[]
   kycSubmissions  KycSubmission[]
+  referralsMade     Referral[]       @relation("ReferralsMade")
+  referralReceived  Referral?        @relation("ReferralsReceived")
+  referralCredits   ReferralCredit[]
 
   @@index([trustScore])
   @@index([kycLevel])
@@ -496,4 +505,31 @@ model KycSubmission {
 
   @@index([userId])
   @@index([status])
+}
+
+model Referral {
+  id          String         @id @default(uuid())
+  referrerId  String
+  referrer    User           @relation("ReferralsMade", fields: [referrerId], references: [id])
+  refereeId   String         @unique
+  referee     User           @relation("ReferralsReceived", fields: [refereeId], references: [id])
+  code        String
+  status      ReferralStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  rewardedAt  DateTime?
+
+  @@index([referrerId])
+  @@index([status])
+}
+
+model ReferralCredit {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  discountPct      Decimal   @db.Decimal(4, 2)
+  consumedAt       DateTime?
+  consumedEscrowId String?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId, consumedAt])
 }

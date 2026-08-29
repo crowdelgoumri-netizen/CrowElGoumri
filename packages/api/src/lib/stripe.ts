@@ -65,6 +65,8 @@ export interface PayoutBreakdown {
   insuranceFee: number;
   /** Net amount transferred to the traveler on release. */
   travelerPayout: number;
+  /** Referral discount % actually applied to the fee, 0 if none. */
+  discountPct: number;
 }
 
 /**
@@ -74,22 +76,34 @@ export interface PayoutBreakdown {
  *                       a flat offered price accepted by the traveler).
  * @param feeBps         Platform fee in basis points (env default 1000 = 10%).
  * @param insuranceFee   Optional premium (0 in v1 — insurance product deferred).
+ * @param discountPct    Optional referral discount on the platform fee (0–100%).
  */
 export function computePayoutBreakdown(
   travelerPrice: Prisma.Decimal | number | string,
   feeBps: number = env.STRIPE_PLATFORM_FEE_BPS,
   insuranceFee: Prisma.Decimal | number | string = 0,
+  discountPct: Prisma.Decimal | number | string = 0,
 ): PayoutBreakdown {
   const price = Number(travelerPrice);
   const insurance = Number(insuranceFee);
+  const discount = Number(discountPct);
 
   // Fee is charged on the traveler price, rounded to the cent. Rounding
   // half-up avoids the platform absorbing sub-cent drift over thousands of
   // transactions.
-  const platformFee = Math.round((price * feeBps) / 10000);
+  const rawPlatformFee = Math.round((price * feeBps) / 10000);
+
+  // Referral discount reduces the fee itself, not totalAmount directly —
+  // travelerPayout is derived as (totalAmount - platformFee - insurance),
+  // so discounting the fee (which totalAmount includes) leaves the
+  // traveler's payout untouched. Discounting totalAmount alone would
+  // silently cut the traveler's payout instead of the platform's cut.
+  const discountAmount = rawPlatformFee * (discount / 100);
+  const platformFee = Math.round((rawPlatformFee - discountAmount) * 100) / 100;
+
   const totalAmount = Math.round((price + insurance + platformFee) * 100) / 100;
   const travelerPayout =
     Math.round((totalAmount - platformFee - insurance) * 100) / 100;
 
-  return { totalAmount, platformFee, insuranceFee: insurance, travelerPayout };
+  return { totalAmount, platformFee, insuranceFee: insurance, travelerPayout, discountPct: discount };
 }

@@ -83,6 +83,8 @@ export default function SettingsScreen() {
         </View>
         <Divider />
         <PressableRow icon="help-circle-outline" label={t("settings.howItWorks")} onPress={() => router.push("/onboarding")} />
+        <Divider />
+        <PressableRow icon="gift-outline" label={t("settings.inviteFriends")} onPress={() => router.push("/invite")} />
       </Card>
 
       <Text className="font-mono text-meta uppercase text-text-secondary mt-section-gap mb-2">{t("settings.appearance")}</Text>

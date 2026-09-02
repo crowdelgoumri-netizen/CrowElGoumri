@@ -121,6 +121,12 @@ enum AddressLevel {
   HUMAN_RELAY
 }
 
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
 // ============== MODELS ==============
 
 model User {
@@ -153,6 +159,9 @@ model User {
   maxDetourKm      Int?
   preferredCurrency Currency @default(EUR)
 
+  // Referral
+  referralCode     String    @unique @default("")
+
   // Stripe Connect (for payouts when acting as traveler)
   stripeAccountId  String?   @unique
   stripePayoutsEnabled Boolean @default(false)
@@ -173,6 +182,7 @@ model User {
   escrowAsTraveler EscrowLedger[] @relation("EscrowTraveler")
   notifications   Notification[]
   kycSubmissions  KycSubmission[]
+  campaigns       Campaign[]     @relation("TravelerCampaigns")
 
   @@index([trustScore])
   @@index([kycLevel])
@@ -496,4 +506,34 @@ model KycSubmission {
 
   @@index([userId])
   @@index([status])
+}
+
+model Campaign {
+  id            String         @id @default(uuid())
+  travelerId    String
+  traveler      User           @relation("TravelerCampaigns", fields: [travelerId], references: [id])
+
+  title         String         @db.VarChar(120)
+  description   String?        @db.Text
+
+  originCity    String         @db.VarChar(100)
+  originCountry String         @db.VarChar(100)
+  destWilayas   String[]
+
+  departureDate DateTime
+  returnDate    DateTime?
+
+  mode          TripMode
+  capacityKg    Float
+  pricePerKg    Float
+
+  status        CampaignStatus @default(DRAFT)
+  featured      Boolean        @default(false)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  expiresAt     DateTime?
+
+  @@index([travelerId])
+  @@index([status, departureDate])
 }

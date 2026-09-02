@@ -20,6 +20,7 @@ import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
 import { parcelRoutes } from "./routes/parcels.js";
 import { tripRoutes } from "./routes/trips.js";
+import { campaignRoutes } from "./routes/campaigns.js";
 import { matchingRoutes } from "./routes/matching.js";
 import { escrowRoutes } from "./routes/escrow.js";
 import { chatRoutes } from "./routes/chat.js";
@@ -88,6 +89,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(meRoutes, { prefix: "/me" });
   await app.register(parcelRoutes, { prefix: "/parcels" });
   await app.register(tripRoutes, { prefix: "/trips" });
+  await app.register(campaignRoutes, { prefix: "/campaigns" });
   await app.register(matchingRoutes, { prefix: "/matching" });
   await app.register(escrowRoutes, { prefix: "/escrow" });
   await app.register(chatRoutes, { prefix: "/chat" });

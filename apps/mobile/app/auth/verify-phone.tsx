@@ -22,7 +22,7 @@ export default function VerifyPhoneScreen() {
   const params = useLocalSearchParams<{ phone?: string }>();
   const setSession = useAuth((s) => s.setSession);
 
-  const [phone, setPhone] = useState(params.phone ?? "+213");
+  const [phone, setPhone] = useState(params.phone ?? "");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
 

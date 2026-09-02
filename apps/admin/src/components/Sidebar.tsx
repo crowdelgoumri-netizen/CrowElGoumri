@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/kyc", label: "KYC Queue", icon: "🪪" },
   { href: "/users", label: "Users", icon: "👥" },
   { href: "/parcels", label: "Parcels", icon: "📦" },
+  { href: "/campaigns", label: "Campaigns", icon: "📣" },
 ];
 
 export function Sidebar() {

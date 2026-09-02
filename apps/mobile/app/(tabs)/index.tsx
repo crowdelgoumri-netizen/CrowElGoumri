@@ -13,6 +13,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -21,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { TripCard } from "../../src/components/TripCard";
 import { ParcelCard } from "../../src/components/ParcelCard";
+import { CampaignCard } from "../../src/components/CampaignCard";
 import { EmptyState } from "../../src/components/EmptyState";
 import { Select } from "../../src/components/Select";
 import { useAuth } from "../../src/store/auth";
@@ -28,6 +30,7 @@ import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
 import * as parcelsApi from "../../src/lib/parcels";
+import * as campaignsApi from "../../src/lib/campaigns";
 import { MODE_KEY } from "../../src/lib/format";
 import { POPULAR_CORRIDORS } from "../../src/config/corridors";
 import type { TransportMode } from "../../src/lib/types";
@@ -47,6 +50,7 @@ export default function HomeScreen() {
     ...Object.entries(MODE_KEY).map(([value, key]) => ({ value, label: t(key) })),
   ];
 
+  const campaigns = useAsync(() => campaignsApi.listCampaigns({ limit: 10 }), []);
   const trips = useAsync(
     () => tripsApi.listPublished(mode ? { mode: mode as TransportMode } : {}),
     [mode],
@@ -96,6 +100,34 @@ export default function HomeScreen() {
           ))}
         </View>
       </View>
+
+      {/* Voyageurs réguliers — horizontal scroll, only when there's data */}
+      {(campaigns.data?.campaigns.length ?? 0) > 0 ? (
+        <View className="mt-section-gap">
+          <View className="flex-row items-baseline justify-between mb-2">
+            <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary">
+              {t("campaign.sectionTitle")}
+            </Text>
+            <Text className="text-text-muted font-body text-xs">
+              {t("campaign.sectionSubtitle")}
+            </Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="gap-3 pr-5"
+            className="mx-[-20px] pl-[20px]"
+          >
+            {campaigns.data!.campaigns.map((c) => (
+              <CampaignCard
+                key={c.id}
+                campaign={c}
+                onPress={(camp) => router.push(`/campaign/${camp.id}`)}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
 
       {/* Segmented toggle */}
       <View className="flex-row bg-glass rounded-chip p-1 mt-section-gap">

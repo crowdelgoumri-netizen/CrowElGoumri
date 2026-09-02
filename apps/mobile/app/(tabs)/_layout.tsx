@@ -152,6 +152,15 @@ export default function TabsLayout() {
                 router.push("/post-trip");
               }}
             />
+            <ChooserOption
+              icon="megaphone"
+              title={t("fab.postCampaign")}
+              subtitle={t("fab.postCampaignSubtitle")}
+              onPress={() => {
+                setFabOpen(false);
+                router.push("/post-campaign");
+              }}
+            />
           </View>
         </Pressable>
       </Modal>

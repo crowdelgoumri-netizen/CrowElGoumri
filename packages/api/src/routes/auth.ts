@@ -18,6 +18,7 @@ import { prisma } from "@crowdshipping/db";
 import { hashPassword, verifyPassword } from "../lib/password.js";
 import { signAccessToken, signRefreshToken } from "../lib/jwt.js";
 import { recomputeTrustForUser } from "../lib/trust-service.js";
+import { generateReferralCode } from "../lib/referral-code.js";
 
 // ── Schemas ──────────────────────────────────────────────────────────
 const signupSchema = z.object({
@@ -72,18 +73,31 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const passwordHash = await hashPassword(password);
-    const user = await prisma.user.create({
-      data: {
-        email,
-        phone,
-        passwordHash,
-        firstName,
-        lastName,
-        displayName: `${firstName} ${lastName.charAt(0)}.`,
-        kycLevel: "NONE",
-      },
-      select: { id: true, email: true, phone: true, firstName: true },
-    });
+
+    // referralCode is @unique — retry on collision (P2002) up to 5 times.
+    let user;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        user = await prisma.user.create({
+          data: {
+            email,
+            phone,
+            passwordHash,
+            firstName,
+            lastName,
+            displayName: `${firstName} ${lastName.charAt(0)}.`,
+            kycLevel: "NONE",
+            referralCode: generateReferralCode(),
+          },
+          select: { id: true, email: true, phone: true, firstName: true },
+        });
+        break;
+      } catch (err: unknown) {
+        const code = (err as { code?: string })?.code;
+        if (code !== "P2002" || attempt === 4) throw err;
+      }
+    }
+    if (!user) throw new Error("Failed to create user after retries");
 
     // In dev mode we "send" the OTP by logging it. In prod we'd call
     // Twilio Verify's /verifications endpoint here.

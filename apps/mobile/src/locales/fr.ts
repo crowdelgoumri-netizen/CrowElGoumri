@@ -119,6 +119,7 @@ export const fr = {
     haveAccount: "Déjà un compte ?",
     errorTitle: "Inscription impossible",
     errorFallback: "Inscription impossible",
+    referralCodeLabel: "Code de parrainage (optionnel)",
   },
   verify: {
     title: "Vérifiez votre téléphone",
@@ -484,6 +485,7 @@ export const fr = {
     stripeMissing: "Configuration Stripe manquante — contactez le support.",
     confirming: "Confirmation en cours…",
     pay: "Payer {{amount}}",
+    referralDiscountApplied: "Réduction de parrainage de {{pct}}% appliquée sur la fee 🎁",
   },
   tracking: {
     title: "Suivi",
@@ -557,6 +559,7 @@ export const fr = {
     preferences: "Préférences",
     pushNotifications: "Notifications push",
     howItWorks: "Comment ça marche",
+    inviteFriends: "Inviter des amis",
     about: "À propos",
     appName: "CrowdShipping",
     aboutTagline:
@@ -569,5 +572,15 @@ export const fr = {
     pushAlertTitle: "Notifications",
     pushAlertBody:
       "Inscription impossible (simulateur ou permission refusée).",
+  },
+  invite: {
+    title: "Inviter des amis",
+    yourCode: "Votre code de parrainage",
+    shareButton: "Partager mon code",
+    shareMessage: "Rejoins CrowdShipping avec mon code {{code}} et profite d'une réduction sur ta première livraison !",
+    yourReferrals: "Vos parrainages",
+    noReferralsYet: "Vous n'avez encore parrainé personne.",
+    statusPending: "En attente",
+    statusRewarded: "Récompensé 🎁",
   },
 } as const;

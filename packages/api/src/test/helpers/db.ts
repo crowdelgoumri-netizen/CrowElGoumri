@@ -18,6 +18,8 @@ async function truncateAllTables(): Promise<void> {
     "Parcel",
     "Trip",
     "KycSubmission",
+    "ReferralCredit",
+    "Referral",
     "User",
   ] as const;
 

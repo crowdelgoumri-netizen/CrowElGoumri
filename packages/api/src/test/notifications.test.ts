@@ -20,6 +20,7 @@ describe("message templates", () => {
     "MATCH_FOUND", "PARCEL_PICKED_UP", "IN_TRANSIT", "AWAITING_DELIVERY",
     "DELIVERED", "PAYOUT_SENT", "ESCROW_FUNDED", "ESCROW_REFUNDED",
     "CHAT_MESSAGE", "KYC_APPROVED", "KYC_REJECTED", "DISPUTE_OPENED",
+    "REFERRAL_REWARDED_REFERRER", "REFERRAL_REWARDED_REFEREE",
   ];
 
   for (const type of types) {
@@ -73,6 +74,16 @@ describe("message templates", () => {
   it("KYC_REJECTED falls back to a generic message without a note", () => {
     const { body } = renderMessage("KYC_REJECTED", {});
     assert.ok(body.length > 0);
+  });
+
+  it("interpolates discountPct into REFERRAL_REWARDED_REFERRER", () => {
+    const { body } = renderMessage("REFERRAL_REWARDED_REFERRER", { discountPct: 50 });
+    assert.ok(body.includes("50"), `expected 50 in: ${body}`);
+  });
+
+  it("interpolates discountPct into REFERRAL_REWARDED_REFEREE", () => {
+    const { body } = renderMessage("REFERRAL_REWARDED_REFEREE", { discountPct: 50 });
+    assert.ok(body.includes("50"), `expected 50 in: ${body}`);
   });
 });
 

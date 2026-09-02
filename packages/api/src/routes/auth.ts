@@ -29,6 +29,10 @@ const signupSchema = z.object({
   password: z.string().min(8, "password must be ≥ 8 chars"),
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
+  // No .length(8): a malformed/mistyped code must never block signup (Global
+  // Constraint). The DB lookup miss below handles any code — right length or
+  // not — that doesn't match a real user, the same as an unknown code.
+  referralCode: z.string().trim().toUpperCase().optional(),
 });
 
 const loginSchema = z.object({
@@ -57,7 +61,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     if (!parsed.success) {
       return reply.code(400).send({ error: parsed.error.flatten() });
     }
-    const { email, phone, password, firstName, lastName } = parsed.data;
+    const { email, phone, password, firstName, lastName, referralCode } = parsed.data;
 
     // Uniqueness check (Prisma throws on unique violation, but a friendly
     // message is better than a 500 for the common case).
@@ -74,7 +78,9 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
 
     const passwordHash = await hashPassword(password);
 
-    // referralCode is @unique — retry on collision (P2002) up to 5 times.
+    // A referralCode collision is astronomically unlikely (33^8 keyspace)
+    // but the field is @unique, so retry on P2002 rather than letting a
+    // rare collision surface as a 500.
     let user;
     for (let attempt = 0; attempt < 5; attempt++) {
       try {
@@ -92,12 +98,28 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
           select: { id: true, email: true, phone: true, firstName: true },
         });
         break;
-      } catch (err: unknown) {
-        const code = (err as { code?: string })?.code;
-        if (code !== "P2002" || attempt === 4) throw err;
+      } catch (err) {
+        const isUniqueViolation =
+          err instanceof Error && "code" in err && (err as { code: string }).code === "P2002";
+        if (!isUniqueViolation || attempt === 4) throw err;
       }
     }
     if (!user) throw new Error("Failed to create user after retries");
+
+    // referralCode entry is signup-only and never blocks account creation:
+    // an unknown code is silently ignored (typo tolerance beats a hard error
+    // over a promo code).
+    if (referralCode) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode },
+        select: { id: true },
+      });
+      if (referrer) {
+        await prisma.referral.create({
+          data: { referrerId: referrer.id, refereeId: user.id, code: referralCode },
+        });
+      }
+    }
 
     // In dev mode we "send" the OTP by logging it. In prod we'd call
     // Twilio Verify's /verifications endpoint here.

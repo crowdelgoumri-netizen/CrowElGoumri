@@ -19,6 +19,7 @@ export interface PayoutBreakdown {
   platformFee: number;
   insuranceFee: number;
   travelerPayout: number;
+  discountPct: number;
 }
 
 export interface Escrow {

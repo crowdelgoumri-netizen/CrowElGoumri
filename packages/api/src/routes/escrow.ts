@@ -31,8 +31,10 @@ import {
   getStripe,
   toCents,
   computePayoutBreakdown,
+  type PayoutBreakdown,
 } from "../lib/stripe.js";
 import { releaseEscrowForParcel } from "../lib/escrow-service.js";
+import { findReferralCredit, consumeReferralCredit } from "../lib/referral-service.js";
 import { notify } from "../lib/notifications.js";
 
 // ── Escrow state machine ─────────────────────────────────────────────
@@ -126,7 +128,13 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
       }
 
       const travelerPrice = resolveTravelerPrice(ctx);
-      const breakdown = computePayoutBreakdown(travelerPrice);
+      const referralCredit = await findReferralCredit(ctx.senderId);
+      const breakdown = computePayoutBreakdown(
+        travelerPrice,
+        undefined,
+        undefined,
+        referralCredit?.discountPct,
+      );
 
       // Idempotent: if an escrow + PaymentIntent already exists, return its
       // client_secret instead of creating a second charge.
@@ -137,11 +145,36 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
         );
         // Only return a usable secret while the intent is still confirmable.
         if (!["succeeded", "canceled"].includes(intent.status)) {
+          // This is a retry of an already-in-flight intent. The referral
+          // credit backing the original request may already be consumed, in
+          // which case the fresh `breakdown` computed above (from a new
+          // findReferralCredit lookup) comes back undiscounted — contradicting
+          // both the live PaymentIntent and this persisted ledger row, which
+          // were created together with the discount already applied. Use the
+          // ledger row's own stored amounts instead so the client never sees
+          // a price that disagrees with what it's actually being charged.
+          const undiscountedFee = computePayoutBreakdown(travelerPrice).platformFee;
+          const persistedPlatformFee = Number(ctx.escrow.platformFee);
+          // discountPct isn't itself persisted on EscrowLedger; derive it from
+          // the stored fee vs. the undiscounted fee for the same traveler
+          // price (a pure computation, no fresh credit lookup involved) so
+          // the discount banner doesn't spuriously vanish on a retry.
+          const persistedDiscountPct =
+            undiscountedFee > 0
+              ? Math.round(((undiscountedFee - persistedPlatformFee) / undiscountedFee) * 10000) / 100
+              : 0;
+          const persistedBreakdown: PayoutBreakdown = {
+            totalAmount: Number(ctx.escrow.totalAmount),
+            platformFee: persistedPlatformFee,
+            insuranceFee: ctx.escrow.insuranceFee ? Number(ctx.escrow.insuranceFee) : 0,
+            travelerPayout: Number(ctx.escrow.travelerPayout),
+            discountPct: persistedDiscountPct,
+          };
           return {
             escrowId: ctx.escrow.id,
             clientSecret: intent.client_secret,
             status: ctx.escrow.status,
-            breakdown,
+            breakdown: persistedBreakdown,
           };
         }
       }
@@ -161,38 +194,64 @@ export const escrowRoutes: FastifyPluginAsync = async (app) => {
         },
       });
 
-      // Upsert the ledger row. Status starts at FUNDED; the webhook flips
-      // it to LOCKED once payment_intent.succeeded arrives.
-      const escrow = await prisma.escrowLedger.upsert({
-        where: { parcelId },
-        create: {
-          parcelId,
-          senderId: ctx.senderId,
-          travelerId: ctx.matchedTrip!.travelerId,
-          status: "FUNDED",
-          totalAmount: breakdown.totalAmount,
-          currency: "EUR",
-          platformFee: breakdown.platformFee,
-          insuranceFee: breakdown.insuranceFee || null,
-          travelerPayout: breakdown.travelerPayout,
-          fundingMethod: "CREDIT_CARD_STRIPE",
-          fundedAt: new Date(),
-          stripePaymentIntentId: intent.id,
-        },
-        update: {
-          // Re-funding after a canceled intent: attach the new intent + reset.
-          status: "FUNDED",
-          totalAmount: breakdown.totalAmount,
-          platformFee: breakdown.platformFee,
-          insuranceFee: breakdown.insuranceFee || null,
-          travelerPayout: breakdown.travelerPayout,
-          stripePaymentIntentId: intent.id,
-          stripeTransferId: null,
-          fundedAt: new Date(),
-          lockedAt: null,
-          releasedAt: null,
-          refundedAt: null,
-        },
+      // Upsert the ledger row and (if applicable) mark the referral credit
+      // consumed in one transaction. Status starts at FUNDED; the webhook
+      // flips it to LOCKED once payment_intent.succeeded arrives.
+      //
+      // The two writes are wrapped together so they succeed or fail as a
+      // unit: if the escrow row is written but the credit-consume update
+      // fails (e.g. a DB blip), the whole transaction rolls back rather
+      // than leaving a funded, discounted escrow whose backing credit is
+      // still unconsumed and spendable again. The idempotent early-return
+      // path above (an existing non-final intent) returns before this
+      // point, so a retry of an already-in-flight payment never re-enters
+      // this transaction and never double-consumes a credit.
+      const escrow = await prisma.$transaction(async (tx) => {
+        const escrowRow = await tx.escrowLedger.upsert({
+          where: { parcelId },
+          create: {
+            parcelId,
+            senderId: ctx.senderId,
+            travelerId: ctx.matchedTrip!.travelerId,
+            status: "FUNDED",
+            totalAmount: breakdown.totalAmount,
+            currency: "EUR",
+            platformFee: breakdown.platformFee,
+            insuranceFee: breakdown.insuranceFee || null,
+            travelerPayout: breakdown.travelerPayout,
+            fundingMethod: "CREDIT_CARD_STRIPE",
+            fundedAt: new Date(),
+            stripePaymentIntentId: intent.id,
+          },
+          update: {
+            // Re-funding after a canceled intent: attach the new intent + reset.
+            status: "FUNDED",
+            totalAmount: breakdown.totalAmount,
+            platformFee: breakdown.platformFee,
+            insuranceFee: breakdown.insuranceFee || null,
+            travelerPayout: breakdown.travelerPayout,
+            stripePaymentIntentId: intent.id,
+            stripeTransferId: null,
+            fundedAt: new Date(),
+            lockedAt: null,
+            releasedAt: null,
+            refundedAt: null,
+          },
+        });
+
+        if (referralCredit) {
+          const consumed = await consumeReferralCredit(referralCredit.id, escrowRow.id, tx);
+          if (!consumed) {
+            // Lost the race: another concurrent funding request already
+            // consumed this credit. Roll back rather than ship a discount
+            // that isn't actually backed by an unconsumed credit.
+            throw new Error(
+              `Referral credit ${referralCredit.id} was already consumed by another request`,
+            );
+          }
+        }
+
+        return escrowRow;
       });
 
       return reply.code(201).send({

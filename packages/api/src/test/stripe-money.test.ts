@@ -76,6 +76,42 @@ describe("computePayoutBreakdown", () => {
     assert.strictEqual(b.platformFee, 2);
     assert.strictEqual(b.totalAmount, 21.99);
   });
+
+  it("applies a referral discount to the platform fee without touching the traveler payout", () => {
+    // 30 EUR price → 3 EUR raw fee. 50% discount → 1.5 EUR off → fee = 1.5.
+    const b = computePayoutBreakdown(30, 1000, 0, 50);
+    assert.strictEqual(b.platformFee, 1.5);
+    assert.strictEqual(b.travelerPayout, 30, "traveler must still receive the full price");
+    assert.strictEqual(b.totalAmount, 31.5); // price + discounted fee
+  });
+
+  it("a 100% discount waives the platform fee entirely", () => {
+    const b = computePayoutBreakdown(30, 1000, 0, 100);
+    assert.strictEqual(b.platformFee, 0);
+    assert.strictEqual(b.totalAmount, 30);
+    assert.strictEqual(b.travelerPayout, 30);
+  });
+
+  it("defaults to no discount when the 4th param is omitted", () => {
+    const withDefault = computePayoutBreakdown(30);
+    const explicitZero = computePayoutBreakdown(30, 1000, 0, 0);
+    assert.deepStrictEqual(withDefault, explicitZero);
+  });
+
+  it("echoes the applied discountPct back in the breakdown for the client to display", () => {
+    const b = computePayoutBreakdown(30, 1000, 0, 50);
+    assert.strictEqual(b.discountPct, 50);
+    assert.strictEqual(computePayoutBreakdown(30).discountPct, 0);
+  });
+
+  it("rounds the discount amount to avoid floating-point drift (e.g., 33% discount)", () => {
+    // 70 EUR price → 7 EUR raw fee. 33% discount → 7 × 0.33 = 2.31 → fee = 4.69 (clean).
+    // Without rounding, platformFee could be 4.6899999999999995 (dirty float).
+    const b = computePayoutBreakdown(70, 1000, 0, 33);
+    assert.strictEqual(b.platformFee, 4.69);
+    assert.strictEqual(b.travelerPayout, 70, "traveler must still receive the full price");
+    assert.strictEqual(b.totalAmount, 74.69); // 70 + 4.69 discounted fee
+  });
 });
 
 // node:test auto-runs on import; print a marker for the npm script output.

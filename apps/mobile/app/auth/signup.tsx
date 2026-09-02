@@ -39,6 +39,7 @@ export default function SignupScreen() {
   const [countryCode, setCountryCode] = useState("+33");
   const [nationalNumber, setNationalNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function submit() {
@@ -51,6 +52,7 @@ export default function SignupScreen() {
         email: email.trim(),
         phone,
         password,
+        referralCode: referralCode.trim() || undefined,
       });
       router.replace({
         pathname: "/auth/verify-phone",
@@ -127,6 +129,14 @@ export default function SignupScreen() {
           secureTextEntry
           textContentType="newPassword"
           testID="signup-password"
+        />
+        <Input
+          label={t("signup.referralCodeLabel")}
+          value={referralCode}
+          onChangeText={setReferralCode}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          testID="signup-referral-code"
         />
 
         <Button label={t("signup.submit")} onPress={submit} loading={loading} />

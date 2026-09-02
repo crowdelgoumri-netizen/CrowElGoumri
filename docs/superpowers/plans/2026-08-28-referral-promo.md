@@ -187,15 +187,21 @@ Expected: FAIL — `Cannot find module '../lib/referral-code.js'`
  * Referral code generation — 8-char uppercase alphanumeric, excluding
  * 0/O/1/I so a code read aloud or handwritten is never ambiguous.
  *
+ * Uses crypto.randomInt (not Math.random) — cheap to do right, and a
+ * referral code is a bearer credential of sorts (whoever holds it can
+ * attribute a signup to a referrer), so it shouldn't be predictable.
+ *
  * Collision handling lives at the call site (auth.ts retries on the
  * unique-constraint violation), not here — this function has no DB access.
  */
+import { randomInt } from "node:crypto";
+
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
 
 export function generateReferralCode(): string {
   let code = "";
   for (let i = 0; i < 8; i++) {
-    code += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    code += ALPHABET[randomInt(ALPHABET.length)];
   }
   return code;
 }
@@ -506,6 +512,15 @@ Add to `packages/api/src/test/stripe-money.test.ts`, inside the existing `descri
     assert.strictEqual(b.discountPct, 50);
     assert.strictEqual(computePayoutBreakdown(30).discountPct, 0);
   });
+
+  it("rounds the discount amount to avoid floating-point drift (e.g. 33% discount)", () => {
+    // 70 EUR price → 7 EUR raw fee. 33% off → 4.69, not a dirty float like
+    // 4.6899999999999995, and not euro-granularity-rounded to 5.
+    const b = computePayoutBreakdown(70, 1000, 0, 33);
+    assert.strictEqual(b.platformFee, 4.69);
+    assert.strictEqual(b.totalAmount, 74.69);
+    assert.strictEqual(b.travelerPayout, 70);
+  });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -551,8 +566,13 @@ export function computePayoutBreakdown(
   // so discounting the fee (which totalAmount includes) leaves the
   // traveler's payout untouched. Discounting totalAmount alone would
   // silently cut the traveler's payout instead of the platform's cut.
-  const discountAmount = Math.round(rawPlatformFee * (discount / 100));
-  const platformFee = rawPlatformFee - discountAmount;
+  // Round the final fee to the cent, not the intermediate discount amount —
+  // rounding discountAmount alone (e.g. Math.round(7 * 0.33) = 2) snaps to
+  // whole-EUR granularity, which is wrong for a percentage discount (7 EUR
+  // fee, 33% off should be 4.69, not 5). Match the *100/100 pattern used
+  // below for totalAmount/travelerPayout.
+  const discountAmount = rawPlatformFee * (discount / 100);
+  const platformFee = Math.round((rawPlatformFee - discountAmount) * 100) / 100;
 
   const totalAmount = Math.round((price + insurance + platformFee) * 100) / 100;
   const travelerPayout =

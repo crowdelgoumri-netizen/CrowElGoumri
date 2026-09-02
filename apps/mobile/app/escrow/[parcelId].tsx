@@ -136,6 +136,14 @@ export default function EscrowScreen() {
             </View>
           </Card>
 
+          {breakdown.discountPct > 0 ? (
+            <Card className="bg-success/10 border-success/30">
+              <Text className="text-success font-body text-xs font-semibold">
+                {t("escrow.referralDiscountApplied", { pct: breakdown.discountPct })}
+              </Text>
+            </Card>
+          ) : null}
+
           <Card className="bg-info/10 border-info/30">
             <Text className="text-text-secondary font-body text-xs">
               {t("escrow.escrowHint")}

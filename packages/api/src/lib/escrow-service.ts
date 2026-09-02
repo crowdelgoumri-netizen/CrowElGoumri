@@ -25,6 +25,7 @@ import type { EscrowLedger } from "@crowdshipping/db";
 import { prisma } from "@crowdshipping/db";
 import { getStripe, toCents } from "./stripe.js";
 import { notify } from "./notifications.js";
+import { maybeGrantFirstReleaseReward } from "./referral-service.js";
 
 type EscrowStatus = EscrowLedger["status"];
 
@@ -122,6 +123,13 @@ export async function releaseEscrowForParcel(
   }).catch(() => {
     /* swallowed: provider errors are logged inside notify() */
   });
+
+  // Referral reward: fires for either party on their first-ever RELEASED
+  // escrow. See maybeGrantFirstReleaseReward() in referral-service.ts for
+  // the count-then-grant logic (fire-and-forget; errors are swallowed there).
+  for (const userId of [updated.senderId, updated.travelerId]) {
+    maybeGrantFirstReleaseReward(userId);
+  }
 
   return { kind: "released", escrow: updated, transferId };
 }

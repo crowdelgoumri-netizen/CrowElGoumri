@@ -113,6 +113,7 @@ export const en = {
     haveAccount: "Already have an account?",
     errorTitle: "Could not sign up",
     errorFallback: "Sign-up failed",
+    referralCodeLabel: "Referral code (optional)",
   },
   verify: {
     title: "Verify your phone",
@@ -474,6 +475,7 @@ export const en = {
     stripeMissing: "Stripe configuration missing — contact support.",
     confirming: "Confirming…",
     pay: "Pay {{amount}}",
+    referralDiscountApplied: "{{pct}}% referral discount applied to the fee 🎁",
   },
   tracking: {
     title: "Tracking",
@@ -547,6 +549,7 @@ export const en = {
     preferences: "Preferences",
     pushNotifications: "Push notifications",
     howItWorks: "How it works",
+    inviteFriends: "Invite friends",
     about: "About",
     appName: "CrowdShipping",
     aboutTagline:
@@ -558,5 +561,15 @@ export const en = {
     language: "Language",
     pushAlertTitle: "Notifications",
     pushAlertBody: "Could not register (simulator or permission denied).",
+  },
+  invite: {
+    title: "Invite friends",
+    yourCode: "Your referral code",
+    shareButton: "Share my code",
+    shareMessage: "Join CrowdShipping with my code {{code}} and get a discount on your first shipment!",
+    yourReferrals: "Your referrals",
+    noReferralsYet: "You haven't referred anyone yet.",
+    statusPending: "Pending",
+    statusRewarded: "Rewarded 🎁",
   },
 } as const;

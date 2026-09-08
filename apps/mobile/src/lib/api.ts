@@ -26,7 +26,7 @@ import { Platform } from "react-native";
 const extra = Constants.expoConfig?.extra as
   | { apiUrl?: string; twilioVerifySid?: string; stripePublishableKey?: string }
   | undefined;
-const configuredUrl = process.env.EXPO_PUBLIC_API_URL ?? extra?.apiUrl;
+const configuredUrl = (process.env.EXPO_PUBLIC_API_URL ?? extra?.apiUrl)?.trim();
 
 // The Android emulator is its own network namespace — "localhost" there
 // resolves to the emulator device itself, not the host machine running the

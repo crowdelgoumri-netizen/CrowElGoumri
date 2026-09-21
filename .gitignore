@@ -58,3 +58,8 @@ coverage/
 
 # Subagent-driven-development scratch workspace (ledgers, briefs, review packages)
 .superpowers/
+
+# Git worktrees created outside .claude/worktrees/ (e.g. when a nested dot-directory
+# would break Jest's Windows testMatch glob resolution — see the DiasporaCart Phase 1
+# SDD ledger for the repro).
+/worktrees/

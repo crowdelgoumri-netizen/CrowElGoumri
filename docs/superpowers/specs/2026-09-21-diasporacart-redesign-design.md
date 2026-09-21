@@ -46,7 +46,8 @@ session):
 - No backend/API changes. This is a visual + navigation-structure pass over
   the existing data model and endpoints (per brief §1: preserve business
   logic).
-- No dark mode. Aurora's dual-mode mechanism is removed, not repurposed.
+- No dark mode in this pass — deferred, not precluded. See note under
+  "Design tokens" on keeping the token architecture mode-ready.
 - No invented business rules (pricing, insurance, customs, verification
   claims) — see brief §46/57. Anything not backed by real app data/logic
   gets a `TODO` marker or clearly-mocked demo data, and is flagged to the
@@ -58,6 +59,14 @@ session):
 Single light theme, replacing `THEME_COLORS` dark/bright pair in
 `src/theme/tokens.ts` and the corresponding CSS vars wired through
 `tailwind.config.ts` / `ThemeProvider.tsx`.
+
+**Future dark mode**: the CSS-custom-property mechanism Aurora used
+(`ThemeProvider` swapping values via NativeWind's `vars()`) is kept intact —
+only the *values* collapse to one mode for now, not the switching
+mechanism. Components must keep referencing token classNames
+(`bg-base`, `text-primary`, …), never hardcoded hex. This means a dark
+variant can be added later as a second value set + re-enabling the mode
+switch, without touching component code.
 
 | Token | Value | Source |
 |---|---|---|

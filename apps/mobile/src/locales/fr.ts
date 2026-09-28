@@ -331,6 +331,16 @@ export const fr = {
       statSecureValue: "100%",
       statSecureLabel: "sécurisé",
     },
+    actionBar: {
+      segmentParcel: "Envoyer un colis",
+      segmentTrip: "Je voyage",
+      segmentSearch: "Rechercher un voyage",
+      from: "De",
+      fromPlaceholder: "Ville de départ",
+      to: "Vers",
+      toPlaceholder: "Wilaya d'arrivée",
+      cta: "Rechercher",
+    },
     senderTitle: "Vous cherchez quelqu'un pour transporter un colis ?",
     senderBody:
       "Parcourez les voyageurs de confiance, comparez les prix et discutez avant de réserver.",

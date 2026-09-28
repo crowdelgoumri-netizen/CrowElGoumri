@@ -1,16 +1,15 @@
 /**
- * Home / Browse (board 02) — the marketplace hub.
+ * Home (board 02, DiasporaCart) — the dual-intent landing hub.
  *
- * Segmented between "Voyageurs" (browse PUBLISHED trips) and "Mes colis"
- * (the sender's own parcels), with popular-corridor quick picks and a filter
- * for transport mode (board 17). The "+" FAB in the tab shell is the entry to
- * posting.
+ * Hero: "Vous voyagez vers l'Algérie ?" (deep-green card, travel art, CTA to
+ * publish a trip). Second intent: "J'envoie un colis" (white card → Rechercher
+ * tab). Below: popular corridors (tap → pre-filtered search), the live feed
+ * of published trips (real data), a trust strip, and the community invite.
+ * Guests browse everything; publishing CTAs lead to the auth wall.
  */
-import { useState } from "react";
 import { router } from "expo-router";
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -21,297 +20,182 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { TripCard } from "../../src/components/TripCard";
-import { ParcelCard } from "../../src/components/ParcelCard";
-import { CampaignCard } from "../../src/components/CampaignCard";
 import { EmptyState } from "../../src/components/EmptyState";
-import { Select } from "../../src/components/Select";
-import { useAuth } from "../../src/store/auth";
+import { SenderArt } from "../../src/components/Illustrations";
+import { HomeHero } from "../../src/components/HomeHero";
+import { HomeActionBar } from "../../src/components/HomeActionBar";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
-import * as parcelsApi from "../../src/lib/parcels";
-import * as campaignsApi from "../../src/lib/campaigns";
-import { MODE_KEY } from "../../src/lib/format";
 import { POPULAR_CORRIDORS } from "../../src/config/corridors";
-import type { TransportMode } from "../../src/lib/types";
 
-type Tab = "trips" | "parcels";
+const TRUST = [
+  { icon: "lock-closed-outline", key: "home.trustEscrow" },
+  { icon: "shield-checkmark-outline", key: "home.trustVerified" },
+  { icon: "locate-outline", key: "home.trustTracking" },
+] as const;
 
 export default function HomeScreen() {
-  const user = useAuth((s) => s.user);
-  const tokens = useAuth((s) => s.tokens);
   const colors = useThemeColors();
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("trips");
-  const [mode, setMode] = useState<string>("");
 
-  const modeOptions = [
-    { value: "", label: t("home.allModes") },
-    ...Object.entries(MODE_KEY).map(([value, key]) => ({ value, label: t(key) })),
-  ];
-
-  const campaigns = useAsync(() => campaignsApi.listCampaigns({ limit: 10 }), []);
-  const trips = useAsync(
-    () => tripsApi.listPublished(mode ? { mode: mode as TransportMode } : {}),
-    [mode],
-  );
-  // Guests have no parcels — the "Mes colis" segment shows a login CTA.
-  const parcels = useAsync(
-    () =>
-      tokens
-        ? parcelsApi.listMine()
-        : Promise.resolve(null as parcelsApi.ListParcelsResponse | null),
-    [!!tokens],
-  );
+  const trips = useAsync(() => tripsApi.listPublished({}), []);
+  const feed = (trips.data?.trips ?? []).slice(0, 5);
 
   return (
-    <Screen>
-      {/* Header */}
-      <View className="flex-row items-center justify-between mt-md">
-        <View className="flex-1">
-          <Text className="text-text-muted font-body text-sm">
-            {t("home.greeting", { name: user?.firstName ?? "👋" })}
-          </Text>
-          <Text className="text-text-primary font-heading text-2xl font-bold">
-            {t("home.corridor")}
-          </Text>
-        </View>
-        <Pressable
-          onPress={() => router.push("/notifications")}
-          className="h-11 w-11 items-center justify-center rounded-full bg-glass border border-hairline"
-        >
-          <Ionicons name="notifications-outline" size={22} color={colors.textPrimary} />
-        </Pressable>
-      </View>
+    <Screen scroll={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="px-screen-edge pb-xl"
+        refreshControl={
+          <RefreshControl refreshing={trips.loading} onRefresh={trips.refresh} tintColor={colors.accent} />
+        }
+      >
+        <HomeHero />
+        <HomeActionBar />
 
-      {/* Popular corridors */}
-      <View className="mt-section-gap">
-        <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mb-2">
-          {t("home.popularCorridors")}
-        </Text>
-        <View className="flex-row flex-wrap gap-2">
-          {POPULAR_CORRIDORS.map((c) => (
-            <View
-              key={c}
-              className="rounded-chip bg-chip-bg border border-chip-border px-3 py-1.5"
-            >
-              <Text className="text-text-secondary font-body text-xs">{c}</Text>
+        {/* Sender intent */}
+        <View className="mt-stack-gap rounded-card bg-glass border border-hairline">
+          <View className="flex-row items-center">
+            <View className="flex-1 py-lg pl-lg pr-sm" style={{ maxWidth: "68%" }}>
+              <Text className="text-text-primary font-heading text-lg font-bold leading-6">
+                {t("home.senderTitle")}
+              </Text>
+              <Text className="text-text-secondary font-body text-sm mt-1 leading-5">
+                {t("home.senderBody")}
+              </Text>
             </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Voyageurs réguliers — horizontal scroll, only when there's data */}
-      {(campaigns.data?.campaigns.length ?? 0) > 0 ? (
-        <View className="mt-section-gap">
-          <View className="flex-row items-baseline justify-between mb-2">
-            <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary">
-              {t("campaign.sectionTitle")}
-            </Text>
-            <Text className="text-text-muted font-body text-xs">
-              {t("campaign.sectionSubtitle")}
-            </Text>
+            <View className="pr-md">
+              <SenderArt />
+            </View>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-3 pr-5"
-            className="mx-[-20px] pl-[20px]"
+          <Pressable
+            onPress={() => router.push("/(tabs)/search")}
+            className="mx-lg mb-lg mt-1 flex-row items-center justify-center gap-2 rounded-field border border-accent bg-transparent py-3.5 active:opacity-80"
           >
-            {campaigns.data!.campaigns.map((c) => (
-              <CampaignCard
-                key={c.id}
-                campaign={c}
-                onPress={(camp) => router.push(`/campaign/${camp.id}`)}
-              />
+            <Ionicons name="search" size={17} color={colors.accent} />
+            <Text className="text-accent font-heading font-bold text-base">
+              {t("home.senderCta")}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Popular corridors */}
+        <View className="mt-section-gap">
+          <SectionTitle title={t("home.popularCorridors")} />
+          <View className="flex-row flex-wrap gap-2 mt-2.5">
+            {POPULAR_CORRIDORS.map((c) => (
+              <Pressable
+                key={c}
+                onPress={() =>
+                  router.push({ pathname: "/(tabs)/search", params: { corridor: c } })
+                }
+                className="rounded-chip bg-chip-bg border border-chip-border px-3.5 py-2 active:opacity-70"
+              >
+                <Text className="text-text-secondary font-body text-xs font-medium">
+                  {c}
+                </Text>
+              </Pressable>
             ))}
-          </ScrollView>
+          </View>
         </View>
-      ) : null}
 
-      {/* Segmented toggle */}
-      <View className="flex-row bg-glass rounded-chip p-1 mt-section-gap">
-        <SegBtn label={t("home.segmentTrips")} active={tab === "trips"} onPress={() => setTab("trips")} />
-        <SegBtn label={t("home.segmentParcels")} active={tab === "parcels"} onPress={() => setTab("parcels")} />
-      </View>
-
-      {/* Filter (trips only) */}
-      {tab === "trips" ? (
-        <View className="mt-stack-gap">
-          <Select
-            label={t("home.filterMode")}
-            value={mode}
-            options={modeOptions}
-            onSelect={setMode}
-            placeholder={t("home.allModes")}
-          />
+        {/* Live travelers feed */}
+        <View className="mt-section-gap">
+          <View className="flex-row items-center justify-between">
+            <SectionTitle title={t("home.travelersFeed")} />
+            <Pressable onPress={() => router.push("/(tabs)/search")}>
+              <Text className="text-accent font-heading text-xs font-bold">
+                {t("home.seeAll")}
+              </Text>
+            </Pressable>
+          </View>
+          <View className="mt-2.5 gap-3">
+            {trips.loading && feed.length === 0 ? (
+              <View className="py-xl items-center">
+                <ActivityIndicator color={colors.accent} />
+              </View>
+            ) : trips.error ? (
+              <EmptyState
+                icon="cloud-offline-outline"
+                title={t("common.errorTitle")}
+                subtitle={trips.error}
+                ctaLabel={t("common.retry")}
+                onCta={trips.refresh}
+              />
+            ) : feed.length === 0 ? (
+              <EmptyState
+                icon="airplane-outline"
+                title={t("home.noTripsTitle")}
+                subtitle={t("home.noTripsSubtitle")}
+              />
+            ) : (
+              feed.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  trip={trip}
+                  onPress={(tr) => router.push(`/trip/${tr.id}`)}
+                />
+              ))
+            )}
+          </View>
         </View>
-      ) : null}
 
-      {/* List */}
-      <View className="mt-stack-gap">
-        {tab === "trips" ? (
-          <TripsList
-            loading={trips.loading}
-            error={trips.error}
-            trips={trips.data?.trips ?? null}
-            onRefresh={trips.refresh}
-          />
-        ) : !tokens ? (
-          <EmptyState
-            icon="cube-outline"
-            title={t("home.guestParcelsTitle")}
-            subtitle={t("home.guestParcelsSubtitle")}
-            ctaLabel={t("common.login")}
-            onCta={() => router.push("/auth/login")}
-          />
-        ) : (
-          <ParcelsList
-            loading={parcels.loading}
-            error={parcels.error}
-            parcels={parcels.data?.parcels ?? null}
-            onRefresh={parcels.refresh}
-          />
-        )}
-      </View>
+        {/* Trust strip */}
+        <View className="mt-section-gap">
+          <SectionTitle title={t("home.trustTitle")} />
+          <View className="flex-row gap-3 mt-2.5">
+            {TRUST.map((item) => (
+              <View
+                key={item.key}
+                className="flex-1 items-center rounded-card bg-glass border border-hairline py-card-padding gap-2"
+              >
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-info/15">
+                  <Ionicons name={item.icon} size={19} color={colors.infoIcon} />
+                </View>
+                <Text className="text-text-secondary font-body text-xs font-medium text-center leading-4">
+                  {t(item.key)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Community */}
+        <View className="mt-section-gap rounded-card bg-chip-bg border border-chip-border p-card-padding">
+          <View className="flex-row items-center gap-3">
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-accent/15">
+              <Ionicons name="people-outline" size={22} color={colors.accent} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-text-primary font-heading font-bold text-base">
+                {t("home.communityTitle")}
+              </Text>
+              <Text className="text-text-secondary font-body text-xs mt-0.5 leading-4">
+                {t("home.communityBody")}
+              </Text>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => router.push("/invite")}
+            className="mt-card-padding flex-row items-center justify-center gap-2 rounded-field bg-accent py-3.5 active:opacity-80"
+          >
+            <Ionicons name="gift-outline" size={17} color={colors.accentOn} />
+            <Text className="text-accent-on font-heading font-bold text-sm">
+              {t("home.communityCta")}
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
     </Screen>
   );
 }
 
-function SegBtn({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
+function SectionTitle({ title }: { title: string }) {
   return (
-    <Pressable
-      onPress={onPress}
-      className={
-        "flex-1 items-center py-2.5 rounded-chip " +
-        (active ? "bg-accent" : "bg-transparent")
-      }
-    >
-      <Text
-        className={
-          "font-body font-semibold text-sm " +
-          (active ? "text-accent-on" : "text-text-muted")
-        }
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function TripsList({
-  loading,
-  error,
-  trips,
-  onRefresh,
-}: {
-  loading: boolean;
-  error: string | null;
-  trips: tripsApi.Trip[] | null;
-  onRefresh: () => void;
-}) {
-  const colors = useThemeColors();
-  const { t } = useTranslation();
-  if (loading && !trips) {
-    return <Loader />;
-  }
-  if (error) {
-    return (
-      <EmptyState
-        icon="cloud-offline-outline"
-        title={t("common.errorTitle")}
-        subtitle={error}
-        ctaLabel={t("common.retry")}
-        onCta={onRefresh}
-      />
-    );
-  }
-  if (trips && trips.length === 0) {
-    return (
-      <EmptyState
-        icon="airplane-outline"
-        title={t("home.noTripsTitle")}
-        subtitle={t("home.noTripsSubtitle")}
-      />
-    );
-  }
-  return (
-    <FlatList
-      data={trips ?? []}
-      keyExtractor={(t) => t.id}
-      renderItem={({ item }) => (
-        <TripCard trip={item} onPress={(t) => router.push(`/trip/${t.id}`)} />
-      )}
-      ItemSeparatorComponent={() => <View className="h-3" />}
-      scrollEnabled={false}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor={colors.accent} />}
-    />
-  );
-}
-
-function ParcelsList({
-  loading,
-  error,
-  parcels,
-  onRefresh,
-}: {
-  loading: boolean;
-  error: string | null;
-  parcels: parcelsApi.Parcel[] | null;
-  onRefresh: () => void;
-}) {
-  const colors = useThemeColors();
-  const { t } = useTranslation();
-  if (loading && !parcels) {
-    return <Loader />;
-  }
-  if (error) {
-    return (
-      <EmptyState
-        icon="cloud-offline-outline"
-        title={t("common.errorTitle")}
-        subtitle={error}
-        ctaLabel={t("common.retry")}
-        onCta={onRefresh}
-      />
-    );
-  }
-  if (parcels && parcels.length === 0) {
-    return (
-      <EmptyState
-        icon="cube-outline"
-        title={t("home.noParcelsTitle")}
-        subtitle={t("home.noParcelsSubtitle")}
-      />
-    );
-  }
-  return (
-    <FlatList
-      data={parcels ?? []}
-      keyExtractor={(p) => p.id}
-      renderItem={({ item }) => (
-        <ParcelCard parcel={item} onPress={(p) => router.push(`/parcel/${p.id}`)} />
-      )}
-      ItemSeparatorComponent={() => <View className="h-3" />}
-      scrollEnabled={false}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor={colors.accent} />}
-    />
-  );
-}
-
-function Loader() {
-  const colors = useThemeColors();
-  return (
-    <View className="py-xl items-center">
-      <ActivityIndicator color={colors.accent} />
-    </View>
+    <Text className="text-text-primary font-heading font-bold text-base">
+      {title}
+    </Text>
   );
 }

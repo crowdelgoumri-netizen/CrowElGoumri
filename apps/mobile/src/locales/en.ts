@@ -325,6 +325,16 @@ export const en = {
       statSecureValue: "100%",
       statSecureLabel: "secure",
     },
+    actionBar: {
+      segmentParcel: "Send a parcel",
+      segmentTrip: "I'm traveling",
+      segmentSearch: "Search a trip",
+      from: "From",
+      fromPlaceholder: "Departure city",
+      to: "To",
+      toPlaceholder: "Arrival wilaya",
+      cta: "Search",
+    },
     senderTitle: "Looking for someone to carry a parcel?",
     senderBody:
       "Browse trusted travelers, compare prices, and chat before you book.",

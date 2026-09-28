@@ -28,12 +28,6 @@ export function HomeActionBar() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  function swap() {
-    const f = from;
-    setFrom(to);
-    setTo(f);
-  }
-
   function go() {
     if (segment === "parcel") {
       router.push("/post-parcel");
@@ -89,12 +83,6 @@ export function HomeActionBar() {
             placeholder={t("home.actionBar.fromPlaceholder")}
           />
         </View>
-        <Pressable
-          onPress={swap}
-          className="h-11 w-11 items-center justify-center rounded-full bg-glass border border-hairline"
-        >
-          <Ionicons name="swap-horizontal" size={16} color={colors.textMuted} />
-        </Pressable>
         <View className="flex-1">
           <Select
             label={t("home.actionBar.to")}

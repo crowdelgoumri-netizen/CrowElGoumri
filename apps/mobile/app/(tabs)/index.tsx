@@ -26,6 +26,7 @@ import { Card } from "../../src/components/Card";
 import { HomeHero } from "../../src/components/HomeHero";
 import { HomeActionBar } from "../../src/components/HomeActionBar";
 import { HowItWorks } from "../../src/components/HowItWorks";
+import { PromoCards } from "../../src/components/PromoCards";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
@@ -71,6 +72,7 @@ export default function HomeScreen() {
         </Card>
 
         <HowItWorks />
+        <PromoCards />
 
         {/* Sender intent */}
         <View className="mt-stack-gap rounded-card bg-glass border border-hairline">

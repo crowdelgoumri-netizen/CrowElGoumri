@@ -353,6 +353,12 @@ export const fr = {
       step4Title: "Faites plaisir",
       step4Body: "Un bout de chez soi partout dans le monde",
     },
+    promo: {
+      familiesTitle: "Des milliers de familles réunies grâce à vous",
+      familiesBody: "Chaque colis transporte bien plus que des objets.",
+      travelTitle: "Vous voyagez bientôt ?",
+      travelBody: "Partagez votre trajet et aidez la communauté.",
+    },
     senderTitle: "Vous cherchez quelqu'un pour transporter un colis ?",
     senderBody:
       "Parcourez les voyageurs de confiance, comparez les prix et discutez avant de réserver.",

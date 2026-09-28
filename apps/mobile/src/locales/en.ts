@@ -347,6 +347,12 @@ export const en = {
       step4Title: "Make someone's day",
       step4Body: "A piece of home, anywhere in the world",
     },
+    promo: {
+      familiesTitle: "Thousands of families reunited thanks to you",
+      familiesBody: "Every parcel carries far more than objects.",
+      travelTitle: "Traveling soon?",
+      travelBody: "Share your trip and help the community.",
+    },
     senderTitle: "Looking for someone to carry a parcel?",
     senderBody:
       "Browse trusted travelers, compare prices, and chat before you book.",

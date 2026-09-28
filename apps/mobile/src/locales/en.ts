@@ -335,6 +335,18 @@ export const en = {
       toPlaceholder: "Arrival wilaya",
       cta: "Search",
     },
+    howItWorks: {
+      title: "How does it work?",
+      seeMore: "See more",
+      step1Title: "Find a traveler",
+      step1Body: "To or from Algeria",
+      step2Title: "Request the delivery",
+      step2Body: "Chat safely and agree on terms",
+      step3Title: "Track your parcel",
+      step3Body: "Until it's delivered",
+      step4Title: "Make someone's day",
+      step4Body: "A piece of home, anywhere in the world",
+    },
     senderTitle: "Looking for someone to carry a parcel?",
     senderBody:
       "Browse trusted travelers, compare prices, and chat before you book.",

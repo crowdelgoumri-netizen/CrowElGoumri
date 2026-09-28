@@ -341,6 +341,18 @@ export const fr = {
       toPlaceholder: "Wilaya d'arrivée",
       cta: "Rechercher",
     },
+    howItWorks: {
+      title: "Comment ça marche ?",
+      seeMore: "Voir plus",
+      step1Title: "Trouvez un voyageur",
+      step1Body: "Depuis ou vers l'Algérie",
+      step2Title: "Demandez l'envoi",
+      step2Body: "Échangez en toute sécurité",
+      step3Title: "Suivez votre colis",
+      step3Body: "Jusqu'à sa livraison",
+      step4Title: "Faites plaisir",
+      step4Body: "Un bout de chez soi partout dans le monde",
+    },
     senderTitle: "Vous cherchez quelqu'un pour transporter un colis ?",
     senderBody:
       "Parcourez les voyageurs de confiance, comparez les prix et discutez avant de réserver.",

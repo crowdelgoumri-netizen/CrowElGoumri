@@ -25,6 +25,7 @@ import { SenderArt } from "../../src/components/Illustrations";
 import { Card } from "../../src/components/Card";
 import { HomeHero } from "../../src/components/HomeHero";
 import { HomeActionBar } from "../../src/components/HomeActionBar";
+import { HowItWorks } from "../../src/components/HowItWorks";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
@@ -68,6 +69,8 @@ export default function HomeScreen() {
             <StatItem key={s.icon} icon={s.icon} valueKey={s.valueKey} labelKey={s.labelKey} divider={i > 0} />
           ))}
         </Card>
+
+        <HowItWorks />
 
         {/* Sender intent */}
         <View className="mt-stack-gap rounded-card bg-glass border border-hairline">

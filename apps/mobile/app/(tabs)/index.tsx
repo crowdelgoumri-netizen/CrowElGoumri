@@ -22,6 +22,7 @@ import { Screen } from "../../src/components/Screen";
 import { TripCard } from "../../src/components/TripCard";
 import { EmptyState } from "../../src/components/EmptyState";
 import { SenderArt } from "../../src/components/Illustrations";
+import { Card } from "../../src/components/Card";
 import { HomeHero } from "../../src/components/HomeHero";
 import { HomeActionBar } from "../../src/components/HomeActionBar";
 import { useAsync } from "../../src/hooks/useAsync";
@@ -33,6 +34,13 @@ const TRUST = [
   { icon: "lock-closed-outline", key: "home.trustEscrow" },
   { icon: "shield-checkmark-outline", key: "home.trustVerified" },
   { icon: "locate-outline", key: "home.trustTracking" },
+] as const;
+
+const STATS = [
+  { icon: "earth-outline", valueKey: "home.heroBanner.statTravelersValue", labelKey: "home.heroBanner.statTravelersLabel" },
+  { icon: "cube-outline", valueKey: "home.heroBanner.statParcelsValue", labelKey: "home.heroBanner.statParcelsLabel" },
+  { icon: "star", valueKey: "home.heroBanner.statRatingValue", labelKey: "home.heroBanner.statRatingLabel" },
+  { icon: "shield-checkmark", valueKey: "home.heroBanner.statSecureValue", labelKey: "home.heroBanner.statSecureLabel" },
 ] as const;
 
 export default function HomeScreen() {
@@ -54,6 +62,12 @@ export default function HomeScreen() {
       >
         <HomeHero />
         <HomeActionBar />
+
+        <Card raised className="mt-section-gap flex-row">
+          {STATS.map((s, i) => (
+            <StatItem key={s.icon} icon={s.icon} valueKey={s.valueKey} labelKey={s.labelKey} divider={i > 0} />
+          ))}
+        </Card>
 
         {/* Sender intent */}
         <View className="mt-stack-gap rounded-card bg-glass border border-hairline">
@@ -197,5 +211,27 @@ function SectionTitle({ title }: { title: string }) {
     <Text className="text-text-primary font-heading font-bold text-base">
       {title}
     </Text>
+  );
+}
+
+function StatItem({
+  icon,
+  valueKey,
+  labelKey,
+  divider,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  valueKey: string;
+  labelKey: string;
+  divider: boolean;
+}) {
+  const colors = useThemeColors();
+  const { t } = useTranslation();
+  return (
+    <View className={"flex-1 items-center gap-1" + (divider ? " border-l border-hairline" : "")}>
+      <Ionicons name={icon} size={16} color={colors.accent} />
+      <Text className="font-heading font-bold text-text-primary text-xs">{t(valueKey)}</Text>
+      <Text className="font-body text-text-muted text-[9px] text-center">{t(labelKey)}</Text>
+    </View>
   );
 }

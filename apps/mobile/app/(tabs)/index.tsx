@@ -21,7 +21,6 @@ import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { TripCard } from "../../src/components/TripCard";
 import { EmptyState } from "../../src/components/EmptyState";
-import { SenderArt } from "../../src/components/Illustrations";
 import { Card } from "../../src/components/Card";
 import { HomeHero } from "../../src/components/HomeHero";
 import { HomeActionBar } from "../../src/components/HomeActionBar";
@@ -73,32 +72,6 @@ export default function HomeScreen() {
 
         <HowItWorks />
         <PromoCards />
-
-        {/* Sender intent */}
-        <View className="mt-stack-gap rounded-card bg-glass border border-hairline">
-          <View className="flex-row items-center">
-            <View className="flex-1 py-lg pl-lg pr-sm" style={{ maxWidth: "68%" }}>
-              <Text className="text-text-primary font-heading text-lg font-bold leading-6">
-                {t("home.senderTitle")}
-              </Text>
-              <Text className="text-text-secondary font-body text-sm mt-1 leading-5">
-                {t("home.senderBody")}
-              </Text>
-            </View>
-            <View className="pr-md">
-              <SenderArt />
-            </View>
-          </View>
-          <Pressable
-            onPress={() => router.push("/(tabs)/search")}
-            className="mx-lg mb-lg mt-1 flex-row items-center justify-center gap-2 rounded-field border border-accent bg-transparent py-3.5 active:opacity-80"
-          >
-            <Ionicons name="search" size={17} color={colors.accent} />
-            <Text className="text-accent font-heading font-bold text-base">
-              {t("home.senderCta")}
-            </Text>
-          </Pressable>
-        </View>
 
         {/* Popular corridors */}
         <View className="mt-section-gap">
@@ -179,32 +152,6 @@ export default function HomeScreen() {
               </View>
             ))}
           </View>
-        </View>
-
-        {/* Community */}
-        <View className="mt-section-gap rounded-card bg-chip-bg border border-chip-border p-card-padding">
-          <View className="flex-row items-center gap-3">
-            <View className="h-11 w-11 items-center justify-center rounded-full bg-accent/15">
-              <Ionicons name="people-outline" size={22} color={colors.accent} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-text-primary font-heading font-bold text-base">
-                {t("home.communityTitle")}
-              </Text>
-              <Text className="text-text-secondary font-body text-xs mt-0.5 leading-4">
-                {t("home.communityBody")}
-              </Text>
-            </View>
-          </View>
-          <Pressable
-            onPress={() => router.push("/invite")}
-            className="mt-card-padding flex-row items-center justify-center gap-2 rounded-field bg-accent py-3.5 active:opacity-80"
-          >
-            <Ionicons name="gift-outline" size={17} color={colors.accentOn} />
-            <Text className="text-accent-on font-heading font-bold text-sm">
-              {t("home.communityCta")}
-            </Text>
-          </Pressable>
         </View>
       </ScrollView>
     </Screen>

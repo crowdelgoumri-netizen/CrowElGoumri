@@ -412,6 +412,7 @@ export const en = {
   },
   notifications: {
     title: "Notifications",
+    messagesRow: "Messages",
     markAllRead: "Mark all read",
     unread_one: "{{count}} unread",
     unread_other: "{{count}} unread",

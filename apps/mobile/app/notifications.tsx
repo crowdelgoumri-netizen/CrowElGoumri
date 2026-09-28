@@ -5,6 +5,7 @@
  * lets the user mark all read. The unread count also feeds the Messages tab
  * badge via the tab layout. Push registration itself happens at boot (push.ts).
  */
+import { router } from "expo-router";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -78,6 +79,19 @@ export default function NotificationsScreen() {
           ) : undefined
         }
       />
+
+      <Pressable
+        onPress={() => router.push("/messages")}
+        className="flex-row items-center gap-stack-gap py-card-padding mb-1 rounded-card bg-glass border border-hairline px-card-padding active:opacity-80"
+      >
+        <View className="h-9 w-9 items-center justify-center rounded-full bg-accent/15">
+          <Ionicons name="chatbubbles-outline" size={17} color={colors.accent} />
+        </View>
+        <Text className="flex-1 text-text-primary font-body font-semibold text-sm">
+          {t("notifications.messagesRow")}
+        </Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
 
       {data && data.unreadCount > 0 ? (
         <Text className="text-text-muted font-body text-xs mb-2">

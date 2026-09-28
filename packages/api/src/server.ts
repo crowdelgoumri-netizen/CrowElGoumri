@@ -20,6 +20,7 @@ import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
 import { parcelRoutes } from "./routes/parcels.js";
 import { tripRoutes } from "./routes/trips.js";
+import { campaignRoutes } from "./routes/campaigns.js";
 import { matchingRoutes } from "./routes/matching.js";
 import { escrowRoutes } from "./routes/escrow.js";
 import { chatRoutes } from "./routes/chat.js";
@@ -27,6 +28,7 @@ import { notificationRoutes } from "./routes/notifications.js";
 import { kycRoutes } from "./routes/kyc.js";
 import { disputeRoutes } from "./routes/disputes.js";
 import { ratingRoutes } from "./routes/ratings.js";
+import { referralRoutes } from "./routes/referrals.js";
 import { uploadRoutes } from "./routes/uploads.js";
 import { adminRoutes } from "./routes/admin.js";
 import { realtimePlugin } from "./plugins/realtime.js";
@@ -88,6 +90,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(meRoutes, { prefix: "/me" });
   await app.register(parcelRoutes, { prefix: "/parcels" });
   await app.register(tripRoutes, { prefix: "/trips" });
+  await app.register(campaignRoutes, { prefix: "/campaigns" });
   await app.register(matchingRoutes, { prefix: "/matching" });
   await app.register(escrowRoutes, { prefix: "/escrow" });
   await app.register(chatRoutes, { prefix: "/chat" });
@@ -95,6 +98,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(kycRoutes, { prefix: "/kyc" });
   await app.register(disputeRoutes, { prefix: "/disputes" });
   await app.register(ratingRoutes, { prefix: "/ratings" });
+  await app.register(referralRoutes, { prefix: "/referrals" });
   await app.register(uploadRoutes, { prefix: "/uploads" });
   await app.register(adminRoutes, { prefix: "/admin" });
 

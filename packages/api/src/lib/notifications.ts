@@ -36,7 +36,9 @@ export type NotificationType =
   | "KYC_APPROVED"
   | "KYC_REJECTED"
   | "DISPUTE_OPENED"
-  | "PARCEL_SEIZED";
+  | "PARCEL_SEIZED"
+  | "REFERRAL_REWARDED_REFERRER"
+  | "REFERRAL_REWARDED_REFEREE";
 
 /** Payload routes carry into notify(); templates read what they need. */
 export interface NotificationPayload {
@@ -49,6 +51,7 @@ export interface NotificationPayload {
   kycLevel?: string;
   reviewNote?: string;
   disputeReason?: string;
+  discountPct?: number;
   [k: string]: unknown;
 }
 
@@ -131,6 +134,14 @@ const TEMPLATES: Record<
     body: p.disputeReason
       ? `Un signalement a été ouvert pour votre colis (motif : ${p.disputeReason}).`
       : "Un signalement a été ouvert pour votre colis.",
+  }),
+  REFERRAL_REWARDED_REFERRER: (p) => ({
+    title: "Parrainage récompensé 🎁",
+    body: `Un ami que vous avez parrainé a effectué sa première livraison. Vous avez reçu ${p.discountPct ?? 50}% de réduction sur votre prochaine fee.`,
+  }),
+  REFERRAL_REWARDED_REFEREE: (p) => ({
+    title: "Merci d'avoir utilisé un code de parrainage 🎁",
+    body: `Vous avez reçu ${p.discountPct ?? 50}% de réduction sur votre prochaine fee.`,
   }),
 };
 

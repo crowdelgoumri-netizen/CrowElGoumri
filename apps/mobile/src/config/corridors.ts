@@ -137,3 +137,11 @@ export const POPULAR_CORRIDORS: readonly string[] = [
   "Bruxelles → Tizi Ouzou",
   "Madrid → Oran",
 ];
+
+/**
+ * Flattened "Paris (France)"-style origin options, country-grouped. Shared
+ * by the Search screen's From field and the Home action bar's De field.
+ */
+export const CITY_OPTIONS = ORIGIN_COUNTRIES.flatMap((c) =>
+  c.cities.map((city) => ({ value: city, label: `${city} (${c.name})` })),
+);

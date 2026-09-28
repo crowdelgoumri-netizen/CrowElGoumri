@@ -121,6 +121,17 @@ enum AddressLevel {
   HUMAN_RELAY
 }
 
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ReferralStatus {
+  PENDING
+  REWARDED
+}
+
 // ============== MODELS ==============
 
 model User {
@@ -153,6 +164,9 @@ model User {
   maxDetourKm      Int?
   preferredCurrency Currency @default(EUR)
 
+  // Referral
+  referralCode     String    @unique @db.VarChar(8)
+
   // Stripe Connect (for payouts when acting as traveler)
   stripeAccountId  String?   @unique
   stripePayoutsEnabled Boolean @default(false)
@@ -173,6 +187,10 @@ model User {
   escrowAsTraveler EscrowLedger[] @relation("EscrowTraveler")
   notifications   Notification[]
   kycSubmissions  KycSubmission[]
+  campaigns       Campaign[]     @relation("TravelerCampaigns")
+  referralsMade     Referral[]       @relation("ReferralsMade")
+  referralReceived  Referral?        @relation("ReferralsReceived")
+  referralCredits   ReferralCredit[]
 
   @@index([trustScore])
   @@index([kycLevel])
@@ -496,4 +514,61 @@ model KycSubmission {
 
   @@index([userId])
   @@index([status])
+}
+
+model Campaign {
+  id            String         @id @default(uuid())
+  travelerId    String
+  traveler      User           @relation("TravelerCampaigns", fields: [travelerId], references: [id])
+
+  title         String         @db.VarChar(120)
+  description   String?        @db.Text
+
+  originCity    String         @db.VarChar(100)
+  originCountry String         @db.VarChar(100)
+  destWilayas   String[]
+
+  departureDate DateTime
+  returnDate    DateTime?
+
+  mode          TripMode
+  capacityKg    Float
+  pricePerKg    Float
+
+  status        CampaignStatus @default(DRAFT)
+  featured      Boolean        @default(false)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  expiresAt     DateTime?
+
+  @@index([travelerId])
+  @@index([status, departureDate])
+}
+
+model Referral {
+  id          String         @id @default(uuid())
+  referrerId  String
+  referrer    User           @relation("ReferralsMade", fields: [referrerId], references: [id])
+  refereeId   String         @unique
+  referee     User           @relation("ReferralsReceived", fields: [refereeId], references: [id])
+  code        String
+  status      ReferralStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  rewardedAt  DateTime?
+
+  @@index([referrerId])
+  @@index([status])
+}
+
+model ReferralCredit {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  discountPct      Decimal   @db.Decimal(4, 2)
+  consumedAt       DateTime?
+  consumedEscrowId String?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId, consumedAt])
 }

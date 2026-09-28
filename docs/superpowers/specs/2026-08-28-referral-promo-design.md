@@ -128,8 +128,21 @@ Au moment du calcul du breakdown (ligne ~129, avant l'appel Stripe) :
 
 1. Chercher le `ReferralCredit` non consommé le plus ancien du sender
    (`where: { userId: senderId, consumedAt: null }, orderBy: { createdAt: "asc" }`).
-2. Si trouvé : réduire `totalAmount` facturé au sender de `discountPct × platformFee` (le
-   `travelerPayout` n'est **pas** affecté — la plateforme absorbe la réduction, pas le voyageur).
+2. Si trouvé, passer son `discountPct` à `computePayoutBreakdown` (nouveau 4e paramètre optionnel,
+   défaut `0` — rétrocompatible avec tous les appels existants). En interne, la fonction réduit le
+   `platformFee` brut de `discountPct`% **avant** de calculer `totalAmount` et `travelerPayout` à
+   partir de ce fee réduit :
+   ```ts
+   const rawPlatformFee = Math.round((price * feeBps) / 10000);
+   const discountAmount = Math.round(rawPlatformFee * (Number(discountPct) / 100));
+   const platformFee = rawPlatformFee - discountAmount;
+   // totalAmount et travelerPayout dérivent de `platformFee` comme aujourd'hui
+   ```
+   Comme `travelerPayout = totalAmount − platformFee − insurance` et que `totalAmount` inclut ce
+   même `platformFee` réduit, le `travelerPayout` reste égal à `travelerPrice` — la réduction
+   ampute uniquement la part que la plateforme se serait versée, jamais le voyageur. (Réduire
+   directement `totalAmount` sans toucher `platformFee` serait un bug : la formule existante
+   répercuterait la réduction sur le voyageur.)
 3. Après création réussie du PaymentIntent Stripe : marquer le crédit
    `consumedAt = now(), consumedEscrowId = escrow.id`.
 4. Si le paiement échoue avant confirmation (intent non confirmé), le crédit reste marqué consommé

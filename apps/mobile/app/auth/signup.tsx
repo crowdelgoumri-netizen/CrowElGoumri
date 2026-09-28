@@ -1,41 +1,59 @@
-/**
- * Signup screen — POST /auth/signup, then navigate to verify-phone with
- * the phone pre-filled. Account creation doesn't return tokens (phone must
- * be verified first); the verify screen completes the session.
- *
- * E.164 phone hint reflects the Algeria/EUR re-skin: +213 for Algerian
- * diaspora calling home, +33 for France-based senders.
- */
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Button } from "../../src/components/Button";
 import { Input } from "../../src/components/Input";
+import { Select } from "../../src/components/Select";
 import { Screen } from "../../src/components/Screen";
 import { ApiError } from "../../src/lib/api";
 import * as authApi from "../../src/lib/auth";
+
+const COUNTRY_CODES = [
+  { value: "+33",  label: "🇫🇷 +33"  },
+  { value: "+213", label: "🇩🇿 +213" },
+  { value: "+32",  label: "🇧🇪 +32"  },
+  { value: "+41",  label: "🇨🇭 +41"  },
+  { value: "+49",  label: "🇩🇪 +49"  },
+  { value: "+44",  label: "🇬🇧 +44"  },
+  { value: "+34",  label: "🇪🇸 +34"  },
+  { value: "+39",  label: "🇮🇹 +39"  },
+  { value: "+31",  label: "🇳🇱 +31"  },
+  { value: "+351", label: "🇵🇹 +351" },
+  { value: "+352", label: "🇱🇺 +352" },
+  { value: "+212", label: "🇲🇦 +212" },
+  { value: "+216", label: "🇹🇳 +216" },
+  { value: "+46",  label: "🇸🇪 +46"  },
+  { value: "+45",  label: "🇩🇰 +45"  },
+  { value: "+47",  label: "🇳🇴 +47"  },
+  { value: "+43",  label: "🇦🇹 +43"  },
+  { value: "+48",  label: "🇵🇱 +48"  },
+  { value: "+1",   label: "🇺🇸 +1"   },
+];
 
 export default function SignupScreen() {
   const { t } = useTranslation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("+213");
+  const [countryCode, setCountryCode] = useState("+33");
+  const [nationalNumber, setNationalNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function submit() {
     setLoading(true);
     try {
+      const phone = countryCode + nationalNumber.trim();
       const res = await authApi.signup({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
-        phone: phone.trim(),
+        phone,
         password,
+        referralCode: referralCode.trim() || undefined,
       });
-      // Backend doesn't auto-log-in; head to verify with the phone prefilled.
       router.replace({
         pathname: "/auth/verify-phone",
         params: { phone: res.user.phone },
@@ -82,16 +100,28 @@ export default function SignupScreen() {
           textContentType="emailAddress"
           testID="signup-email"
         />
-        <Input
-          label={t("field.phone")}
-          value={phone}
-          onChangeText={setPhone}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="phone-pad"
-          textContentType="telephoneNumber"
-          testID="signup-phone"
-        />
+        <View className="flex-row gap-stack-gap">
+          <View style={{ width: 112 }}>
+            <Select
+              label={t("field.countryCode")}
+              value={countryCode}
+              options={COUNTRY_CODES}
+              onSelect={setCountryCode}
+            />
+          </View>
+          <View className="flex-1">
+            <Input
+              label={t("field.phone")}
+              value={nationalNumber}
+              onChangeText={setNationalNumber}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              testID="signup-phone"
+            />
+          </View>
+        </View>
         <Input
           label={t("field.passwordHint")}
           value={password}
@@ -99,6 +129,14 @@ export default function SignupScreen() {
           secureTextEntry
           textContentType="newPassword"
           testID="signup-password"
+        />
+        <Input
+          label={t("signup.referralCodeLabel")}
+          value={referralCode}
+          onChangeText={setReferralCode}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          testID="signup-referral-code"
         />
 
         <Button label={t("signup.submit")} onPress={submit} loading={loading} />

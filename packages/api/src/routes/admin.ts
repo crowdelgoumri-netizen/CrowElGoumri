@@ -276,4 +276,46 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
 
     return { parcels, total, limit, offset };
   });
+
+  // GET /admin/campaigns — all campaigns regardless of status
+  app.get("/campaigns", admin, async (req, reply) => {
+    const q = z.object({
+      status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
+      limit: z.coerce.number().min(1).max(100).default(50),
+      offset: z.coerce.number().min(0).default(0),
+    }).safeParse(req.query);
+    if (!q.success) return reply.code(400).send({ error: q.error.flatten() });
+    const { status, limit, offset } = q.data;
+
+    const where = status ? { status } : {};
+    const [campaigns, total] = await Promise.all([
+      prisma.campaign.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        skip: offset,
+        include: {
+          traveler: { select: { id: true, firstName: true, lastName: true, email: true } },
+        },
+      }),
+      prisma.campaign.count({ where }),
+    ]);
+    return { campaigns, total, limit, offset };
+  });
+
+  // PATCH /admin/campaigns/:id — feature or change status
+  app.patch("/campaigns/:id", admin, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const parsed = z.object({
+      featured: z.boolean().optional(),
+      status:   z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
+    }).safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
+
+    const campaign = await prisma.campaign.findUnique({ where: { id } });
+    if (!campaign) return reply.code(404).send({ error: "Campaign not found" });
+
+    const updated = await prisma.campaign.update({ where: { id }, data: parsed.data });
+    return { campaign: updated };
+  });
 };

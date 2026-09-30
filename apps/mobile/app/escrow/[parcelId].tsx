@@ -55,7 +55,7 @@ export default function EscrowScreen() {
     setBusy(true);
     try {
       const { error: initErr } = await initPaymentSheet({
-        merchantDisplayName: "CrowdShipping",
+        merchantDisplayName: "DiasporaCart",
         paymentIntentClientSecret: data.clientSecret,
       });
 

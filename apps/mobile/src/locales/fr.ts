@@ -311,7 +311,8 @@ export const fr = {
   tabs: {
     home: "Accueil",
     search: "Rechercher",
-    trips: "Mes envois",
+    trips: "Mes voyages",
+    messages: "Messages",
     profile: "Profil",
   },
   home: {

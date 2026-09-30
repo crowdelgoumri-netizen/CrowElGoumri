@@ -305,7 +305,8 @@ export const en = {
   tabs: {
     home: "Home",
     search: "Search",
-    trips: "My shipments",
+    trips: "My trips",
+    messages: "Messages",
     profile: "Profile",
   },
   home: {

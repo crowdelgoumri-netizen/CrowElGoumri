@@ -8,15 +8,15 @@
 import { router } from "expo-router";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Screen } from "../src/components/Screen";
-import { Avatar } from "../src/components/Avatar";
-import { EmptyState } from "../src/components/EmptyState";
-import { AuthWall } from "../src/components/AuthWall";
-import { useAuth } from "../src/store/auth";
-import { useAsync } from "../src/hooks/useAsync";
-import { useThemeColors } from "../src/hooks/useThemeColors";
-import { listThreads, type ChatThread } from "../src/lib/chat";
-import { PARCEL_STATUS, timeAgo } from "../src/lib/format";
+import { Screen } from "../../src/components/Screen";
+import { Avatar } from "../../src/components/Avatar";
+import { EmptyState } from "../../src/components/EmptyState";
+import { AuthWall } from "../../src/components/AuthWall";
+import { useAuth } from "../../src/store/auth";
+import { useAsync } from "../../src/hooks/useAsync";
+import { useThemeColors } from "../../src/hooks/useThemeColors";
+import { listThreads, type ChatThread } from "../../src/lib/chat";
+import { PARCEL_STATUS, timeAgo } from "../../src/lib/format";
 
 export default function MessagesScreen() {
   const colors = useThemeColors();

@@ -1,9 +1,10 @@
 /**
- * Profile & wallet (board 05) + traveler earnings entry (board 15).
+ * Profil — the user's dashboard (board 09, DiasporaCart: "Bonjour Ahmed 👋").
  *
- * The user's trust/KYC snapshot, a wallet card that surfaces Stripe Connect
- * onboarding status (so the traveler can get paid), and quick links to the
- * traveler's trips, KYC verification, notifications, and settings.
+ * Greeting + stats, then live cards: the next active trip (with the "Voir les
+ * demandes" entry into its matches), "Vos livraisons" progress, the wallet /
+ * Stripe Connect payout status card, and the account menu (KYC, Mes demandes,
+ * Mes voyages, notifications, settings).
  */
 import { useState } from "react";
 import { router } from "expo-router";
@@ -21,27 +22,39 @@ import { useAuth } from "../../src/store/auth";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import { getConnectStatus, startConnectOnboarding } from "../../src/lib/escrow";
+import { listMine as listMyTrips } from "../../src/lib/trips";
+import { listMine as listMyParcels } from "../../src/lib/parcels";
 import { ApiError } from "../../src/lib/api";
-import { KYC_LEVEL } from "../../src/lib/format";
+import {
+  cityOf,
+  formatDate,
+  KYC_LEVEL,
+  TRIP_STATUS,
+} from "../../src/lib/format";
 
-const BADGE_EMOJI: Record<string, string> = {
-  BRONZE: "🥉",
-  SILVER: "🥈",
-  GOLD: "🥇",
-  PLATINUM: "💎",
-};
+const ACTIVE_TRIP = ["PUBLISHED", "MATCHING", "IN_PROGRESS"];
+const CLOSED_PARCEL = ["DELIVERED", "CANCELLED", "SEIZED", "DISPUTED"];
 
 export default function ProfileScreen() {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const { user, tokens, logout } = useAuth();
-  // Guests get the sign-in wall (profile + wallet are per-account); skip
-  // the Connect status call instead of eating a 401.
+
+  // Guests get the sign-in wall (profile + wallet are per-account); skip the
+  // per-account calls instead of eating a 401.
   const connect = useAsync(
     () =>
       tokens
         ? getConnectStatus().catch(() => null)
         : Promise.resolve(null),
+    [!!tokens],
+  );
+  const tripsReq = useAsync(
+    () => (tokens ? listMyTrips() : Promise.resolve(null)),
+    [!!tokens],
+  );
+  const parcelsReq = useAsync(
+    () => (tokens ? listMyParcels() : Promise.resolve(null)),
     [!!tokens],
   );
   const [onboarding, setOnboarding] = useState(false);
@@ -60,9 +73,8 @@ export default function ProfileScreen() {
     try {
       const { url } = await startConnectOnboarding();
       // Stripe Connect onboarding is a hosted web flow — open it in the system
-      // browser (in-app browser on iOS SFSafariViewController / Android Custom
-      // Tabs). openBrowserAsync resolves when the user returns to the app, so
-      // refresh Connect status right after to pick up payoutsEnabled.
+      // browser. openBrowserAsync resolves when the user returns to the app,
+      // so refresh Connect status right after to pick up payoutsEnabled.
       await WebBrowser.openBrowserAsync(url);
       connect.refresh();
     } catch (e) {
@@ -76,33 +88,51 @@ export default function ProfileScreen() {
   }
 
   const kyc = user ? KYC_LEVEL[user.kycLevel as keyof typeof KYC_LEVEL] : null;
-  const badge = user?.trustBadge ? BADGE_EMOJI[user.trustBadge] ?? "•" : "•";
+  const trips = tripsReq.data?.trips ?? [];
+  const nextTrip = trips.find((tr) => ACTIVE_TRIP.includes(tr.status));
+  const parcels = parcelsReq.data?.parcels ?? [];
+  const activeParcels = parcels.filter((p) => !CLOSED_PARCEL.includes(p.status));
+  const deliveredParcels = parcels.filter((p) => p.status === "DELIVERED");
+  const deliveredPct = parcels.length
+    ? Math.round((deliveredParcels.length / parcels.length) * 100)
+    : 0;
 
   return (
-    <Screen>
+    <Screen scroll={false}>
       <ScrollView
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-xl"
+        contentContainerClassName="px-screen-edge pb-xl"
       >
-        {/* Header */}
+        {/* Greeting */}
         <View className="flex-row items-center gap-stack-gap mt-md">
           <Avatar name={user?.firstName} size="lg" />
           <View className="flex-1">
             <Text className="text-text-primary font-heading text-2xl font-bold">
-              {user?.firstName} {user?.lastName}
+              {t("profile.greeting", { name: user?.firstName ?? "" })}
             </Text>
-            <Text className="text-text-muted font-body text-sm">{user?.email}</Text>
             <View className="flex-row items-center gap-2 mt-1.5">
               {kyc ? <StatusPill label={t(kyc.key)} tone={kyc.tone} /> : null}
-              <Text className="text-text-secondary font-body text-xs">
-                {t("profile.trustScore", { badge, score: user?.trustScore ?? 0 })}
-              </Text>
+              {user?.averageRating != null ? (
+                <View className="flex-row items-center gap-0.5">
+                  <Ionicons name="star" size={12} color={"#C9A227"} />
+                  <Text className="text-text-secondary font-body text-xs">
+                    {user.averageRating.toFixed(1)}
+                  </Text>
+                </View>
+              ) : null}
             </View>
           </View>
+          <Pressable
+            onPress={() => router.push("/notifications")}
+            className="h-11 w-11 items-center justify-center rounded-full bg-glass border border-hairline"
+          >
+            <Ionicons name="notifications-outline" size={21} color={colors.textPrimary} />
+          </Pressable>
         </View>
 
-        {/* Activity stats */}
-        <View className="flex-row justify-between mt-section-gap">
+        {/* Stats */}
+        <View className="flex-row gap-3 mt-section-gap">
           <Stat label={t("profile.statDeliveries")} value={user?.completedDeliveries ?? 0} />
           <Stat label={t("profile.statTrips")} value={user?.completedTrips ?? 0} />
           <Stat
@@ -111,16 +141,96 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Wallet / earnings (traveler payouts) */}
-        <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mt-section-gap mb-2">
+        {/* Next trip */}
+        <Text className="text-text-primary font-heading font-bold text-base mt-section-gap mb-2.5">
+          {t("profile.nextTrip")}
+        </Text>
+        {tripsReq.loading && trips.length === 0 ? (
+          <Card>
+            <Text className="text-text-muted font-body text-sm">{t("common.loading")}</Text>
+          </Card>
+        ) : nextTrip ? (
+          <Card raised className="gap-2.5">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2 flex-1">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-accent/12">
+                  <Ionicons name="airplane" size={16} color={colors.accent} />
+                </View>
+                <Text className="text-text-primary font-heading font-bold text-base flex-1" numberOfLines={1}>
+                  {cityOf(nextTrip.origin)} → {cityOf(nextTrip.destination)}
+                </Text>
+              </View>
+              {TRIP_STATUS[nextTrip.status] ? (
+                <StatusPill
+                  label={t(TRIP_STATUS[nextTrip.status].key)}
+                  tone={TRIP_STATUS[nextTrip.status].tone}
+                />
+              ) : null}
+            </View>
+            <Text className="text-text-secondary font-body text-sm">
+              {formatDate(nextTrip.departureTime)} ·{" "}
+              {Math.max(0, nextTrip.maxWeightKg - (nextTrip.currentWeightKg ?? 0)).toFixed(0)} kg{" "}
+              {t("profile.capacityFree")}
+            </Text>
+            <Button
+              label={t("profile.viewRequests")}
+              variant="secondary"
+              onPress={() => router.push(`/trip/${nextTrip.id}`)}
+            />
+          </Card>
+        ) : (
+          <Card className="items-center gap-3">
+            <Text className="text-text-secondary font-body text-sm text-center">
+              {t("profile.noTrip")}
+            </Text>
+            <Button
+              label={t("profile.addTripCta")}
+              variant="secondary"
+              onPress={() => router.push("/post-trip")}
+            />
+          </Card>
+        )}
+
+        {/* Deliveries progress */}
+        <Text className="text-text-primary font-heading font-bold text-base mt-section-gap mb-2.5">
+          {t("profile.deliveries")}
+        </Text>
+        <Card className="gap-2.5">
+          <View className="flex-row items-end justify-between">
+            <Text className="text-text-secondary font-body text-sm">
+              {t("profile.deliveriesCount", {
+                active: activeParcels.length,
+                done: deliveredParcels.length,
+              })}
+            </Text>
+            <Pressable onPress={() => router.push("/parcels")}>
+              <Text className="text-accent font-heading text-xs font-bold">
+                {t("profile.seeAll")}
+              </Text>
+            </Pressable>
+          </View>
+          <View className="h-2.5 rounded-full bg-text-muted/10 overflow-hidden">
+            <View
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${deliveredPct}%` }}
+            />
+          </View>
+        </Card>
+
+        {/* Wallet / gains */}
+        <Text className="text-text-primary font-heading font-bold text-base mt-section-gap mb-2.5">
           {t("profile.wallet")}
         </Text>
-        <Card raised className="gap-2">
+        <Card raised className="gap-2.5">
           <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="font-mono text-meta text-text-secondary">{t("profile.paymentsStatus")}</Text>
-              <Text className="text-text-primary font-heading text-lg font-semibold">
-                {connect.data?.payoutsEnabled ? t("profile.paymentsEnabled") : t("profile.paymentsDisabled")}
+            <View className="flex-1">
+              <Text className="text-text-muted font-body text-xs">
+                {t("profile.paymentsStatus")}
+              </Text>
+              <Text className="text-text-primary font-heading text-lg font-bold">
+                {connect.data?.payoutsEnabled
+                  ? t("profile.paymentsEnabled")
+                  : t("profile.paymentsDisabled")}
               </Text>
             </View>
             <Ionicons
@@ -143,7 +253,7 @@ export default function ProfileScreen() {
         </Card>
 
         {/* Menu */}
-        <Text className="font-mono text-meta uppercase tracking-wide text-text-secondary mt-section-gap mb-2">
+        <Text className="text-text-primary font-heading font-bold text-base mt-section-gap mb-2.5">
           {t("profile.account")}
         </Text>
         <Card className="gap-1">
@@ -155,15 +265,15 @@ export default function ProfileScreen() {
           />
           <Divider />
           <MenuRow
-            icon="airplane-outline"
-            label={t("profile.myTrips")}
-            onPress={() => router.push("/my-trips")}
+            icon="cube-outline"
+            label={t("profile.myParcels")}
+            onPress={() => router.push("/parcels")}
           />
           <Divider />
           <MenuRow
-            icon="cube-outline"
-            label={t("profile.myParcels")}
-            onPress={() => router.replace("/(tabs)")}
+            icon="airplane-outline"
+            label={t("profile.myTrips")}
+            onPress={() => router.push("/(tabs)/trips")}
           />
           <Divider />
           <MenuRow

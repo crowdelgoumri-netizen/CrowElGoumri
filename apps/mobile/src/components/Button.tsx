@@ -1,8 +1,10 @@
 /**
  * Button — primary/secondary/ghost variants, loading + disabled states.
  *
- * Primary = accent fill with glow shadow (Aurora CTA). Secondary = glass
- * surface + hairline border. Ghost = text-only.
+ * Primary = accent (deep green) fill with glow shadow. Secondary = glass
+ * surface + hairline border. Ghost = text-only. Labels use font-heading
+ * (Plus Jakarta Sans) per the DiasporaCart type pairing: Jakarta for
+ * titles & buttons, Inter for body/UI text.
  */
 import { ActivityIndicator, Pressable, type PressableProps, Text } from "react-native";
 import { clsx } from "../lib/clsx";
@@ -31,9 +33,9 @@ export function Button({
     ghost: "bg-transparent",
   } as const;
   const labelClass = {
-    primary: "text-accent-on font-body font-extrabold text-base",
-    secondary: "text-oncard font-body font-semibold text-base",
-    ghost: "text-accent font-body font-semibold text-base",
+    primary: "text-accent-on font-heading font-extrabold text-base",
+    secondary: "text-oncard font-heading font-semibold text-base",
+    ghost: "text-accent font-heading font-semibold text-base",
   } as const;
 
   return (

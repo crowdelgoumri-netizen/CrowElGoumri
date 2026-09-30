@@ -6,7 +6,7 @@
  * (accent), theirs on the left (glass). The thread is marked read on mount.
  */
 import { useEffect, useRef, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -19,7 +19,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { ScreenHeader } from "../../src/components/ScreenHeader";
 import { Avatar } from "../../src/components/Avatar";
 import { AuthWall } from "../../src/components/AuthWall";
 import { useAuth } from "../../src/store/auth";
@@ -83,10 +82,35 @@ export default function ChatScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
-        <ScreenHeader
-          title={counterpartyName ?? t("chat.title")}
-          subtitle={parcel?.description}
-        />
+        {/* Thread header — back + avatar + counterparty + parcel context */}
+        <View className="flex-row items-center gap-3 px-screen-edge py-2.5 border-b border-hairline bg-base">
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={12}
+            className="h-10 w-10 items-center justify-center rounded-full bg-glass border border-hairline"
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
+          </Pressable>
+          <Avatar name={counterpartyName} size="md" />
+          <View className="flex-1">
+            <Text className="text-text-primary font-heading font-bold text-base" numberOfLines={1}>
+              {counterpartyName ?? t("chat.title")}
+            </Text>
+            <View className="flex-row items-center gap-1">
+              <View className="h-1.5 w-1.5 rounded-full bg-success" />
+              <Text className="text-text-muted font-body text-xs" numberOfLines={1}>
+                {parcel?.description ?? t("chat.online")}
+              </Text>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => parcel && router.push(`/tracking/${parcel.id}`)}
+            hitSlop={12}
+            className="h-10 w-10 items-center justify-center rounded-full bg-glass border border-hairline"
+          >
+            <Ionicons name="cube-outline" size={19} color={colors.textPrimary} />
+          </Pressable>
+        </View>
 
         <FlatList
           ref={listRef}
@@ -113,8 +137,8 @@ export default function ChatScreen() {
         />
 
         {/* Composer */}
-        <View className="flex-row items-end gap-2 px-screen-edge py-card-padding border-t border-hairline bg-base">
-          <View className="flex-1 flex-row items-center rounded-field bg-glass border border-hairline px-card-padding">
+        <View className="flex-row items-center gap-2.5 px-screen-edge py-card-padding border-t border-hairline bg-base">
+          <View className="flex-1 flex-row items-center rounded-full bg-glass border border-hairline px-lg">
             <TextInput
               value={draft}
               onChangeText={setDraft}
@@ -128,10 +152,10 @@ export default function ChatScreen() {
           <Pressable
             onPress={onSend}
             disabled={!draft.trim() || sending}
-            className="h-11 w-11 items-center justify-center rounded-full bg-accent active:opacity-80"
+            className="h-12 w-12 items-center justify-center rounded-full bg-accent active:opacity-80"
             style={{ opacity: draft.trim() && !sending ? 1 : 0.4 }}
           >
-            <Ionicons name="send" size={18} color={colors.accentOn} />
+            <Ionicons name="send" size={19} color={colors.accentOn} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -153,11 +177,19 @@ function Bubble({
     <View className={mine ? "items-end" : "items-start"}>
       <View
         className={
-          "max-w-[78%] rounded-card px-card-padding py-2 " +
-          (mine ? "bg-accent" : "bg-glass border border-hairline")
+          "max-w-[78%] px-card-padding py-2.5 " +
+          (mine
+            ? "bg-accent rounded-card rounded-tr-md"
+            : "bg-glass border border-hairline rounded-card rounded-tl-md")
         }
       >
-        <Text className={mine ? "text-accent-on font-body text-sm" : "text-text-oncard font-body text-sm"}>
+        <Text
+          className={
+            mine
+              ? "text-accent-on font-body text-[15px] leading-5"
+              : "text-text-oncard font-body text-[15px] leading-5"
+          }
+        >
           {message.body}
         </Text>
       </View>

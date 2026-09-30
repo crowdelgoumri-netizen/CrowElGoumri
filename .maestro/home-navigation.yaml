@@ -36,6 +36,14 @@ appId: host.exp.exponent
 - assertVisible: "Europe.*"
 - tapOn: "Accueil"
 
+# Search tab
+- tapOn: "Rechercher"
+- assertVisible: "Trouvez un voyageur.*"
+
+# My trips tab
+- tapOn: "Mes voyages"
+- assertVisible: "Gérez vos trajets.*"
+
 # Messages tab
 - tapOn: "Messages"
 - assertVisible: "Messages"

@@ -1,5 +1,5 @@
 /**
- * Tailwind / NativeWind config — Aurora design system (dark + bright).
+ * Tailwind / NativeWind config — DiasporaCart design system (bright + dark).
  *
  * Every color resolves through a CSS custom property (`var(--color-*)`)
  * instead of a literal value — src/theme/ThemeProvider.tsx swaps the actual
@@ -7,7 +7,7 @@
  * across screens never needs to change when the mode does. The var names
  * here and the keys ThemeProvider sets must match exactly; both are
  * generated from src/theme/tokens.ts's THEME_COLORS, the single source of
- * truth (itself lifted from design_handoff_crowshi_aurora/tokens.json).
+ * truth.
  */
 import type { Config } from "tailwindcss";
 
@@ -59,13 +59,16 @@ export default {
         // Neutral chips
         "chip-bg": "var(--color-chip-bg)",
         "chip-border": "var(--color-chip-border)",
+        // Brand sand (mockup swatch) — hero CTA fill, warm accents
+        sand: "var(--color-sand)",
         // Functional
-        danger: "#EF4444",
+        danger: "#D64545",
       },
       fontFamily: {
-        heading: ["SpaceGrotesk", "system-ui"],
-        body: ["PlusJakartaSans", "system-ui"],
+        heading: ["PlusJakartaSans", "system-ui"],
+        body: ["Inter", "system-ui"],
         mono: ["IBMPlexMono", "monospace"],
+        script: ["Caveat", "cursive"],
       },
       borderRadius: {
         card: "20px",

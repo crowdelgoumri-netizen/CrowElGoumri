@@ -118,7 +118,7 @@ export async function registerForPush(): Promise<string | null> {
     // Android needs a notification channel for heads-up display.
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
-        name: "CrowdShipping",
+        name: "DiasporaCart",
         importance: Notifications.AndroidImportance.HIGH,
       });
     }

@@ -1,14 +1,15 @@
 /**
- * Post a trip (board 14) — the traveler publishes bag space.
- *
- * Mirrors POST /trips. Origin is a European city, destination an Algerian
- * wilaya (from config), departure date/time, transport mode, capacity, and an
- * optional price/kg. On success the traveler lands on the trip detail, ready
- * to find parcels to carry.
+ * Ajouter mon voyage (board 04, DiasporaCart) — the traveler publishes bag
+ * space. Mirrors POST /trips: itinerary (Europe → Algerian wilaya),
+ * departure date/time, transport mode, capacity, optional price/kg and
+ * notes. Grouped into cards (itinerary / details / comfort guarantees) with
+ * a single full-width CTA. On success the traveler lands on the trip detail,
+ * ready to find parcels to carry.
  */
 import { useState } from "react";
 import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { ScreenHeader } from "../src/components/ScreenHeader";
@@ -22,10 +23,18 @@ import { ApiError } from "../src/lib/api";
 import { MODE_KEY } from "../src/lib/format";
 import { ORIGIN_COUNTRIES, WILAYAS_1_58 } from "../src/config/corridors";
 import type { TransportMode } from "../src/lib/types";
+import { useThemeColors } from "../src/hooks/useThemeColors";
 
 const COUNTRIES = ORIGIN_COUNTRIES.map((c) => ({ value: c.code, label: c.name }));
 
+const COMFORT = [
+  { icon: "call-outline", key: "postTrip.comfortContact" },
+  { icon: "shield-checkmark-outline", key: "postTrip.comfortInsurance" },
+  { icon: "time-outline", key: "postTrip.comfortMatching" },
+] as const;
+
 export default function PostTripScreen() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
   const [submitting, setSubmitting] = useState(false);
@@ -109,45 +118,157 @@ export default function PostTripScreen() {
   }
 
   return (
-    <Screen>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScreenHeader title={t("postTrip.title")} />
+    <Screen scroll={false}>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="px-screen-edge pb-xl"
+        >
+          <ScreenHeader title={t("postTrip.title")} />
 
-        <View className="gap-stack-gap">
-          <Text className="font-mono text-meta text-text-secondary ml-1">{t("route.departure")}</Text>
-          <Select label={t("route.originCountry")} value={originCountry} options={COUNTRIES} onSelect={(v) => { setOriginCountry(v); setOriginCity(""); }} />
-          <Select label={t("route.originCity")} value={originCity} options={cities} onSelect={setOriginCity} placeholder={t("route.chooseCity")} />
-
-          <Text className="font-mono text-meta text-text-secondary ml-1 mt-sm">{t("route.arrival")}</Text>
-          <Select label={t("route.arrivalWilaya")} value={destinationWilaya} options={WILAYAS_1_58} onSelect={setDestinationWilaya} />
-
-          <View className="flex-row gap-stack-gap">
-            <View className="flex-1">
-              <Input label={t("postTrip.date")} value={date} onChangeText={setDate} placeholder="2026-09-01" testID="trip-date" />
+          {/* Itinerary */}
+          <View className="rounded-card bg-glass border border-hairline p-card-padding gap-stack-gap">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="navigate-outline" size={17} color={colors.accent} />
+              <Text className="text-text-primary font-heading font-bold text-base">
+                {t("route.departure")}
+              </Text>
             </View>
-            <View className="flex-1">
-              <Input label={t("postTrip.time")} value={time} onChangeText={setTime} placeholder="14:30" testID="trip-time" />
+            <Select
+              label={t("route.originCountry")}
+              value={originCountry}
+              options={COUNTRIES}
+              onSelect={(v) => {
+                setOriginCountry(v);
+                setOriginCity("");
+              }}
+            />
+            <Select
+              label={t("route.originCity")}
+              value={originCity}
+              options={cities}
+              onSelect={setOriginCity}
+              placeholder={t("route.chooseCity")}
+            />
+            <View className="flex-row items-center gap-2 mt-sm">
+              <Ionicons name="location-outline" size={17} color={colors.accent} />
+              <Text className="text-text-primary font-heading font-bold text-base">
+                {t("route.arrival")}
+              </Text>
             </View>
+            <Select
+              label={t("route.arrivalWilaya")}
+              value={destinationWilaya}
+              options={WILAYAS_1_58}
+              onSelect={setDestinationWilaya}
+            />
           </View>
 
-          <Select label={t("postTrip.transportMode")} value={mode} options={modes} onSelect={(v) => setMode(v as TransportMode)} />
-
-          <View className="flex-row gap-stack-gap">
-            <View className="flex-1">
-              <Input label={t("postTrip.capacity")} value={maxWeightKg} onChangeText={setMaxWeightKg} keyboardType="numeric" placeholder="20" testID="trip-capacity" />
+          {/* Trip details */}
+          <View className="mt-stack-gap rounded-card bg-glass border border-hairline p-card-padding gap-stack-gap">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="calendar-outline" size={17} color={colors.accent} />
+              <Text className="text-text-primary font-heading font-bold text-base">
+                {t("postTrip.detailsTitle")}
+              </Text>
             </View>
-            <View className="flex-1">
-              <Input label={t("postTrip.pricePerKg")} value={pricePerKg} onChangeText={setPricePerKg} keyboardType="numeric" placeholder="8" testID="trip-price" />
+            <View className="flex-row gap-stack-gap">
+              <View className="flex-1">
+                <Input
+                  label={t("postTrip.date")}
+                  value={date}
+                  onChangeText={setDate}
+                  placeholder="2026-09-01"
+                  testID="trip-date"
+                />
+              </View>
+              <View className="flex-1">
+                <Input
+                  label={t("postTrip.time")}
+                  value={time}
+                  onChangeText={setTime}
+                  placeholder="14:30"
+                  testID="trip-time"
+                />
+              </View>
             </View>
+            <Select
+              label={t("postTrip.transportMode")}
+              value={mode}
+              options={modes}
+              onSelect={(v) => setMode(v as TransportMode)}
+            />
+            <View className="flex-row gap-stack-gap">
+              <View className="flex-1">
+                <Input
+                  label={t("postTrip.capacity")}
+                  value={maxWeightKg}
+                  onChangeText={setMaxWeightKg}
+                  keyboardType="numeric"
+                  placeholder="20"
+                  testID="trip-capacity"
+                />
+              </View>
+              <View className="flex-1">
+                <Input
+                  label={t("postTrip.pricePerKg")}
+                  value={pricePerKg}
+                  onChangeText={setPricePerKg}
+                  keyboardType="numeric"
+                  placeholder="8"
+                  testID="trip-price"
+                />
+              </View>
+            </View>
+            <Input
+              label={t("postTrip.distance")}
+              value={distanceKm}
+              onChangeText={setDistanceKm}
+              keyboardType="numeric"
+              placeholder="1500"
+              testID="trip-distance"
+            />
+            <Input
+              label={t("postTrip.notes")}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder={t("postTrip.notesPlaceholder")}
+              multiline
+              className="h-20"
+              testID="trip-notes"
+            />
           </View>
 
-          <Input label={t("postTrip.distance")} value={distanceKm} onChangeText={setDistanceKm} keyboardType="numeric" placeholder="1500" testID="trip-distance" />
-          <Input label={t("postTrip.notes")} value={notes} onChangeText={setNotes} placeholder={t("postTrip.notesPlaceholder")} multiline className="h-20" testID="trip-notes" />
+          {/* Comfort guarantees */}
+          <View className="mt-stack-gap rounded-card bg-glass border border-hairline p-card-padding">
+            <Text className="text-text-primary font-heading font-bold text-base mb-1">
+              {t("postTrip.comfortTitle")}
+            </Text>
+            {COMFORT.map((c) => (
+              <View key={c.key} className="flex-row items-center gap-3 py-sm">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-info/15">
+                  <Ionicons name={c.icon} size={16} color={colors.infoIcon} />
+                </View>
+                <Text className="text-text-secondary font-body text-sm flex-1">
+                  {t(c.key)}
+                </Text>
+                <Ionicons name="checkmark-circle" size={18} color={colors.successText} />
+              </View>
+            ))}
+          </View>
 
           <View className="mt-section-gap">
-            <Button label={t("postTrip.publish")} onPress={submit} loading={submitting} />
+            <Button
+              label={t("postTrip.publish")}
+              onPress={submit}
+              loading={submitting}
+            />
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Screen>
   );

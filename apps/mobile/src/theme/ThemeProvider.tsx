@@ -49,6 +49,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     "--color-info-border": c.infoBorder,
     "--color-chip-bg": c.chipBg,
     "--color-chip-border": c.chipBorder,
+    "--color-sand": c.sand,
   });
 
   // `className` (even a no-op one) is required here: NativeWind's babel

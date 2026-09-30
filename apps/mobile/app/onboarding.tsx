@@ -1,18 +1,20 @@
 /**
- * Onboarding / guide (board 01) — a lightweight "how it works" walkthrough.
+ * Onboarding / guide (boards 01+11) — brand splash + "how it works".
  *
- * Reachable from Settings. Three steps mirroring the marketplace loop:
- * envoyez → matchez → payez & suivez. Kept deliberately simple (no first-run
- * gate logic); it doubles as an in-app guide.
+ * Reachable from Settings. A deep-green brand panel (travel art + wordmark +
+ * tagline) sits above the three-step walkthrough mirroring the marketplace
+ * loop: envoyez → matchez → payez & suivez. Kept deliberately simple (no
+ * first-run gate logic); it doubles as an in-app guide.
  */
 import { useState } from "react";
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { ImageBackground, Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
 import { Button } from "../src/components/Button";
 import { useThemeColors } from "../src/hooks/useThemeColors";
+import planeWindow from "../assets/plane-window.jpg";
 
 const STEPS = [
   {
@@ -41,15 +43,29 @@ export default function OnboardingScreen() {
 
   return (
     <Screen scroll={false}>
+      {/* Brand splash — plane-window photo under the deep-green scrim */}
+      <View className="mt-md rounded-card overflow-hidden">
+        <ImageBackground source={planeWindow} resizeMode="cover">
+          <View className="bg-accent/80 px-lg py-lg">
+            <Text className="text-accent-on font-heading text-3xl font-extrabold">
+              DiasporaCart
+            </Text>
+            <Text className="text-accent-on/80 font-body text-sm mt-1">
+              {t("onboarding.tagline")}
+            </Text>
+          </View>
+        </ImageBackground>
+      </View>
+
       <View className="flex-1 justify-center">
         <View className="items-center">
-          <View className="h-24 w-24 items-center justify-center rounded-full bg-glass border border-hairline mb-section-gap">
-            <Ionicons name={step.icon} size={44} color={colors.accent} />
+          <View className="h-20 w-20 items-center justify-center rounded-full bg-glass border border-hairline mb-section-gap">
+            <Ionicons name={step.icon} size={38} color={colors.accent} />
           </View>
-          <Text className="text-text-primary font-heading text-2xl font-bold text-center">
+          <Text className="text-text-primary font-heading text-xl font-bold text-center">
             {t(step.titleKey)}
           </Text>
-          <Text className="text-text-muted font-body text-base text-center mt-2 max-w-[300px]">
+          <Text className="text-text-muted font-body text-sm text-center mt-2 max-w-[300px] leading-5">
             {t(step.bodyKey)}
           </Text>
         </View>
@@ -60,7 +76,7 @@ export default function OnboardingScreen() {
               key={idx}
               className={
                 "h-2 rounded-full " +
-                (idx === i ? "w-6 bg-accent" : "w-2 bg-glass")
+                (idx === i ? "w-6 bg-accent" : "w-2 bg-chip-bg border border-chip-border")
               }
             />
           ))}

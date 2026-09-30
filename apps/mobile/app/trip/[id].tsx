@@ -1,13 +1,14 @@
 /**
- * Trip detail — the traveler's command center, plus the sender/browsing view.
+ * Trip detail ("Détail du voyageur", board 05) — the traveler's command
+ * center, plus the sender/browsing vetting view.
  *
+ *  - Anyone: a vetting view of a PUBLISHED trip + its traveler — hero card
+ *    (avatar on the green banner, verified ticks, rating, trip count), the
+ *    route with a capacity bar, price, and the "Faire une demande" CTA into
+ *    the parcel flow.
  *  - Traveler (owns the trip): accepts parcels from ranked matches, posts
  *    checkpoints (DEPARTURE advances → IN_PROGRESS, ARRIVAL may complete),
  *    and watches accepted parcels progress.
- *  - Anyone else: a read-only vetting view of a PUBLISHED trip + its traveler.
- *
- * Acceptance is traveler-driven (POST /matching/accept), so the matches
- * section only renders for the trip's owner while the trip is bookable.
  */
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
@@ -75,47 +76,161 @@ export default function TripDetailScreen() {
 
   const st = TRIP_STATUS[trip.status];
   const remaining = Math.max(0, trip.maxWeightKg - (trip.currentWeightKg ?? 0));
+  const usedPct = Math.min(
+    100,
+    Math.round(((trip.currentWeightKg ?? 0) / trip.maxWeightKg) * 100),
+  );
+  const rating = trip.traveler?.averageRating;
 
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-xl">
-        <ScreenHeader title={t("tripDetail.title")} subtitle={`${cityOf(trip.origin)} → ${cityOf(trip.destination)}`} />
-        <StatusPill label={t(st.key)} tone={st.tone} />
+        <ScreenHeader title={t("tripDetail.title")} />
 
-        {/* Trip info */}
-        <Card className="mt-section-gap gap-2">
-          <View className="flex-row items-center gap-2">
-            <Ionicons name={MODE_ICON[trip.mode as TransportMode] as keyof typeof Ionicons.glyphMap} size={18} color={colors.accent} />
-            <Text className="text-text-primary font-heading font-bold text-lg flex-1">
-              {cityOf(trip.origin)} → {cityOf(trip.destination)}
-            </Text>
-          </View>
-          <Row k={t("tripDetail.departure")} v={formatDate(trip.departureTime)} />
-          <Row k={t("tripDetail.mode")} v={t(MODE_KEY[trip.mode as TransportMode] ?? trip.mode)} />
-          <Row k={t("tripDetail.capacityLeft")} v={`${remaining.toFixed(1)} / ${trip.maxWeightKg} kg`} />
-          {trip.pricePerKg != null ? <Row k={t("tripDetail.price")} v={`${eur(trip.pricePerKg)}${t("tripCard.perKg")}`} /> : null}
-          {trip.notes ? <Row k={t("tripDetail.notes")} v={trip.notes} /> : null}
-        </Card>
+        {/* Traveler hero */}
+        <Card className="overflow-hidden p-0">
+          <View className="h-20 bg-accent" />
+          <View className="px-card-padding pb-card-padding">
+            <View className="flex-row items-end gap-3 -mt-7">
+              <View className="rounded-full border-[3px] border-glass">
+                <Avatar name={trip.traveler?.firstName} size="lg" />
+              </View>
+              <View className="flex-1 pb-1">
+                <View className="flex-row items-center gap-1.5">
+                  <Text className="text-text-primary font-heading font-bold text-lg" numberOfLines={1}>
+                    {trip.traveler?.firstName} {trip.traveler?.lastName ?? ""}
+                  </Text>
+                  {trip.traveler?.trustBadge ? (
+                    <Ionicons name="checkmark-circle" size={17} color={colors.successText} />
+                  ) : null}
+                </View>
+                <View className="flex-row items-center gap-2 mt-0.5">
+                  {rating != null ? (
+                    <View className="flex-row items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <Ionicons
+                          key={i}
+                          name={i <= Math.round(rating) ? "star" : "star-outline"}
+                          size={11}
+                          color={"#C9A227"}
+                        />
+                      ))}
+                      <Text className="text-text-secondary font-body text-xs ml-1">
+                        {rating.toFixed(1)}
+                      </Text>
+                    </View>
+                  ) : null}
+                  <Text className="text-text-muted font-body text-xs">
+                    · {t("tripCard.trips", { n: trip.traveler?.completedTrips ?? 0 })}
+                  </Text>
+                </View>
+              </View>
+              <StatusPill label={t(st.key)} tone={st.tone} />
+            </View>
 
-        {/* Traveler */}
-        <Card className="mt-section-gap">
-          <View className="flex-row items-center gap-stack-gap">
-            <Avatar name={trip.traveler?.firstName} />
-            <View className="flex-1">
-              <Text className="text-text-primary font-body font-semibold">
-                {trip.traveler?.firstName} {trip.traveler?.lastName ?? ""}
-              </Text>
-              <Text className="text-text-muted text-xs font-body">
-                {t("tripCard.trips", { n: trip.traveler?.completedTrips ?? 0 })} · {trip.traveler?.trustBadge ?? "—"}
-              </Text>
+            {/* Verified ticks */}
+            <View className="flex-row flex-wrap gap-x-4 gap-y-1.5 mt-card-padding">
+              {trip.traveler?.trustBadge ? (
+                <Tick icon="finger-print-outline" label={t("tripDetail.verifiedIdentity")} />
+              ) : null}
+              <Tick icon="call-outline" label={t("tripDetail.verifiedPhone")} />
+              <Tick icon="ribbon-outline" label={trip.traveler?.trustBadge ?? "—"} />
             </View>
           </View>
         </Card>
 
+        {/* Route */}
+        <Card className="mt-stack-gap gap-stack-gap">
+          <View className="flex-row items-center gap-3">
+            <View className="flex-1">
+              <Text className="font-mono text-meta uppercase text-text-muted">
+                {t("tripDetail.departure")}
+              </Text>
+              <Text className="text-text-primary font-heading font-bold text-lg" numberOfLines={1}>
+                {cityOf(trip.origin)}
+              </Text>
+              <Text className="text-text-secondary font-body text-xs mt-0.5">
+                {formatDate(trip.departureTime)}
+              </Text>
+            </View>
+            <View className="items-center px-1">
+              <View className="h-9 w-9 items-center justify-center rounded-full bg-accent/12">
+                <Ionicons
+                  name={MODE_ICON[trip.mode as TransportMode] as keyof typeof Ionicons.glyphMap}
+                  size={16}
+                  color={colors.accent}
+                />
+              </View>
+            </View>
+            <View className="flex-1 items-end">
+              <Text className="font-mono text-meta uppercase text-text-muted">
+                {t("tripDetail.arrival")}
+              </Text>
+              <Text className="text-text-primary font-heading font-bold text-lg" numberOfLines={1}>
+                {cityOf(trip.destination)}
+              </Text>
+              <Text className="text-text-secondary font-body text-xs mt-0.5">
+                {trip.estimatedArrival ? formatDate(trip.estimatedArrival) : t(MODE_KEY[trip.mode as TransportMode] ?? trip.mode)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Capacity */}
+          <View>
+            <View className="flex-row items-center justify-between mb-1.5">
+              <Text className="text-text-secondary font-body text-sm">
+                {t("tripDetail.capacityLeft")}
+              </Text>
+              <Text className="text-text-primary font-body text-sm font-semibold">
+                {remaining.toFixed(1)} / {trip.maxWeightKg} kg
+              </Text>
+            </View>
+            <View className="h-2 rounded-full bg-text-muted/10 overflow-hidden">
+              <View className="h-full rounded-full bg-accent" style={{ width: `${usedPct}%` }} />
+            </View>
+          </View>
+
+          {/* Price */}
+          {trip.pricePerKg != null ? (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-text-secondary font-body text-sm">
+                {t("tripDetail.price")}
+              </Text>
+              <Text className="font-heading font-extrabold text-numeral text-accent">
+                {eur(trip.pricePerKg)}
+                <Text className="text-text-muted text-xs font-body font-normal">
+                  {t("tripCard.perKg")}
+                </Text>
+              </Text>
+            </View>
+          ) : null}
+
+          {trip.notes ? (
+            <View className="rounded-field bg-chip-bg px-card-padding py-3">
+              <Text className="text-text-secondary font-body text-sm leading-5">
+                “{trip.notes}”
+              </Text>
+            </View>
+          ) : null}
+        </Card>
+
+        {/* Sender CTA */}
+        {!isTraveler && bookable ? (
+          <View className="mt-section-gap">
+            <Button
+              label={t("tripDetail.requestCta")}
+              onPress={() => router.push("/post-parcel")}
+            />
+            <Text className="text-text-muted font-body text-xs text-center mt-2.5">
+              {t("tripDetail.requestHint")}
+            </Text>
+          </View>
+        ) : null}
+
         {/* Accepted parcels */}
         {trip.parcels && trip.parcels.length > 0 ? (
           <View className="mt-section-gap">
-            <Text className="font-mono text-meta uppercase text-text-secondary mb-2">
+            <Text className="text-text-primary font-heading font-bold text-base mb-2">
               {t("tripDetail.carriedParcels", { n: trip.parcels.length })}
             </Text>
             {trip.parcels.map((p) => {
@@ -126,7 +241,7 @@ export default function TripDetailScreen() {
                   onPress={() => router.push(`/parcel/${p.id}`)}
                   className="flex-row items-center justify-between rounded-card bg-glass border border-hairline p-card-padding mb-2 active:opacity-70"
                 >
-                  <View className="flex-1">
+                  <View className="flex-1 pr-2">
                     <Text className="text-text-primary font-body text-sm" numberOfLines={1}>
                       {p.description}
                     </Text>
@@ -145,12 +260,21 @@ export default function TripDetailScreen() {
             {bookable ? (
               <TravelerMatches tripId={trip.id} onAccepted={refresh} />
             ) : null}
-
             <Checkpoints trip={trip} onPosted={refresh} />
           </View>
         ) : null}
       </ScrollView>
     </Screen>
+  );
+}
+
+function Tick({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  const colors = useThemeColors();
+  return (
+    <View className="flex-row items-center gap-1.5">
+      <Ionicons name={icon} size={13} color={colors.successText} />
+      <Text className="text-text-secondary font-body text-xs">{label}</Text>
+    </View>
   );
 }
 
@@ -176,7 +300,9 @@ function TravelerMatches({ tripId, onAccepted }: { tripId: string; onAccepted: (
 
   return (
     <View>
-      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">{t("tripDetail.recommended")}</Text>
+      <Text className="text-text-primary font-heading font-bold text-base mb-2">
+        {t("tripDetail.recommended")}
+      </Text>
       {loading && matches.length === 0 ? (
         <Text className="text-text-muted">{t("tripDetail.searching")}</Text>
       ) : null}
@@ -302,7 +428,9 @@ function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
 
   return (
     <View>
-      <Text className="font-mono text-meta uppercase text-text-secondary mb-2">{t("tripDetail.progress")}</Text>
+      <Text className="text-text-primary font-heading font-bold text-base mb-2">
+        {t("tripDetail.progress")}
+      </Text>
       <View className="flex-row flex-wrap gap-2">
         {CHECKPOINTS.map((c) => (
           <Pressable
@@ -317,17 +445,6 @@ function Checkpoints({ trip, onPosted }: { trip: Trip; onPosted: () => void }) {
         ))}
       </View>
       {busy ? <Text className="text-text-muted text-xs mt-2">{t("tripDetail.saving")}</Text> : null}
-    </View>
-  );
-}
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <View className="flex-row justify-between gap-stack-gap">
-      <Text className="text-text-muted font-body text-sm">{k}</Text>
-      <Text className="text-text-primary font-body text-sm font-semibold text-right flex-shrink" numberOfLines={2}>
-        {v}
-      </Text>
     </View>
   );
 }

@@ -31,14 +31,9 @@ appId: host.exp.exponent
     visible: "Europe.*"
     timeout: 900000
 
-# Open the FAB chooser
-- tapOn:
-    id: "fab-button"
-- assertVisible: "Que voulez-vous faire ?"
-
-# Choose "Proposer un trajet"
-- tapOn: "Proposer un trajet"
-- assertVisible: "Proposer un trajet"
+# Open the Home hero CTA (the FAB is gone — publish actions live on Home)
+- tapOn: "Ajouter mon voyage"
+- assertVisible: "Détails du voyage"
 
 # Fill trip form (text inputs tapped by testID — see auth-flow.yaml;
 # Selects by their visible label text)
@@ -50,7 +45,7 @@ appId: host.exp.exponent
 - tapOn: "Alger"
 - tapOn:
     id: "trip-date"
-- inputText: "2026-09-15"
+- inputText: "2026-12-15"
 - tapOn:
     id: "trip-time"
 - inputText: "14:30"

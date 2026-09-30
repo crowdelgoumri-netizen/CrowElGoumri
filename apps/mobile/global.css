@@ -1,8 +1,8 @@
 /**
- * NativeWind entry — @tailwind directives + Aurora base layer.
+ * NativeWind entry — @tailwind directives + DiasporaCart base layer.
  *
  * Static :root fallback for the CSS custom properties tailwind.config.ts's
- * colors resolve through. This is the dark-mode value set (the app's
+ * colors resolve through. This is the bright-mode value set (the app's
  * default) — src/theme/ThemeProvider.tsx overrides these at runtime via
  * NativeWind's vars() once the theme store resolves the active mode. This
  * :root block exists so styling is correct from first paint / before that
@@ -15,40 +15,41 @@
 
 @layer base {
   :root {
-    --color-bg-base: #0A0F1A;
-    --color-aurora-warm: rgba(255,106,43,0.16);
-    --color-aurora-warm-band: rgba(255,106,43,0.55);
-    --color-aurora-cool: rgba(159,140,255,0.16);
-    --color-aurora-cool-band: rgba(159,140,255,0.40);
-    --color-glass: rgba(255,255,255,0.045);
-    --color-glass-raised: rgba(255,255,255,0.065);
-    --color-glass-strong: rgba(255,255,255,0.07);
-    --color-glass-border: rgba(255,255,255,0.10);
-    --color-glass-border-raised: rgba(255,255,255,0.14);
-    --color-glass-border-strong: rgba(255,255,255,0.16);
-    --color-divider: rgba(255,255,255,0.10);
-    --color-chrome-bar: rgba(10,15,26,0.72);
-    --color-chrome-border: rgba(255,255,255,0.08);
-    --color-tab-inactive: rgba(255,255,255,0.14);
-    --color-text-primary: #F7F9FC;
-    --color-text-secondary: #98A5BC;
-    --color-text-muted: #7C8AA5;
-    --color-text-oncard: #C6D0E2;
-    --color-accent: #FF6A2B;
-    --color-accent-on: #0B1220;
-    --color-accent-text: #FF8A4F;
-    --color-success-text: #4CE0AE;
-    --color-success-bg: rgba(52,211,153,0.14);
-    --color-success-border: rgba(52,211,153,0.30);
-    --color-info-text: #CDC4F0;
-    --color-info-icon: #9F8CFF;
-    --color-info-bg: rgba(159,140,255,0.10);
-    --color-info-border: rgba(159,140,255,0.24);
-    --color-chip-bg: rgba(255,255,255,0.07);
-    --color-chip-border: rgba(255,255,255,0.14);
+    --color-bg-base: #FBFAF6;
+    --color-aurora-warm: rgba(15,93,59,0.10);
+    --color-aurora-warm-band: rgba(15,93,59,0.35);
+    --color-aurora-cool: rgba(104,139,91,0.10);
+    --color-aurora-cool-band: rgba(104,139,91,0.30);
+    --color-glass: #FFFFFF;
+    --color-glass-raised: #FFFFFF;
+    --color-glass-strong: #FFFFFF;
+    --color-glass-border: #EEE7D8;
+    --color-glass-border-raised: #E7DEC9;
+    --color-glass-border-strong: #DED2B8;
+    --color-divider: #EEE7D8;
+    --color-chrome-bar: rgba(255,255,255,0.94);
+    --color-chrome-border: #EEE7D8;
+    --color-tab-inactive: #C3CBC1;
+    --color-text-primary: #16241C;
+    --color-text-secondary: #5B6B5F;
+    --color-text-muted: #8B9690;
+    --color-text-oncard: #3E4B41;
+    --color-accent: #0F5D4A;
+    --color-accent-on: #FFFFFF;
+    --color-accent-text: #0F5D4A;
+    --color-success-text: #1E8A5A;
+    --color-success-bg: #E3F1E8;
+    --color-success-border: #BFE0CC;
+    --color-info-text: #5C6E3F;
+    --color-info-icon: #688B5B;
+    --color-info-bg: rgba(104,139,91,0.12);
+    --color-info-border: rgba(104,139,91,0.28);
+    --color-chip-bg: #F3EEE4;
+    --color-chip-border: #E7DFCB;
+    --color-sand: #EADCC8;
   }
 
-  /* Aurora gradient background — kept for any future gradient use; not
+  /* Brand gradient background — kept for any future gradient use; not
      currently applied by any component (Screen.tsx uses flat bg-base). */
   .bg-aurora {
     background: linear-gradient(180deg, var(--color-bg-base) 0%, var(--color-bg-base) 100%);

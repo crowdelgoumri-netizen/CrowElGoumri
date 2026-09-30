@@ -63,3 +63,10 @@ coverage/
 # would break Jest's Windows testMatch glob resolution — see the DiasporaCart Phase 1
 # SDD ledger for the repro).
 /worktrees/
+
+# Native prebuild output (regenerate with expo prebuild) + built binaries
+apps/*/android/
+apps/*/ios/
+*.apk
+*.aab
+*.ipa

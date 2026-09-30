@@ -38,13 +38,11 @@ appId: host.exp.exponent
     visible: "Europe.*"
     timeout: 900000
 
-# Open the FAB chooser
-- tapOn:
-    id: "fab-button"
-- assertVisible: "Que voulez-vous faire ?"
-
-# Choose "Envoyer un colis"
-- tapOn: "Envoyer un colis"
+# The FAB is gone — open the parcel wizard by deep link (its UI entries are
+# the traveler-detail "Faire une demande" CTA and the Mes demandes empty CTA).
+- openLink: "exp://10.0.2.2:8081/--/post-parcel"
+- waitForAnimationToEnd:
+    timeout: 30000
 - assertVisible: "Envoyer un colis"
 - assertVisible: "Colis"
 

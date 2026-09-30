@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "CrowdShipping",
+    "name": "DiasporaCart",
     "slug": "crowdshipping",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "crowdshipping",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -25,7 +25,7 @@
       [
         "expo-notifications",
         {
-          "color": "#FF6A2B",
+          "color": "#0F5D3B",
           "defaultChannel": "default"
         }
       ],

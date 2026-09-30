@@ -1,6 +1,9 @@
 /**
- * ParcelCard — a parcel as a list item (sender's "my parcels" list + detail
- * links). Aurora glass styling.
+ * ParcelCard — a parcel as a list item ("Mes demandes" look, board 07).
+ *
+ * Route headline (bold, origin → wilaya) with the status pill at the top
+ * right, then the meta strip (weight · category · deadline chip) and the
+ * offered price anchored right in heading weight.
  */
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,6 +14,7 @@ import {
   CATEGORY_KEY,
   cityOf,
   eur,
+  formatDate,
   PARCEL_STATUS,
 } from "../lib/format";
 import { useThemeColors } from "../hooks/useThemeColors";
@@ -31,29 +35,51 @@ export function ParcelCard({ parcel, onPress }: ParcelCardProps) {
   return (
     <Pressable onPress={() => onPress?.(parcel)} className="active:opacity-80">
       <Card className="gap-stack-gap">
-        <View className="flex-row items-center justify-between">
+        {/* Route + status */}
+        <View className="flex-row items-start justify-between gap-2">
+          <View className="flex-row items-center gap-2 flex-1">
+            <Ionicons name="navigate" size={15} color={colors.accent} />
+            <Text
+              className="text-text-primary font-heading font-bold text-base flex-1"
+              numberOfLines={1}
+            >
+              {cityOf(parcel.pickupAddress)} → {cityOf(parcel.deliveryAddress)}
+            </Text>
+          </View>
           <StatusPill label={t(st.key)} tone={st.tone} />
-          <Text className="text-text-muted text-xs font-mono font-medium">{cat}</Text>
         </View>
 
-        <Text className="text-oncard font-body text-sm" numberOfLines={2}>
-          {parcel.description}
-        </Text>
-
-        <View className="flex-row items-center">
-          <Ionicons name="location-outline" size={14} color={colors.accent} />
-          <Text className="text-text-secondary font-body text-xs ml-1 flex-1" numberOfLines={1}>
-            {cityOf(parcel.pickupAddress)} → {cityOf(parcel.deliveryAddress)}
-          </Text>
-          <Ionicons name="scale-outline" size={14} color={colors.textMuted} />
-          <Text className="text-text-muted font-mono text-meta ml-1">{parcel.weightKg} kg</Text>
+        {/* Meta strip */}
+        <View className="flex-row items-center gap-2 flex-wrap">
+          <View className="flex-row items-center gap-1 rounded-chip bg-chip-bg border border-chip-border px-2 py-0.5">
+            <Ionicons name="scale-outline" size={11} color={colors.textSecondary} />
+            <Text className="text-text-secondary font-body text-xs">{parcel.weightKg} kg</Text>
+          </View>
+          <View className="flex-row items-center gap-1 rounded-chip bg-chip-bg border border-chip-border px-2 py-0.5">
+            <Ionicons name="cube-outline" size={11} color={colors.textSecondary} />
+            <Text className="text-text-secondary font-body text-xs">{cat}</Text>
+          </View>
+          {parcel.urgencyDeadline ? (
+            <View className="flex-row items-center gap-1 rounded-chip bg-info/15 border border-info/25 px-2 py-0.5">
+              <Ionicons name="time-outline" size={11} color={colors.infoText} />
+              <Text className="text-info font-body text-xs">
+                {t("parcelCard.before", { date: formatDate(parcel.urgencyDeadline) })}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
-        {parcel.offeredPrice != null ? (
-          <Text className="text-accent font-heading font-bold">
-            {eur(parcel.offeredPrice)}
+        {/* Description + price */}
+        <View className="flex-row items-end justify-between gap-2">
+          <Text className="text-text-secondary font-body text-sm flex-1" numberOfLines={1}>
+            {parcel.description}
           </Text>
-        ) : null}
+          {parcel.offeredPrice != null ? (
+            <Text className="text-accent font-heading font-extrabold text-lg">
+              {eur(parcel.offeredPrice)}
+            </Text>
+          ) : null}
+        </View>
       </Card>
     </Pressable>
   );

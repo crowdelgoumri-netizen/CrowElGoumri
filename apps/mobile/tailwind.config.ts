@@ -61,8 +61,9 @@ export default {
         "chip-border": "var(--color-chip-border)",
         // Brand sand (mockup swatch) — hero CTA fill, warm accents
         sand: "var(--color-sand)",
-        // Functional
-        danger: "#D64545",
+        // Functional (design-system spec: Warning #B7791F, Error #C94B45)
+        warning: "#B7791F",
+        danger: "#C94B45",
       },
       fontFamily: {
         heading: ["PlusJakartaSans", "system-ui"],

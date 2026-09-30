@@ -19,7 +19,7 @@ import type {
   UrgencyLevel,
 } from "./types";
 
-export type Tone = "accent" | "success" | "violet" | "muted" | "danger";
+export type Tone = "accent" | "success" | "violet" | "muted" | "warning" | "danger";
 
 export function eur(n: number | null | undefined): string {
   if (n == null || Number.isNaN(n)) return "—";

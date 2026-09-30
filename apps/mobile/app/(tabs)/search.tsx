@@ -1,22 +1,33 @@
 /**
- * Rechercher (board 03, DiasporaCart) — find a traveler.
+ * Rechercher (board 03, DiasporaCart) — browse-first destination explorer,
+ * matching the NewDesign mockup: hero title, floating destination cards over
+ * the corridors map, a live "top corridor" summary strip, an "Autres
+ * destinations" photo grid, and a "post your trip" promo banner. The search
+ * icon in the header reveals the full filter form (départ / destination /
+ * quand / poids) for anyone who wants to search directly instead of
+ * browsing; submitting it (or tapping a destination card for a route that's
+ * actually live) filters the real published-trips feed below.
  *
- * Top: the conversational search form (départ / destination / quand / poids).
- * Below: the corridors panel (map art) and "Nos trajets populaires" cards —
- * live stats computed from the published-trips feed (voyageurs + kg
- * disponibles per corridor). Searching filters the real feed; tapping a
- * result opens the traveler's trip detail.
+ * Only Paris↔Alger and the other Tier-1 EUR corridors (see
+ * src/config/corridors.ts) are wired to live search. The mockup's Montréal /
+ * Londres / New York / Genève cards are shown as in the design (kept static
+ * per product direction) but aren't searchable yet — tapping one shows a
+ * "bientôt disponible" notice instead of silently doing nothing.
  */
 import { useMemo, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
+  Alert,
+  ImageBackground,
+  type ImageSourcePropType,
   Pressable,
   ScrollView,
   Text,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
 import { Input } from "../../src/components/Input";
@@ -29,6 +40,15 @@ import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
 import { cityOf } from "../../src/lib/format";
 import { CITY_OPTIONS, WILAYAS_1_58 } from "../../src/config/corridors";
+import planeWindow from "../../assets/plane-window.jpg";
+import cityMontreal from "../../assets/city-montreal.jpg";
+import cityLondon from "../../assets/city-london.jpg";
+import cityParis from "../../assets/city-paris.jpg";
+import cityNewYork from "../../assets/city-newyork.jpg";
+import cityGeneva from "../../assets/city-geneva.jpg";
+import destOran from "../../assets/dest-oran.jpg";
+import destAlger from "../../assets/dest-alger.jpg";
+import destConstantine from "../../assets/dest-constantine.jpg";
 
 interface Query {
   city: string;
@@ -38,6 +58,41 @@ interface Query {
 }
 
 const EMPTY_QUERY: Query = { city: "", wilaya: "", date: "", weight: "" };
+
+/** Mockup's exact destination cards. Only Paris is a real Tier-1 origin
+ * (see src/config/corridors.ts) — the rest are shown per product direction
+ * but aren't searchable yet. */
+const EXPLORE_CITIES: {
+  key: string;
+  city: string;
+  wilaya: string;
+  image: ImageSourcePropType;
+  supported: boolean;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { key: "montreal", city: "Montréal", wilaya: "Alger", image: cityMontreal, supported: false, icon: "heart" },
+  { key: "london", city: "Londres", wilaya: "Alger", image: cityLondon, supported: false, icon: "heart" },
+  { key: "paris", city: "Paris", wilaya: "Alger", image: cityParis, supported: true, icon: "airplane" },
+  { key: "newyork", city: "New York", wilaya: "Alger", image: cityNewYork, supported: false, icon: "airplane" },
+  { key: "geneva", city: "Genève", wilaya: "Alger", image: cityGeneva, supported: false, icon: "airplane" },
+];
+
+/** "Autres destinations" — real Tier-1 countries (France, Espagne, Italie),
+ * filtered by destination wilaya only (no single city implied). Stats are
+ * live when trips exist for that wilaya, else the mockup's placeholder
+ * numbers. */
+const OTHER_DESTINATIONS: {
+  key: string;
+  label: string;
+  wilaya: string;
+  image: ImageSourcePropType;
+  fallbackCount: number;
+  fallbackPrice: number;
+}[] = [
+  { key: "oran", label: "France → Oran", wilaya: "Oran", image: destOran, fallbackCount: 23, fallbackPrice: 30 },
+  { key: "alger", label: "Espagne → Alger", wilaya: "Alger", image: destAlger, fallbackCount: 18, fallbackPrice: 35 },
+  { key: "constantine", label: "Italie → Constantine", wilaya: "Constantine", image: destConstantine, fallbackCount: 12, fallbackPrice: 40 },
+];
 
 export default function SearchScreen() {
   const colors = useThemeColors();
@@ -53,6 +108,7 @@ export default function SearchScreen() {
 
   const [draft, setDraft] = useState<Query>(initial);
   const [query, setQuery] = useState<Query>(initial);
+  const [formOpen, setFormOpen] = useState(!!corridor);
 
   const trips = useAsync(() => tripsApi.listPublished({}), []);
   const all = trips.data?.trips ?? [];
@@ -72,6 +128,25 @@ export default function SearchScreen() {
     }
     return [...byRoute.values()].sort((a, b) => b.count - a.count).slice(0, 4);
   }, [all]);
+
+  // Live stats per destination wilaya (for the "Autres destinations" grid
+  // and the top summary strip) — falls back to mockup placeholders when a
+  // route has no live trips yet.
+  const byWilaya = useMemo(() => {
+    const map = new Map<string, { count: number; minPrice?: number }>();
+    for (const tr of all) {
+      const wilaya = tr.destination.wilaya ?? cityOf(tr.destination);
+      const cur = map.get(wilaya) ?? { count: 0, minPrice: undefined };
+      cur.count += 1;
+      if (tr.pricePerKg != null) {
+        cur.minPrice = cur.minPrice == null ? tr.pricePerKg : Math.min(cur.minPrice, tr.pricePerKg);
+      }
+      map.set(wilaya, cur);
+    }
+    return map;
+  }, [all]);
+
+  const parisAlger = corridors.find((c) => c.city === "Paris" && c.wilaya === "Alger");
 
   const results = useMemo(() => {
     return all.filter((tr) => {
@@ -98,10 +173,30 @@ export default function SearchScreen() {
     setQuery(draft);
   }
 
+  function resetSearch() {
+    setDraft(EMPTY_QUERY);
+    setQuery(EMPTY_QUERY);
+    setFormOpen(false);
+  }
+
   function applyCorridor(c: { city: string; wilaya: string }) {
     const q = { ...EMPTY_QUERY, city: c.city, wilaya: c.wilaya };
     setDraft(q);
     setQuery(q);
+  }
+
+  function applyDestination(wilaya: string) {
+    const q = { ...EMPTY_QUERY, wilaya };
+    setDraft(q);
+    setQuery(q);
+  }
+
+  function tapExploreCity(c: (typeof EXPLORE_CITIES)[number]) {
+    if (!c.supported) {
+      Alert.alert(t("searchExplore.comingSoonTitle"), t("searchExplore.comingSoonBody"));
+      return;
+    }
+    applyCorridor(c);
   }
 
   return (
@@ -111,142 +206,208 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-screen-edge pb-xl"
       >
-        <View className="mt-md">
-          <Text className="text-text-primary font-heading text-screen-title font-bold">
-            {t("search.title")}
-          </Text>
-          <Text className="text-text-secondary font-body text-sm mt-1">
-            {t("search.subtitle")}
-          </Text>
-        </View>
-
-        {/* Search form */}
-        <View className="mt-section-gap rounded-card bg-glass border border-hairline p-card-padding gap-stack-gap">
-          <Select
-            label={t("search.from")}
-            value={draft.city || null}
-            options={CITY_OPTIONS}
-            onSelect={(v) => setDraft((d) => ({ ...d, city: v }))}
-            placeholder={t("search.anyCity")}
-          />
-          <Select
-            label={t("search.to")}
-            value={draft.wilaya || null}
-            options={WILAYAS_1_58}
-            onSelect={(v) => setDraft((d) => ({ ...d, wilaya: v }))}
-            placeholder={t("search.anyWilaya")}
-          />
-          <View className="flex-row gap-stack-gap">
-            <View className="flex-1">
-              <Input
-                label={t("search.when")}
-                value={draft.date}
-                onChangeText={(v) => setDraft((d) => ({ ...d, date: v }))}
-                placeholder={t("search.datePlaceholder")}
-              />
-            </View>
-            <View className="flex-1">
-              <Input
-                label={t("search.weight")}
-                value={draft.weight}
-                onChangeText={(v) => setDraft((d) => ({ ...d, weight: v }))}
-                keyboardType="numeric"
-                placeholder="5"
-              />
-            </View>
+        {/* Header: title + search-icon toggle for the filter form */}
+        <View className="mt-md flex-row items-start justify-between">
+          <View className="flex-1 pr-3">
+            <Text className="text-text-primary font-heading text-screen-title font-bold">
+              {queryActive || formOpen ? t("search.title") : t("searchExplore.heroTitle")}
+            </Text>
+            <Text className="text-text-secondary font-body text-sm mt-1">
+              {queryActive || formOpen ? t("search.subtitle") : t("searchExplore.heroSubtitle")}
+            </Text>
           </View>
           <Pressable
-            onPress={search}
-            className="mt-1 flex-row items-center justify-center gap-2 rounded-field bg-accent py-4 active:opacity-80"
+            onPress={() => setFormOpen((v) => !v)}
+            className="h-11 w-11 items-center justify-center rounded-full bg-glass border border-hairline"
           >
-            <Ionicons name="search" size={18} color={colors.accentOn} />
-            <Text className="text-accent-on font-heading font-extrabold text-base">
-              {t("search.cta")}
-            </Text>
+            <Ionicons
+              name={formOpen ? "close" : "search"}
+              size={20}
+              color={colors.textPrimary}
+            />
           </Pressable>
         </View>
 
-        {/* Corridors map panel */}
-        {!queryActive ? (
-          <View className="mt-section-gap rounded-card bg-chip-bg border border-chip-border overflow-hidden">
-            <View className="pt-card-padding px-card-padding">
-              <Text className="text-text-primary font-heading font-bold text-base">
-                {t("search.corridorsTitle")}
-              </Text>
-              <Text className="text-text-secondary font-body text-xs mt-0.5">
-                {t("search.corridorsSubtitle")}
-              </Text>
+        {/* Search form (collapsed by default; opened via the header icon,
+            or pre-opened when we arrived with a corridor param) */}
+        {formOpen ? (
+          <View className="mt-section-gap rounded-card bg-glass border border-hairline p-card-padding gap-stack-gap">
+            <Select
+              label={t("search.from")}
+              value={draft.city || null}
+              options={CITY_OPTIONS}
+              onSelect={(v) => setDraft((d) => ({ ...d, city: v }))}
+              placeholder={t("search.anyCity")}
+            />
+            <Select
+              label={t("search.to")}
+              value={draft.wilaya || null}
+              options={WILAYAS_1_58}
+              onSelect={(v) => setDraft((d) => ({ ...d, wilaya: v }))}
+              placeholder={t("search.anyWilaya")}
+            />
+            <View className="flex-row gap-stack-gap">
+              <View className="flex-1">
+                <Input
+                  label={t("search.when")}
+                  value={draft.date}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, date: v }))}
+                  placeholder={t("search.datePlaceholder")}
+                />
+              </View>
+              <View className="flex-1">
+                <Input
+                  label={t("search.weight")}
+                  value={draft.weight}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, weight: v }))}
+                  keyboardType="numeric"
+                  placeholder="5"
+                />
+              </View>
             </View>
-            <CorridorMapArt />
-            <View className="pb-card-padding px-card-padding flex-row items-center gap-1.5">
-              <Ionicons name="location" size={13} color={colors.accent} />
-              <Text className="text-accent font-heading text-xs font-bold">
-                {t("search.allToAlgiers")}
+            <Pressable
+              onPress={search}
+              className="mt-1 flex-row items-center justify-center gap-2 rounded-field bg-accent py-4 active:opacity-80"
+            >
+              <Ionicons name="search" size={18} color={colors.accentOn} />
+              <Text className="text-accent-on font-heading font-extrabold text-base">
+                {t("search.cta")}
               </Text>
-            </View>
+            </Pressable>
           </View>
         ) : null}
 
-        {/* Popular routes (live stats) */}
-        {!queryActive && corridors.length > 0 ? (
-          <View className="mt-section-gap">
-            <Text className="text-text-primary font-heading font-bold text-base">
-              {t("search.popularTitle")}
-            </Text>
-            <View className="mt-2.5 gap-3">
-              {corridors.map((c, i) => (
-                <Pressable
-                  key={`${c.city}-${c.wilaya}`}
-                  onPress={() => applyCorridor(c)}
-                  className={
-                    "flex-row items-center rounded-card p-card-padding gap-3 active:opacity-80 " +
-                    (i === 0
-                      ? "bg-accent"
-                      : "bg-glass border border-hairline")
-                  }
-                >
-                  <View
-                    className={
-                      "h-10 w-10 items-center justify-center rounded-full " +
-                      (i === 0 ? "bg-sand" : "bg-accent/12")
-                    }
+        {/* Browse mode: destination cards + map + popular routes + promo */}
+        {!queryActive && !formOpen ? (
+          <>
+            {/* Corridors map panel with floating destination cards */}
+            <View className="mt-section-gap rounded-card bg-chip-bg border border-chip-border overflow-hidden">
+              <CorridorMapArt />
+              <View className="px-card-padding pb-card-padding -mt-6 gap-2.5">
+                {EXPLORE_CITIES.map((c) => (
+                  <Pressable
+                    key={c.key}
+                    onPress={() => tapExploreCity(c)}
+                    className="flex-row items-center gap-2.5 rounded-card bg-glass-strong border border-hairline p-2 active:opacity-80"
+                    style={{ maxWidth: 220 }}
                   >
-                    <Ionicons
-                      name="airplane"
-                      size={18}
-                      color={i === 0 ? colors.accent : colors.accent}
+                    <View className="h-9 w-9 items-center justify-center rounded-full bg-text-primary">
+                      <Ionicons name={c.icon} size={15} color="#fff" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-text-primary font-heading font-bold text-sm" numberOfLines={1}>
+                        {c.city}
+                      </Text>
+                      <Text className="text-text-muted font-body text-[11px]">→ {c.wilaya}</Text>
+                    </View>
+                    <ImageBackground
+                      source={c.image}
+                      resizeMode="cover"
+                      style={{ width: 44, height: 44, borderRadius: 10, overflow: "hidden" }}
                     />
-                  </View>
-                  <View className="flex-1">
-                    <Text
-                      className={
-                        "font-heading font-bold text-base " +
-                        (i === 0 ? "text-accent-on" : "text-text-primary")
-                      }
-                    >
-                      {c.city} → {c.wilaya}
-                    </Text>
-                    <Text
-                      className={
-                        "font-body text-xs mt-0.5 " +
-                        (i === 0 ? "text-accent-on/75" : "text-text-secondary")
-                      }
-                    >
-                      {t("search.corridorStats", {
-                        travelers: c.count,
-                        kg: Math.round(c.kg),
-                      })}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={i === 0 ? colors.accentOn : colors.textMuted}
-                  />
-                </Pressable>
-              ))}
+                  </Pressable>
+                ))}
+              </View>
             </View>
-          </View>
+
+            {/* Top corridor summary strip (live when Paris→Alger has trips) */}
+            <Pressable
+              onPress={() => applyCorridor({ city: "Paris", wilaya: "Alger" })}
+              className="mt-stack-gap flex-row items-center rounded-card bg-glass border border-hairline p-card-padding gap-3 active:opacity-80"
+            >
+              <View className="h-11 w-11 items-center justify-center rounded-full bg-accent/12">
+                <Ionicons name="location" size={18} color={colors.accent} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary font-heading font-bold text-base">
+                  Paris → Alger
+                </Text>
+                <Text className="text-text-secondary font-body text-xs mt-0.5">
+                  {t("searchExplore.summaryTravelers", { n: parisAlger?.count ?? 47 })} ·{" "}
+                  {t("searchExplore.summaryKgAvailable", { kg: Math.round(parisAlger?.kg ?? 132) })}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Pressable>
+
+            {/* Autres destinations — real Tier-1 countries, live stats when available */}
+            <View className="mt-section-gap">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-text-primary font-heading font-bold text-base">
+                  {t("searchExplore.otherDestinations")}
+                </Text>
+                <Pressable onPress={() => setFormOpen(true)}>
+                  <Text className="text-accent font-heading text-xs font-bold">
+                    {t("searchExplore.seeAll")}
+                  </Text>
+                </Pressable>
+              </View>
+              <View className="flex-row gap-3 mt-2.5">
+                {OTHER_DESTINATIONS.map((d) => {
+                  const live = byWilaya.get(d.wilaya);
+                  const count = live?.count || d.fallbackCount;
+                  const price = live?.minPrice ?? d.fallbackPrice;
+                  return (
+                    <Pressable
+                      key={d.key}
+                      onPress={() => applyDestination(d.wilaya)}
+                      className="flex-1 rounded-card overflow-hidden"
+                      style={{ height: 150 }}
+                    >
+                      <ImageBackground source={d.image} resizeMode="cover" style={{ flex: 1 }}>
+                        <LinearGradient
+                          colors={["transparent", "rgba(0,0,0,0.55)"]}
+                          locations={[0.4, 1]}
+                          style={{ flex: 1, justifyContent: "flex-end", padding: 10 }}
+                        >
+                          <Text className="text-white font-heading font-bold text-xs" numberOfLines={2}>
+                            {d.label}
+                          </Text>
+                          <View className="mt-2 self-start rounded-chip bg-white/90 px-2 py-1">
+                            <Text className="text-accent-text font-heading text-[10px] font-bold">
+                              {t("searchExplore.fromPrice", { price })}
+                            </Text>
+                          </View>
+                          <Text className="text-white/75 font-body text-[10px] mt-1">
+                            {t("searchExplore.summaryTravelers", { n: count })}
+                          </Text>
+                        </LinearGradient>
+                      </ImageBackground>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Promo banner — post your own trip */}
+            <Pressable
+              onPress={() => router.push("/post-trip")}
+              className="mt-section-gap rounded-card overflow-hidden"
+              style={{ height: 128 }}
+            >
+              <ImageBackground source={planeWindow} resizeMode="cover" style={{ flex: 1 }}>
+                <LinearGradient
+                  colors={["rgba(15,93,74,0.15)", "rgba(15,93,74,0.55)"]}
+                  style={{ flex: 1, flexDirection: "row", alignItems: "center", padding: 16 }}
+                >
+                  <View className="flex-1 pr-3">
+                    <Text className="text-white font-heading font-bold text-sm">
+                      {t("searchExplore.promoTitle")}
+                    </Text>
+                    <Text className="text-white/80 font-body text-xs mt-1" numberOfLines={2}>
+                      {t("searchExplore.promoBody")}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-1.5 rounded-field bg-text-primary px-3 py-2.5">
+                    <Text className="text-white font-heading font-bold text-xs">
+                      {t("searchExplore.promoCta")}
+                    </Text>
+                    <Ionicons name="arrow-forward" size={14} color="#fff" />
+                  </View>
+                </LinearGradient>
+              </ImageBackground>
+            </Pressable>
+          </>
         ) : null}
 
         {/* Results */}
@@ -258,7 +419,7 @@ export default function SearchScreen() {
                   ? t("common.loading")
                   : t("search.resultsCount", { n: results.length })}
               </Text>
-              <Pressable onPress={() => { setDraft(EMPTY_QUERY); setQuery(EMPTY_QUERY); }}>
+              <Pressable onPress={resetSearch}>
                 <Text className="text-accent font-heading text-xs font-bold">
                   {t("search.reset")}
                 </Text>

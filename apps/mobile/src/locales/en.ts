@@ -385,6 +385,21 @@ export const en = {
     noResultsTitle: "No trips found",
     noResultsSubtitle: "Try widening the date, origin city, or weight.",
   },
+  searchExplore: {
+    heroTitle: "Our popular routes",
+    heroSubtitle:
+      "Thousands of travelers head to Algeria and beyond every month.",
+    comingSoonTitle: "Coming soon",
+    comingSoonBody: "This destination isn't open to search yet. Check back soon!",
+    summaryTravelers: "{{n}} travelers",
+    summaryKgAvailable: "{{kg}} kg available",
+    otherDestinations: "Other destinations",
+    seeAll: "See all →",
+    fromPrice: "From €{{price}}",
+    promoTitle: "Got a trip coming up?",
+    promoBody: "Add your trip and earn up to €80 per parcel.",
+    promoCta: "Add a trip",
+  },
   tripCard: {
     traveler: "Traveler",
     trips: "{{n}} trips",

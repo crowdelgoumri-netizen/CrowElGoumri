@@ -392,6 +392,22 @@ export const fr = {
     noResultsSubtitle:
       "Essayez d'élargir la date, la ville de départ ou le poids.",
   },
+  searchExplore: {
+    heroTitle: "Nos trajets populaires",
+    heroSubtitle:
+      "Des milliers de voyageurs partent chaque mois vers l'Algérie et au-delà.",
+    comingSoonTitle: "Bientôt disponible",
+    comingSoonBody:
+      "Cette destination n'est pas encore ouverte à la recherche. Revenez bientôt !",
+    summaryTravelers: "{{n}} voyageurs",
+    summaryKgAvailable: "{{kg}} kg disponibles",
+    otherDestinations: "Autres destinations",
+    seeAll: "Voir tout →",
+    fromPrice: "À partir de {{price}} €",
+    promoTitle: "Vous avez un voyage prévu ?",
+    promoBody: "Ajoutez votre trajet et gagnez jusqu'à 80 € par colis.",
+    promoCta: "Ajouter un voyage",
+  },
   tripCard: {
     traveler: "Voyageur",
     trips: "{{n}} trajets",

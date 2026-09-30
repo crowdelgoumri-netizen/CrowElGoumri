@@ -4,7 +4,7 @@
  * the palette (olive/sand on deep green), so they theme and scale for free
  * without binary image assets.
  */
-import Svg, { Circle, Path } from "react-native-svg";
+import Svg, { Circle, Path, Rect } from "react-native-svg";
 
 /**
  * SenderArt — small inline art for the "J'envoie un colis" white card:
@@ -32,78 +32,57 @@ export function SenderArt() {
 }
 
 /**
- * CorridorMapArt — the Search screen's corridors panel: a soft dotted grid
- * over sand, curved flight arcs converging on Algiers' pin (the star marker),
- * with origin pins for the main diaspora cities. Drawn for a ~320×150 box.
+ * PopularRoutesMapArt — the Rechercher screen's "Nos trajets populaires"
+ * backdrop: a soft mint gradient with a dotted "map paper" texture, curved
+ * flight paths converging on a central Algiers pin, sized tall enough to
+ * host the floating destination cards search.tsx positions on top of it.
+ * Drawn for a 328×380 box (stretches to fill its container's width/height).
  */
-export function CorridorMapArt() {
-  // Dotted grid (5×11) — a soft "map paper" texture.
+export function PopularRoutesMapArt() {
   const dots = [];
-  for (let r = 0; r < 6; r++) {
+  for (let r = 0; r < 14; r++) {
     for (let c = 0; c < 12; c++) {
       dots.push(
         <Circle
           key={`${r}-${c}`}
           cx={14 + c * 27}
-          cy={16 + r * 24}
-          r={1.4}
+          cy={14 + r * 27}
+          r={1.3}
           fill="#688B5B"
-          opacity={0.22}
+          opacity={0.18}
         />,
       );
     }
   }
-  // Diaspora origins → Algiers (converging arcs).
+  // Diaspora origins → Algiers (converging arcs), endpoints matching the
+  // floating card anchor points search.tsx positions over this art.
   const arcs: { d: string; main?: boolean }[] = [
-    { d: "M34 34 C 110 18, 190 44, 268 78", main: true }, // Montréal-ish far left
-    { d: "M96 88 C 150 80, 200 82, 268 80" },
-    { d: "M150 30 C 190 44, 230 62, 268 79" },
-    { d: "M214 108 C 236 100, 252 92, 268 82" },
+    { d: "M50 60 C 110 90, 140 200, 164 300", main: true }, // Montréal
+    { d: "M278 100 C 240 160, 200 230, 164 300" }, // Londres
+    { d: "M298 185 C 260 220, 210 260, 164 300" }, // Paris
+    { d: "M40 235 C 90 250, 130 270, 164 300" }, // New York
+    { d: "M298 265 C 250 280, 210 290, 164 300" }, // Genève
   ];
   return (
-    <Svg width="100%" height={156} viewBox="0 0 328 156" fill="none">
+    <Svg width="100%" height="100%" viewBox="0 0 328 380" fill="none">
+      <Rect x={0} y={0} width={328} height={380} fill="#DCECE2" />
       {dots}
       {arcs.map((a, i) => (
         <Path
           key={i}
           d={a.d}
-          stroke={a.main ? "#0F5D4A" : "#688B5B"}
-          strokeOpacity={a.main ? 0.9 : 0.55}
-          strokeWidth={a.main ? 2 : 1.5}
+          stroke="#0F5D4A"
+          strokeOpacity={a.main ? 0.85 : 0.4}
+          strokeWidth={a.main ? 2.2 : 1.4}
           strokeDasharray={a.main ? undefined : "1 6"}
           strokeLinecap="round"
+          fill="none"
         />
       ))}
-      {/* plane on the main arc */}
-      <Path
-        d="M186 47 l 11 -7.5 c 1.7 -1.2 3.9 -0.9 4.6 0.5 c 0.6 1.3 -0.3 3 -2 3.7 L 189 51 Z"
-        fill="#0F5D4A"
-      />
-      <Path
-        d="M189.8 49.3 l -9.3 6.4 c -1.5 1 -1.6 2.7 -0.2 3.3 c 1.1 0.5 2.8 0 3.8 -1.2 l 7.2 -7.7 Z"
-        fill="#0F5D4A"
-      />
-      {/* origin pins */}
-      {[
-        { x: 34, y: 34 },
-        { x: 96, y: 88 },
-        { x: 150, y: 30 },
-        { x: 214, y: 108 },
-      ].map((p, i) => (
-        <Circle key={i} cx={p.x} cy={p.y} r={4.5} fill="#688B5B" />
-      ))}
-      {[
-        { x: 34, y: 34 },
-        { x: 96, y: 88 },
-        { x: 150, y: 30 },
-        { x: 214, y: 108 },
-      ].map((p, i) => (
-        <Circle key={`w-${i}`} cx={p.x} cy={p.y} r={8.5} fill="#688B5B" opacity={0.25} />
-      ))}
-      {/* destination pin — Algiers (star) */}
-      <Circle cx={268} cy={80} r={13} fill="#0F5D4A" opacity={0.15} />
-      <Circle cx={268} cy={80} r={6.5} fill="#0F5D4A" />
-      <Circle cx={268} cy={80} r={2.6} fill="#EADCC8" />
+      {/* destination pin — Algiers */}
+      <Circle cx={164} cy={300} r={20} fill="#0F5D4A" opacity={0.14} />
+      <Circle cx={164} cy={300} r={11} fill="#0F5D4A" />
+      <Circle cx={164} cy={300} r={4.5} fill="#EADCC8" />
     </Svg>
   );
 }

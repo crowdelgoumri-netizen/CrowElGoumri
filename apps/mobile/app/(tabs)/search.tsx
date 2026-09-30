@@ -19,6 +19,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
+  type DimensionValue,
   ImageBackground,
   type ImageSourcePropType,
   Pressable,
@@ -34,21 +35,14 @@ import { Input } from "../../src/components/Input";
 import { Select } from "../../src/components/Select";
 import { EmptyState } from "../../src/components/EmptyState";
 import { TripCard } from "../../src/components/TripCard";
-import { CorridorMapArt } from "../../src/components/Illustrations";
+import { PopularRoutesMapArt } from "../../src/components/Illustrations";
 import { useAsync } from "../../src/hooks/useAsync";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
 import * as tripsApi from "../../src/lib/trips";
 import { cityOf } from "../../src/lib/format";
 import { CITY_OPTIONS, WILAYAS_1_58 } from "../../src/config/corridors";
 import planeWindow from "../../assets/plane-window.jpg";
-import cityMontreal from "../../assets/city-montreal.jpg";
-import cityLondon from "../../assets/city-london.jpg";
-import cityParis from "../../assets/city-paris.jpg";
-import cityNewYork from "../../assets/city-newyork.jpg";
-import cityGeneva from "../../assets/city-geneva.jpg";
-import destOran from "../../assets/dest-oran.jpg";
-import destAlger from "../../assets/dest-alger.jpg";
-import destConstantine from "../../assets/dest-constantine.jpg";
+import heroAlgiers from "../../assets/hero-algiers.jpg";
 
 interface Query {
   city: string;
@@ -59,39 +53,66 @@ interface Query {
 
 const EMPTY_QUERY: Query = { city: "", wilaya: "", date: "", weight: "" };
 
-/** Mockup's exact destination cards. Only Paris is a real Tier-1 origin
- * (see src/config/corridors.ts) — the rest are shown per product direction
- * but aren't searchable yet. */
+/**
+ * PhotoTile — a destination's photo, or (while most destinations have no
+ * real photo yet) a consistent brand-gradient placeholder with a landmark
+ * icon instead of a mismatched flat color. Swapping in a real photo later
+ * is just passing `image`.
+ */
+function PhotoTile({ image, style }: { image?: ImageSourcePropType; style?: object }) {
+  if (image) {
+    return <ImageBackground source={image} resizeMode="cover" style={[{ flex: 1 }, style]} />;
+  }
+  return (
+    <LinearGradient
+      colors={["#0F5D4A", "#5C8B6F"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[{ flex: 1, alignItems: "center", justifyContent: "center" }, style]}
+    >
+      <Ionicons name="location" size={20} color="rgba(255,255,255,0.8)" />
+    </LinearGradient>
+  );
+}
+
+/** Mockup's exact floating destination cards, positioned over the map art
+ * (see the `anchor` percentages, matching PopularRoutesMapArt's line
+ * endpoints). Only Paris is a real Tier-1 origin (see
+ * src/config/corridors.ts) — the rest are shown per product direction but
+ * aren't searchable yet. None have a real photo yet — see PhotoTile. */
 const EXPLORE_CITIES: {
   key: string;
   city: string;
   wilaya: string;
-  image: ImageSourcePropType;
+  image?: ImageSourcePropType;
   supported: boolean;
   icon: keyof typeof Ionicons.glyphMap;
+  anchor: { top: DimensionValue; left?: DimensionValue; right?: DimensionValue };
 }[] = [
-  { key: "montreal", city: "Montréal", wilaya: "Alger", image: cityMontreal, supported: false, icon: "heart" },
-  { key: "london", city: "Londres", wilaya: "Alger", image: cityLondon, supported: false, icon: "heart" },
-  { key: "paris", city: "Paris", wilaya: "Alger", image: cityParis, supported: true, icon: "airplane" },
-  { key: "newyork", city: "New York", wilaya: "Alger", image: cityNewYork, supported: false, icon: "airplane" },
-  { key: "geneva", city: "Genève", wilaya: "Alger", image: cityGeneva, supported: false, icon: "airplane" },
+  { key: "montreal", city: "Montréal", wilaya: "Alger", supported: false, icon: "heart", anchor: { top: "4%", left: "3%" } },
+  { key: "london", city: "Londres", wilaya: "Alger", supported: false, icon: "heart", anchor: { top: "18%", right: "3%" } },
+  { key: "paris", city: "Paris", wilaya: "Alger", supported: true, icon: "airplane", anchor: { top: "40%", right: "3%" } },
+  { key: "newyork", city: "New York", wilaya: "Alger", supported: false, icon: "airplane", anchor: { top: "48%", left: "2%" } },
+  { key: "geneva", city: "Genève", wilaya: "Alger", supported: false, icon: "airplane", anchor: { top: "62%", right: "3%" } },
 ];
 
 /** "Autres destinations" — real Tier-1 countries (France, Espagne, Italie),
  * filtered by destination wilaya only (no single city implied). Stats are
  * live when trips exist for that wilaya, else the mockup's placeholder
- * numbers. */
+ * numbers. Espagne→Alger reuses the real hero-algiers.jpg photo (same
+ * Maqam Echahid monument as the mockup); Oran/Constantine have no real
+ * photo yet — see PhotoTile. */
 const OTHER_DESTINATIONS: {
   key: string;
   label: string;
   wilaya: string;
-  image: ImageSourcePropType;
+  image?: ImageSourcePropType;
   fallbackCount: number;
   fallbackPrice: number;
 }[] = [
-  { key: "oran", label: "France → Oran", wilaya: "Oran", image: destOran, fallbackCount: 23, fallbackPrice: 30 },
-  { key: "alger", label: "Espagne → Alger", wilaya: "Alger", image: destAlger, fallbackCount: 18, fallbackPrice: 35 },
-  { key: "constantine", label: "Italie → Constantine", wilaya: "Constantine", image: destConstantine, fallbackCount: 12, fallbackPrice: 40 },
+  { key: "oran", label: "France → Oran", wilaya: "Oran", fallbackCount: 23, fallbackPrice: 30 },
+  { key: "alger", label: "Espagne → Alger", wilaya: "Alger", image: heroAlgiers, fallbackCount: 18, fallbackPrice: 35 },
+  { key: "constantine", label: "Italie → Constantine", wilaya: "Constantine", fallbackCount: 12, fallbackPrice: 40 },
 ];
 
 export default function SearchScreen() {
@@ -206,14 +227,16 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-screen-edge pb-xl"
       >
-        {/* Header: title + search-icon toggle for the filter form */}
-        <View className="mt-md flex-row items-start justify-between">
-          <View className="flex-1 pr-3">
-            <Text className="text-text-primary font-heading text-screen-title font-bold">
-              {queryActive || formOpen ? t("search.title") : t("searchExplore.heroTitle")}
-            </Text>
-            <Text className="text-text-secondary font-body text-sm mt-1">
-              {queryActive || formOpen ? t("search.subtitle") : t("searchExplore.heroSubtitle")}
+        {/* Logo lockup — matches HomeHero's, so the brand header is
+            consistent across the tabs the mockup shows it on. */}
+        <View className="mt-md flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <View className="h-8 w-8 items-center justify-center rounded-lg bg-accent">
+              <Ionicons name="heart" size={16} color={colors.accentOn} />
+            </View>
+            <Text className="font-heading text-lg font-extrabold">
+              <Text className="text-text-primary">Diaspora</Text>
+              <Text className="text-accent">Cart</Text>
             </Text>
           </View>
           <Pressable
@@ -226,6 +249,16 @@ export default function SearchScreen() {
               color={colors.textPrimary}
             />
           </Pressable>
+        </View>
+
+        {/* Title + subtitle */}
+        <View className="mt-section-gap">
+          <Text className="text-text-primary font-heading text-screen-title font-bold">
+            {queryActive || formOpen ? t("search.title") : t("searchExplore.heroTitle")}
+          </Text>
+          <Text className="text-text-secondary font-body text-sm mt-1">
+            {queryActive || formOpen ? t("search.subtitle") : t("searchExplore.heroSubtitle")}
+          </Text>
         </View>
 
         {/* Search form (collapsed by default; opened via the header icon,
@@ -280,34 +313,37 @@ export default function SearchScreen() {
         {/* Browse mode: destination cards + map + popular routes + promo */}
         {!queryActive && !formOpen ? (
           <>
-            {/* Corridors map panel with floating destination cards */}
-            <View className="mt-section-gap rounded-card bg-chip-bg border border-chip-border overflow-hidden">
-              <CorridorMapArt />
-              <View className="px-card-padding pb-card-padding -mt-6 gap-2.5">
-                {EXPLORE_CITIES.map((c) => (
-                  <Pressable
-                    key={c.key}
-                    onPress={() => tapExploreCity(c)}
-                    className="flex-row items-center gap-2.5 rounded-card bg-glass-strong border border-hairline p-2 active:opacity-80"
-                    style={{ maxWidth: 220 }}
-                  >
-                    <View className="h-9 w-9 items-center justify-center rounded-full bg-text-primary">
-                      <Ionicons name={c.icon} size={15} color="#fff" />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-text-primary font-heading font-bold text-sm" numberOfLines={1}>
-                        {c.city}
-                      </Text>
-                      <Text className="text-text-muted font-body text-[11px]">→ {c.wilaya}</Text>
-                    </View>
-                    <ImageBackground
-                      source={c.image}
-                      resizeMode="cover"
-                      style={{ width: 44, height: 44, borderRadius: 10, overflow: "hidden" }}
-                    />
-                  </Pressable>
-                ))}
+            {/* Corridors map — floating destination cards scattered over a
+                tall map backdrop, matching the mockup's collage layout
+                (cards anchored via EXPLORE_CITIES.anchor, not a stacked list). */}
+            <View
+              className="mt-section-gap rounded-card overflow-hidden"
+              style={{ height: 340 }}
+            >
+              <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+                <PopularRoutesMapArt />
               </View>
+              {EXPLORE_CITIES.map((c) => (
+                <Pressable
+                  key={c.key}
+                  onPress={() => tapExploreCity(c)}
+                  className="flex-row items-center gap-2 rounded-card bg-glass-strong border border-hairline p-1.5 active:opacity-80"
+                  style={[{ position: "absolute", maxWidth: 170 }, c.anchor]}
+                >
+                  <View className="h-7 w-7 items-center justify-center rounded-full bg-text-primary">
+                    <Ionicons name={c.icon} size={13} color="#fff" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-text-primary font-heading font-bold text-xs" numberOfLines={1}>
+                      {c.city}
+                    </Text>
+                    <Text className="text-text-muted font-body text-[10px]">→ {c.wilaya}</Text>
+                  </View>
+                  <View style={{ width: 34, height: 34, borderRadius: 8, overflow: "hidden" }}>
+                    <PhotoTile image={c.image} />
+                  </View>
+                </Pressable>
+              ))}
             </View>
 
             {/* Top corridor summary strip (live when Paris→Alger has trips) */}
@@ -351,28 +387,30 @@ export default function SearchScreen() {
                     <Pressable
                       key={d.key}
                       onPress={() => applyDestination(d.wilaya)}
-                      className="flex-1 rounded-card overflow-hidden"
-                      style={{ height: 150 }}
+                      className="flex-1 rounded-card overflow-hidden bg-glass border border-hairline"
                     >
-                      <ImageBackground source={d.image} resizeMode="cover" style={{ flex: 1 }}>
-                        <LinearGradient
-                          colors={["transparent", "rgba(0,0,0,0.55)"]}
-                          locations={[0.4, 1]}
-                          style={{ flex: 1, justifyContent: "flex-end", padding: 10 }}
-                        >
-                          <Text className="text-white font-heading font-bold text-xs" numberOfLines={2}>
-                            {d.label}
-                          </Text>
-                          <View className="mt-2 self-start rounded-chip bg-white/90 px-2 py-1">
-                            <Text className="text-accent-text font-heading text-[10px] font-bold">
-                              {t("searchExplore.fromPrice", { price })}
-                            </Text>
-                          </View>
-                          <Text className="text-white/75 font-body text-[10px] mt-1">
+                      <View style={{ height: 88 }}>
+                        <PhotoTile image={d.image} />
+                        <View className="absolute top-1.5 right-1.5 h-6 w-6 items-center justify-center rounded-full bg-white">
+                          <Ionicons name="heart-outline" size={13} color={colors.textPrimary} />
+                        </View>
+                      </View>
+                      <View className="p-2">
+                        <Text className="text-text-primary font-heading font-bold text-xs" numberOfLines={1}>
+                          {d.label}
+                        </Text>
+                        <View className="flex-row items-center gap-1 mt-1">
+                          <Ionicons name="people-outline" size={11} color={colors.textMuted} />
+                          <Text className="text-text-muted font-body text-[10px]">
                             {t("searchExplore.summaryTravelers", { n: count })}
                           </Text>
-                        </LinearGradient>
-                      </ImageBackground>
+                        </View>
+                        <View className="mt-1.5 self-start rounded-chip bg-success-bg px-1.5 py-0.5">
+                          <Text className="text-success-text font-heading text-[9px] font-bold">
+                            {t("searchExplore.fromPrice", { price })}
+                          </Text>
+                        </View>
+                      </View>
                     </Pressable>
                   );
                 })}

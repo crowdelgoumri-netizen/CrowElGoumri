@@ -82,9 +82,9 @@ export function timeAgo(iso: string | null | undefined): string {
 // ── Status labels (i18n keys — render via t()) ────────────────────────
 export const PARCEL_STATUS: Record<string, { key: string; tone: Tone }> = {
   DRAFT: { key: "status.parcel.DRAFT", tone: "muted" },
-  PENDING_MATCH: { key: "status.parcel.PENDING_MATCH", tone: "accent" },
+  PENDING_MATCH: { key: "status.parcel.PENDING_MATCH", tone: "warning" },
   MATCHED: { key: "status.parcel.MATCHED", tone: "violet" },
-  AWAITING_PICKUP: { key: "status.parcel.AWAITING_PICKUP", tone: "violet" },
+  AWAITING_PICKUP: { key: "status.parcel.AWAITING_PICKUP", tone: "warning" },
   IN_TRANSIT: { key: "status.parcel.IN_TRANSIT", tone: "accent" },
   AWAITING_DELIVERY: { key: "status.parcel.AWAITING_DELIVERY", tone: "accent" },
   DELIVERED: { key: "status.parcel.DELIVERED", tone: "success" },

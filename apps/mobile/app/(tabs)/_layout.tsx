@@ -1,14 +1,19 @@
 /**
  * Tabs layout — the main app shell (guests welcome).
  *
- * Five flat tabs (Accueil / Rechercher / Mes voyages / Messages / Profil)
- * per the DiasporaCart Complete Design System nav spec. Parcel creation
- * ("Envoyer un colis" → /post-parcel) is reached from Home's action bar
- * and other in-context CTAs (trip detail, campaign, parcels list) rather
- * than from a dedicated tab.
+ * Five tabs (Accueil / Rechercher / Créer un envoi / Mes envois / Profil)
+ * per the 2026-09-28 Home redesign. The center "Créer un envoi" tab has no
+ * screen of its own — pressing it pushes /post-parcel directly (see
+ * `tabPress` listener below); trip-posting stays reachable from the "Mes
+ * envois" tab's own CTA and from Home's action bar. Messages moved out of
+ * the tab bar entirely — chat threads are now reached via the Home
+ * header's notification bell (see HomeHero.tsx) and a "Messages" row on
+ * /notifications.
  */
 import { Tabs } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "../../src/hooks/useThemeColors";
@@ -55,25 +60,51 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="create"
+        options={{
+          title: "",
+          tabBarButton: () => (
+            <Pressable
+              onPress={() => router.push("/post-parcel")}
+              hitSlop={8}
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "flex-start",
+              }}
+            >
+              <Pressable
+                onPress={() => router.push("/post-parcel")}
+                style={{
+                  marginTop: -22,
+                  height: 52,
+                  width: 52,
+                  borderRadius: 26,
+                  backgroundColor: colors.accent,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: colors.accentGlow,
+                }}
+              >
+                <Ionicons name="add" size={26} color={colors.accentOn} />
+              </Pressable>
+            </Pressable>
+          ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push("/post-parcel");
+          },
+        }}
+      />
+      <Tabs.Screen
         name="trips"
         options={{
           title: t("tabs.trips"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "airplane" : "airplane-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          title: t("tabs.messages"),
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "chatbubbles" : "chatbubbles-outline"}
               size={22}
               color={color}
             />
@@ -93,10 +124,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* Not a tab — the center-button redirect this used to power is gone,
-          but the route file stays as a safe fallback for any stale deep
-          link. `href: null` keeps it out of the tab bar entirely. */}
-      <Tabs.Screen name="create" options={{ href: null }} />
     </Tabs>
   );
 }

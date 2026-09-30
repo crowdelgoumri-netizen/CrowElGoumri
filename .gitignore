@@ -70,3 +70,9 @@ apps/*/ios/
 *.apk
 *.aab
 *.ipa
+
+# Local machine-specific config (Claude Code settings, pnpm store overrides)
+.claude/settings.local.json
+.npmrc
+.tmp/
+.zcodeignore

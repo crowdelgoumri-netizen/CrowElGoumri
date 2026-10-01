@@ -136,15 +136,16 @@ export const en = {
   },
   onboarding: {
     tagline: "Your parcels, carried by the community",
-    step1Title: "Send your parcel",
-    step1Body:
-      "Describe what you want to send, the origin in Europe, and the destination wilaya. Set your price or let travelers make offers.",
-    step2Title: "Find a traveler",
-    step2Body:
-      "Our engine ranks trusted travelers for your corridor. As soon as a traveler accepts, you're notified.",
-    step3Title: "Pay securely",
-    step3Body:
-      "Payment is held in escrow and released to the traveler on delivery, confirmed with a 6-digit code.",
+    suitcaseTitle: "More than a parcel, a piece of home",
+    suitcaseBody:
+      "Every bag has a little room for someone else's parcel — a gift, a document, a taste of home for family abroad.",
+    travelerTitle: "Travelling to or from Algeria? Earn on the way.",
+    pillarSimpleTitle: "Simple",
+    pillarSimpleBody: "Publish your trip in a minute and set your own capacity and price.",
+    pillarSecureTitle: "Secure",
+    pillarSecureBody: "Payment stays in escrow and is released once delivery is confirmed.",
+    pillarCommunityTitle: "Community",
+    pillarCommunityBody: "Thousands of travelers already carrying parcels for the diaspora.",
     prev: "Back",
     next: "Next",
     start: "Get started",

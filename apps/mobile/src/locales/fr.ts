@@ -142,15 +142,16 @@ export const fr = {
   },
   onboarding: {
     tagline: "Vos colis, portés par la communauté",
-    step1Title: "Envoyez votre colis",
-    step1Body:
-      "Décrivez ce que vous voulez envoyer, l'origine en Europe et la wilaya de destination. Fixez votre prix ou laissez les voyageurs proposer.",
-    step2Title: "Trouvez un voyageur",
-    step2Body:
-      "Notre moteur classe les voyageurs de confiance pour votre corridor. Dès qu'un voyageur accepte, vous êtes notifié.",
-    step3Title: "Payez en toute sécurité",
-    step3Body:
-      "Le paiement est bloqué en escrow et libéré au voyageur à la livraison, confirmée par un code à 6 chiffres.",
+    suitcaseTitle: "Plus qu'un colis, un bout de chez soi",
+    suitcaseBody:
+      "Chaque valise a un peu de place pour le colis de quelqu'un d'autre — un cadeau, un document, un goût du pays pour la famille au loin.",
+    travelerTitle: "Vous voyagez vers ou depuis l'Algérie ? Rentabilisez le trajet.",
+    pillarSimpleTitle: "Simple",
+    pillarSimpleBody: "Publiez votre trajet en une minute et fixez votre capacité et votre prix.",
+    pillarSecureTitle: "Sécurisé",
+    pillarSecureBody: "Le paiement reste en escrow et n'est libéré qu'une fois la livraison confirmée.",
+    pillarCommunityTitle: "Communauté",
+    pillarCommunityBody: "Des milliers de voyageurs transportent déjà des colis pour la diaspora.",
     prev: "Précédent",
     next: "Suivant",
     start: "Commencer",

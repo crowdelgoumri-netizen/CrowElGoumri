@@ -43,6 +43,13 @@ import { cityOf } from "../../src/lib/format";
 import { CITY_OPTIONS, WILAYAS_1_58 } from "../../src/config/corridors";
 import planeWindow from "../../assets/plane-window.jpg";
 import heroAlgiers from "../../assets/hero-algiers.jpg";
+import cityMontreal from "../../assets/city-montreal.jpg";
+import cityLondon from "../../assets/city-london.jpg";
+import cityParis from "../../assets/city-paris.jpg";
+import cityNewYork from "../../assets/city-newyork.jpg";
+import cityGeneva from "../../assets/city-geneva.jpg";
+import destOran from "../../assets/dest-oran.jpg";
+import destConstantine from "../../assets/dest-constantine.jpg";
 
 interface Query {
   city: string;
@@ -79,7 +86,8 @@ function PhotoTile({ image, style }: { image?: ImageSourcePropType; style?: obje
  * (see the `anchor` percentages, matching PopularRoutesMapArt's line
  * endpoints). Only Paris is a real Tier-1 origin (see
  * src/config/corridors.ts) — the rest are shown per product direction but
- * aren't searchable yet. None have a real photo yet — see PhotoTile. */
+ * aren't searchable yet. Photos are cropped directly from the mockup
+ * (NewDesign/ChatGPT Image 28 sept. 2026, 14_40_45.png). */
 const EXPLORE_CITIES: {
   key: string;
   city: string;
@@ -89,19 +97,20 @@ const EXPLORE_CITIES: {
   icon: keyof typeof Ionicons.glyphMap;
   anchor: { top: DimensionValue; left?: DimensionValue; right?: DimensionValue };
 }[] = [
-  { key: "montreal", city: "Montréal", wilaya: "Alger", supported: false, icon: "heart", anchor: { top: "4%", left: "3%" } },
-  { key: "london", city: "Londres", wilaya: "Alger", supported: false, icon: "heart", anchor: { top: "18%", right: "3%" } },
-  { key: "paris", city: "Paris", wilaya: "Alger", supported: true, icon: "airplane", anchor: { top: "40%", right: "3%" } },
-  { key: "newyork", city: "New York", wilaya: "Alger", supported: false, icon: "airplane", anchor: { top: "48%", left: "2%" } },
-  { key: "geneva", city: "Genève", wilaya: "Alger", supported: false, icon: "airplane", anchor: { top: "62%", right: "3%" } },
+  { key: "montreal", city: "Montréal", wilaya: "Alger", image: cityMontreal, supported: false, icon: "heart", anchor: { top: "4%", left: "3%" } },
+  { key: "london", city: "Londres", wilaya: "Alger", image: cityLondon, supported: false, icon: "heart", anchor: { top: "18%", right: "3%" } },
+  { key: "paris", city: "Paris", wilaya: "Alger", image: cityParis, supported: true, icon: "airplane", anchor: { top: "40%", right: "3%" } },
+  { key: "newyork", city: "New York", wilaya: "Alger", image: cityNewYork, supported: false, icon: "airplane", anchor: { top: "48%", left: "2%" } },
+  { key: "geneva", city: "Genève", wilaya: "Alger", image: cityGeneva, supported: false, icon: "airplane", anchor: { top: "62%", right: "3%" } },
 ];
 
 /** "Autres destinations" — real Tier-1 countries (France, Espagne, Italie),
  * filtered by destination wilaya only (no single city implied). Stats are
  * live when trips exist for that wilaya, else the mockup's placeholder
- * numbers. Espagne→Alger reuses the real hero-algiers.jpg photo (same
- * Maqam Echahid monument as the mockup); Oran/Constantine have no real
- * photo yet — see PhotoTile. */
+ * numbers. All three photos are cropped from the mockup; Espagne→Alger
+ * reuses the existing hero-algiers.jpg instead (same Maqam Echahid
+ * monument, higher resolution). The mockup's favorite-heart badge is baked
+ * into these crops, so the card below doesn't draw its own on top. */
 const OTHER_DESTINATIONS: {
   key: string;
   label: string;
@@ -110,9 +119,9 @@ const OTHER_DESTINATIONS: {
   fallbackCount: number;
   fallbackPrice: number;
 }[] = [
-  { key: "oran", label: "France → Oran", wilaya: "Oran", fallbackCount: 23, fallbackPrice: 30 },
+  { key: "oran", label: "France → Oran", wilaya: "Oran", image: destOran, fallbackCount: 23, fallbackPrice: 30 },
   { key: "alger", label: "Espagne → Alger", wilaya: "Alger", image: heroAlgiers, fallbackCount: 18, fallbackPrice: 35 },
-  { key: "constantine", label: "Italie → Constantine", wilaya: "Constantine", fallbackCount: 12, fallbackPrice: 40 },
+  { key: "constantine", label: "Italie → Constantine", wilaya: "Constantine", image: destConstantine, fallbackCount: 12, fallbackPrice: 40 },
 ];
 
 export default function SearchScreen() {
@@ -391,9 +400,11 @@ export default function SearchScreen() {
                     >
                       <View style={{ height: 88 }}>
                         <PhotoTile image={d.image} />
-                        <View className="absolute top-1.5 right-1.5 h-6 w-6 items-center justify-center rounded-full bg-white">
-                          <Ionicons name="heart-outline" size={13} color={colors.textPrimary} />
-                        </View>
+                        {d.key !== "oran" && d.key !== "constantine" ? (
+                          <View className="absolute top-1.5 right-1.5 h-6 w-6 items-center justify-center rounded-full bg-white">
+                            <Ionicons name="heart-outline" size={13} color={colors.textPrimary} />
+                          </View>
+                        ) : null}
                       </View>
                       <View className="p-2">
                         <Text className="text-text-primary font-heading font-bold text-xs" numberOfLines={1}>

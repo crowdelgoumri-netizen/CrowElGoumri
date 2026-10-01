@@ -66,6 +66,17 @@ export function PopularRoutesMapArt() {
   return (
     <Svg width="100%" height="100%" viewBox="0 0 328 380" fill="none">
       <Rect x={0} y={0} width={328} height={380} fill="#DCECE2" />
+      {/* stylised landmass silhouette, so the panel reads as a world map */}
+      <Path
+        d="M20 76 C60 38 110 57 140 95 S200 76 230 104.5 S300 76 320 114 V209 C280 228 250 190 210 218.5 S120 209 80 237.5 S30 209 10 218.5 Z"
+        fill="#C9DFCB"
+        opacity={0.75}
+      />
+      <Path
+        d="M150 228 C190 218.5 240 237.5 300 228 V380 H140Z"
+        fill="#C9DFCB"
+        opacity={0.75}
+      />
       {dots}
       {arcs.map((a, i) => (
         <Path

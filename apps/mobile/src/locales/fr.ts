@@ -91,6 +91,12 @@ export const fr = {
     errCapacity: "Capacité (kg) requise.",
     errDateFormat: "Format attendu : AAAA-MM-JJ et HH:MM.",
     errDateFuture: "Le départ doit être dans le futur.",
+    oneWay: "Aller simple",
+    roundTrip: "Aller-retour",
+    returnDate: "Date de retour (AAAA-MM-JJ)",
+    errReturnDate: "Date de retour requise.",
+    errReturnDateOrder: "Le retour doit être après le départ.",
+    returnLegErrorTitle: "Trajet retour non publié",
   },
   authWall: {
     title: "Créez votre compte",

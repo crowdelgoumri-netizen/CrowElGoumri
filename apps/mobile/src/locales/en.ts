@@ -85,6 +85,12 @@ export const en = {
     errCapacity: "Capacity (kg) required.",
     errDateFormat: "Expected format: YYYY-MM-DD and HH:MM.",
     errDateFuture: "Departure must be in the future.",
+    oneWay: "One way",
+    roundTrip: "Round trip",
+    returnDate: "Return date (YYYY-MM-DD)",
+    errReturnDate: "Return date required.",
+    errReturnDateOrder: "Return must be after departure.",
+    returnLegErrorTitle: "Return trip not published",
   },
   authWall: {
     title: "Create your account",

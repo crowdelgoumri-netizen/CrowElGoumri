@@ -8,7 +8,7 @@
  */
 import { useState } from "react";
 import { router } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Screen } from "../src/components/Screen";
@@ -26,6 +26,8 @@ import type { TransportMode } from "../src/lib/types";
 import { useThemeColors } from "../src/hooks/useThemeColors";
 
 const COUNTRIES = ORIGIN_COUNTRIES.map((c) => ({ value: c.code, label: c.name }));
+
+const CAPACITY_PRESETS = [5, 10, 15, 20, 30];
 
 const COMFORT = [
   { icon: "call-outline", key: "postTrip.comfortContact" },
@@ -46,6 +48,8 @@ export default function PostTripScreen() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [mode, setMode] = useState<TransportMode>("FLIGHT");
+  const [tripType, setTripType] = useState<"oneway" | "roundtrip">("oneway");
+  const [returnDate, setReturnDate] = useState("");
   const [maxWeightKg, setMaxWeightKg] = useState("");
   const [pricePerKg, setPricePerKg] = useState("");
   const [distanceKm, setDistanceKm] = useState("");
@@ -82,6 +86,23 @@ export default function PostTripScreen() {
       return;
     }
 
+    let returnDeparture: Date | null = null;
+    if (tripType === "roundtrip") {
+      if (!returnDate) {
+        Alert.alert(t("common.missingTitle"), t("postTrip.errReturnDate"));
+        return;
+      }
+      returnDeparture = new Date(`${returnDate}T${time}:00`);
+      if (isNaN(returnDeparture.getTime())) {
+        Alert.alert(t("postTrip.invalidDateTitle"), t("postTrip.errDateFormat"));
+        return;
+      }
+      if (returnDeparture <= departure) {
+        Alert.alert(t("postTrip.invalidDateTitle"), t("postTrip.errReturnDateOrder"));
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       const input: CreateTripInput = {
@@ -106,6 +127,41 @@ export default function PostTripScreen() {
         notes: notes.trim() || undefined,
       };
       const { trip } = await createTrip(input);
+
+      if (returnDeparture) {
+        const returnInput: CreateTripInput = {
+          origin: {
+            level: "OFFICIAL_GEOCODE",
+            label: `${destinationWilaya}, Algérie`,
+            wilaya: destinationWilaya,
+            country: "DZ",
+          },
+          destination: {
+            level: "OFFICIAL_GEOCODE",
+            label: `${originCity}, ${ORIGIN_COUNTRIES.find((c) => c.code === originCountry)?.name}`,
+            city: originCity,
+            country: originCountry,
+          },
+          totalDistanceKm: input.totalDistanceKm,
+          departureTime: returnDeparture.toISOString(),
+          mode,
+          maxWeightKg: parseFloat(maxWeightKg),
+          pricePerKg: pricePerKg ? parseFloat(pricePerKg) : undefined,
+          priceCurrency: "EUR",
+          notes: notes.trim() || undefined,
+        };
+        try {
+          await createTrip(returnInput);
+        } catch (e) {
+          // Outbound leg already published — surface the return-leg failure
+          // separately rather than losing the whole submission.
+          Alert.alert(
+            t("postTrip.returnLegErrorTitle"),
+            e instanceof ApiError ? e.message : t("common.retryLater"),
+          );
+        }
+      }
+
       router.replace(`/trip/${trip.id}`);
     } catch (e) {
       Alert.alert(
@@ -176,6 +232,34 @@ export default function PostTripScreen() {
                 {t("postTrip.detailsTitle")}
               </Text>
             </View>
+            <View className="flex-row bg-glass-strong rounded-chip p-1">
+              <Pressable
+                onPress={() => setTripType("oneway")}
+                className={`flex-1 items-center py-2 rounded-chip ${tripType === "oneway" ? "bg-accent" : ""}`}
+                testID="trip-type-oneway"
+              >
+                <Text
+                  className={`font-heading font-semibold text-xs ${
+                    tripType === "oneway" ? "text-accent-on" : "text-text-secondary"
+                  }`}
+                >
+                  {t("postTrip.oneWay")}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setTripType("roundtrip")}
+                className={`flex-1 items-center py-2 rounded-chip ${tripType === "roundtrip" ? "bg-accent" : ""}`}
+                testID="trip-type-roundtrip"
+              >
+                <Text
+                  className={`font-heading font-semibold text-xs ${
+                    tripType === "roundtrip" ? "text-accent-on" : "text-text-secondary"
+                  }`}
+                >
+                  {t("postTrip.roundTrip")}
+                </Text>
+              </Pressable>
+            </View>
             <View className="flex-row gap-stack-gap">
               <View className="flex-1">
                 <Input
@@ -196,6 +280,15 @@ export default function PostTripScreen() {
                 />
               </View>
             </View>
+            {tripType === "roundtrip" ? (
+              <Input
+                label={t("postTrip.returnDate")}
+                value={returnDate}
+                onChangeText={setReturnDate}
+                placeholder="2026-09-10"
+                testID="trip-return-date"
+              />
+            ) : null}
             <Select
               label={t("postTrip.transportMode")}
               value={mode}
@@ -212,6 +305,28 @@ export default function PostTripScreen() {
                   placeholder="20"
                   testID="trip-capacity"
                 />
+                <View className="flex-row flex-wrap gap-1.5 mt-1.5">
+                  {CAPACITY_PRESETS.map((kg) => (
+                    <Pressable
+                      key={kg}
+                      onPress={() => setMaxWeightKg(String(kg))}
+                      className={`rounded-chip border px-2.5 py-1 ${
+                        maxWeightKg === String(kg)
+                          ? "bg-accent/12 border-accent"
+                          : "border-hairline"
+                      }`}
+                      testID={`trip-capacity-preset-${kg}`}
+                    >
+                      <Text
+                        className={`font-body text-[11px] ${
+                          maxWeightKg === String(kg) ? "text-accent-text font-semibold" : "text-text-muted"
+                        }`}
+                      >
+                        {kg} kg
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
               </View>
               <View className="flex-1">
                 <Input

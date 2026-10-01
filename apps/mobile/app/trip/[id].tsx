@@ -13,6 +13,7 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Screen } from "../../src/components/Screen";
@@ -89,7 +90,14 @@ export default function TripDetailScreen() {
 
         {/* Traveler hero */}
         <Card className="overflow-hidden p-0">
-          <View className="h-20 bg-accent" />
+          <View className="h-24 bg-accent" style={{ position: "relative", overflow: "hidden" }}>
+            <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+              <Svg width="100%" height="100%" viewBox="0 0 320 96" preserveAspectRatio="none">
+                <Path d="M0 70 Q160 40 320 66 V96 H0 Z" fill="#000000" opacity={0.12} />
+                <Path d="M0 82 Q160 58 320 80 V96 H0 Z" fill="#000000" opacity={0.1} />
+              </Svg>
+            </View>
+          </View>
           <View className="px-card-padding pb-card-padding">
             <View className="flex-row items-end gap-3 -mt-7">
               <View className="rounded-full border-[3px] border-glass">

@@ -4,7 +4,9 @@
  * the palette (olive/sand on deep green), so they theme and scale for free
  * without binary image assets.
  */
-import Svg, { Circle, Path, Rect } from "react-native-svg";
+import { ImageBackground, View } from "react-native";
+import Svg, { Circle, Path } from "react-native-svg";
+import mapEarthBg from "../../assets/map-earth-bg.jpg";
 
 /**
  * SenderArt — small inline art for the "J'envoie un colis" white card:
@@ -33,27 +35,13 @@ export function SenderArt() {
 
 /**
  * PopularRoutesMapArt — the Rechercher screen's "Nos trajets populaires"
- * backdrop: a soft mint gradient with a dotted "map paper" texture, curved
- * flight paths converging on a central Algiers pin, sized tall enough to
- * host the floating destination cards search.tsx positions on top of it.
+ * backdrop: a satellite photo of Earth (brand-tinted so it reads as one
+ * surface with the rest of the app, not a stock photo), with curved flight
+ * paths converging on a central Algiers pin drawn on top, sized tall enough
+ * to host the floating destination cards search.tsx positions over it.
  * Drawn for a 328×380 box (stretches to fill its container's width/height).
  */
 export function PopularRoutesMapArt() {
-  const dots = [];
-  for (let r = 0; r < 14; r++) {
-    for (let c = 0; c < 12; c++) {
-      dots.push(
-        <Circle
-          key={`${r}-${c}`}
-          cx={14 + c * 27}
-          cy={14 + r * 27}
-          r={1.3}
-          fill="#688B5B"
-          opacity={0.18}
-        />,
-      );
-    }
-  }
   // Diaspora origins → Algiers (converging arcs), endpoints matching the
   // floating card anchor points search.tsx positions over this art.
   const arcs: { d: string; main?: boolean }[] = [
@@ -64,36 +52,35 @@ export function PopularRoutesMapArt() {
     { d: "M298 265 C 250 280, 210 290, 164 300" }, // Genève
   ];
   return (
-    <Svg width="100%" height="100%" viewBox="0 0 328 380" fill="none">
-      <Rect x={0} y={0} width={328} height={380} fill="#DCECE2" />
-      {/* stylised landmass silhouette, so the panel reads as a world map */}
-      <Path
-        d="M20 76 C60 38 110 57 140 95 S200 76 230 104.5 S300 76 320 114 V209 C280 228 250 190 210 218.5 S120 209 80 237.5 S30 209 10 218.5 Z"
-        fill="#C9DFCB"
-        opacity={0.75}
-      />
-      <Path
-        d="M150 228 C190 218.5 240 237.5 300 228 V380 H140Z"
-        fill="#C9DFCB"
-        opacity={0.75}
-      />
-      {dots}
-      {arcs.map((a, i) => (
-        <Path
-          key={i}
-          d={a.d}
-          stroke="#0F5D4A"
-          strokeOpacity={a.main ? 0.85 : 0.4}
-          strokeWidth={a.main ? 2.2 : 1.4}
-          strokeDasharray={a.main ? undefined : "1 6"}
-          strokeLinecap="round"
-          fill="none"
-        />
-      ))}
-      {/* destination pin — Algiers */}
-      <Circle cx={164} cy={300} r={20} fill="#0F5D4A" opacity={0.14} />
-      <Circle cx={164} cy={300} r={11} fill="#0F5D4A" />
-      <Circle cx={164} cy={300} r={4.5} fill="#EADCC8" />
-    </Svg>
+    <View style={{ width: "100%", height: "100%" }}>
+      <ImageBackground
+        source={mapEarthBg}
+        resizeMode="cover"
+        style={{ width: "100%", height: "100%" }}
+      >
+        {/* brand tint so the photo reads as part of the app, not a stock image */}
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#0F5D3B", opacity: 0.45 }} />
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+          <Svg width="100%" height="100%" viewBox="0 0 328 380" fill="none">
+            {arcs.map((a, i) => (
+              <Path
+                key={i}
+                d={a.d}
+                stroke="#EADCC8"
+                strokeOpacity={a.main ? 0.95 : 0.55}
+                strokeWidth={a.main ? 2.2 : 1.4}
+                strokeDasharray={a.main ? undefined : "1 6"}
+                strokeLinecap="round"
+                fill="none"
+              />
+            ))}
+            {/* destination pin — Algiers */}
+            <Circle cx={164} cy={300} r={20} fill="#0F5D3B" opacity={0.3} />
+            <Circle cx={164} cy={300} r={11} fill="#0F5D3B" stroke="#EADCC8" strokeWidth={1.5} />
+            <Circle cx={164} cy={300} r={4.5} fill="#EADCC8" />
+          </Svg>
+        </View>
+      </ImageBackground>
+    </View>
   );
 }

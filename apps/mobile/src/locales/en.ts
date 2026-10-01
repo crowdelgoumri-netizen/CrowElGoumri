@@ -316,6 +316,13 @@ export const en = {
   },
   home: {
     popularCorridors: "Popular routes",
+    dashboard: {
+      title: "Your trip",
+      requestCount_one: "{{count}} request",
+      requestCount_other: "{{count}} requests",
+      inProgress: "Delivery in progress",
+      earnings: "{{amount}} earned this month",
+    },
     heroBanner: {
       tagline: "The link that brings Algerians closer, wherever they are",
       valueProps: "Travel · Send · Stay close",
@@ -648,6 +655,7 @@ export const en = {
     emptyBody: "Send your first message. The conversation is tied to this parcel.",
     placeholder: "Message…",
     read: "Read",
+    attachErrorTitle: "Couldn't send photo",
   },
   report: {
     reason: "Reason",

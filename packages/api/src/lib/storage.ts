@@ -41,6 +41,7 @@ export const UPLOAD_PURPOSES = [
   "parcel-photo",
   "invoice",
   "dispute-attachment",
+  "chat-attachment",
 ] as const;
 
 export type UploadPurpose = (typeof UPLOAD_PURPOSES)[number];
@@ -65,6 +66,7 @@ export const PURPOSE_RULES: Record<UploadPurpose, PurposeRule> = {
     contentTypes: DOC_TYPES,
     maxSizeBytes: MAX_IMAGE_BYTES,
   },
+  "chat-attachment": { contentTypes: IMAGE_TYPES, maxSizeBytes: MAX_IMAGE_BYTES },
 };
 
 // MIME → file extension for the object key. Explicit (rather than splitting

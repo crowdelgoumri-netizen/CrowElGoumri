@@ -25,7 +25,8 @@ export type UploadPurpose =
   | "kyc-selfie"
   | "parcel-photo"
   | "invoice"
-  | "dispute-attachment";
+  | "dispute-attachment"
+  | "chat-attachment";
 
 /** Mirrors packages/api/src/lib/storage.ts PURPOSE_RULES maxSizeBytes. */
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB

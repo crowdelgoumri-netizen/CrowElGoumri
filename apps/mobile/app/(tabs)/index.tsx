@@ -24,6 +24,7 @@ import { EmptyState } from "../../src/components/EmptyState";
 import { Card } from "../../src/components/Card";
 import { HomeHero } from "../../src/components/HomeHero";
 import { HomeActionBar } from "../../src/components/HomeActionBar";
+import { TravelerDashboardCard } from "../../src/components/TravelerDashboardCard";
 import { HowItWorks } from "../../src/components/HowItWorks";
 import { PromoCards } from "../../src/components/PromoCards";
 import { useAsync } from "../../src/hooks/useAsync";
@@ -63,6 +64,7 @@ export default function HomeScreen() {
       >
         <HomeHero />
         <HomeActionBar />
+        <TravelerDashboardCard />
 
         <Card raised className="mt-section-gap flex-row">
           {STATS.map((s, i) => (

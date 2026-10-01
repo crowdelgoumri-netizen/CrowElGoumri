@@ -322,6 +322,13 @@ export const fr = {
   },
   home: {
     popularCorridors: "Trajets populaires",
+    dashboard: {
+      title: "Votre voyage",
+      requestCount_one: "{{count}} demande",
+      requestCount_other: "{{count}} demandes",
+      inProgress: "Livraison en cours",
+      earnings: "{{amount}} gagnés ce mois-ci",
+    },
     heroBanner: {
       tagline: "Le lien qui rapproche les Algériens du monde entier",
       valueProps: "Voyagez · Envoyez · Restez proches",
@@ -659,6 +666,7 @@ export const fr = {
     emptyBody: "Envoyez votre premier message. La discussion est liée à ce colis.",
     placeholder: "Message…",
     read: "Lu",
+    attachErrorTitle: "Envoi de la photo impossible",
   },
   report: {
     reason: "Motif",

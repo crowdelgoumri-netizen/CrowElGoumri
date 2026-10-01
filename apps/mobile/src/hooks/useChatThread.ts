@@ -82,11 +82,11 @@ export function useChatThread(parcelId: string, myId: string | undefined) {
   }, [parcelId, myId]);
 
   const send = useCallback(
-    async (body: string) => {
+    async (body: string, attachments: string[] = []) => {
       const trimmed = body.trim();
-      if (!trimmed) return;
+      if (!trimmed && attachments.length === 0) return;
       try {
-        const { message } = await sendMessage(parcelId, trimmed);
+        const { message } = await sendMessage(parcelId, trimmed, attachments);
         setMessages((prev) =>
           prev.some((x) => x.id === message.id) ? prev : [...prev, message],
         );
@@ -98,6 +98,7 @@ export function useChatThread(parcelId: string, myId: string | undefined) {
             parcelId,
             senderId: myIdRef.current,
             body: trimmed,
+            attachments,
             createdAt: new Date().toISOString(),
           };
           setMessages((prev) => [...prev, pending]);

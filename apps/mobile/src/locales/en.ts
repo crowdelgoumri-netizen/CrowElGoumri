@@ -479,8 +479,10 @@ export const en = {
   },
   parcels: {
     title: "My requests",
+    segmentNew: "New",
     segmentActive: "In progress",
     segmentHistory: "History",
+    emptyNewTitle: "No new requests",
     emptyActiveTitle: "No active requests",
     emptyHistoryTitle: "Nothing in history",
     emptySubtitle: "Your shipments and their statuses will appear here.",

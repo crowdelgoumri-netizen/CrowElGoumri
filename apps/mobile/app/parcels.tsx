@@ -1,9 +1,10 @@
 /**
  * Mes demandes (board 07, DiasporaCart) — the sender's parcels.
  *
- * Segmented between "En cours" (everything not yet delivered/cancelled) and
- * "Historique" (delivered + cancelled). Tapping a card opens the parcel
- * detail (tracking, chat, escrow). Linked from the Profile dashboard.
+ * Three segments: "Nouvelles" (not yet taken by a traveler), "En cours"
+ * (matched through to in-transit), and "Historique" (delivered/closed).
+ * Tapping a card opens the parcel detail (tracking, chat, escrow). Linked
+ * from the Profile dashboard.
  */
 import { useState } from "react";
 import { router } from "expo-router";
@@ -20,15 +21,19 @@ import { useAsync } from "../src/hooks/useAsync";
 import { useThemeColors } from "../src/hooks/useThemeColors";
 import { listMine } from "../src/lib/parcels";
 
-type Seg = "active" | "history";
+type Seg = "new" | "active" | "history";
 
+// "Nouvelles" merges the design system's "Reçues" idea (not yet taken by a
+// traveler) into the existing active/history split, rather than running two
+// parallel segmentations side by side.
+const NEW = ["DRAFT", "PENDING_MATCH"];
 const CLOSED = ["DELIVERED", "CANCELLED", "SEIZED", "DISPUTED"];
 
 export default function ParcelsScreen() {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const tokens = useAuth((s) => s.tokens);
-  const [seg, setSeg] = useState<Seg>("active");
+  const [seg, setSeg] = useState<Seg>("new");
   const { data, loading, error, refresh } = useAsync(
     () => (tokens ? listMine() : Promise.resolve(null)),
     [!!tokens],
@@ -39,9 +44,11 @@ export default function ParcelsScreen() {
   }
 
   const all = data?.parcels ?? [];
-  const parcels = all.filter((p) =>
-    seg === "active" ? !CLOSED.includes(p.status) : CLOSED.includes(p.status),
-  );
+  const parcels = all.filter((p) => {
+    if (seg === "new") return NEW.includes(p.status);
+    if (seg === "history") return CLOSED.includes(p.status);
+    return !NEW.includes(p.status) && !CLOSED.includes(p.status);
+  });
 
   return (
     <Screen>
@@ -49,6 +56,11 @@ export default function ParcelsScreen() {
 
       {/* Segmented toggle */}
       <View className="flex-row bg-glass rounded-chip p-1 mb-stack-gap">
+        <SegBtn
+          label={t("parcels.segmentNew")}
+          active={seg === "new"}
+          onPress={() => setSeg("new")}
+        />
         <SegBtn
           label={t("parcels.segmentActive")}
           active={seg === "active"}
@@ -87,10 +99,16 @@ export default function ParcelsScreen() {
           ListEmptyComponent={
             <EmptyState
               icon="cube-outline"
-              title={seg === "active" ? t("parcels.emptyActiveTitle") : t("parcels.emptyHistoryTitle")}
+              title={
+                seg === "new"
+                  ? t("parcels.emptyNewTitle")
+                  : seg === "active"
+                    ? t("parcels.emptyActiveTitle")
+                    : t("parcels.emptyHistoryTitle")
+              }
               subtitle={t("parcels.emptySubtitle")}
-              ctaLabel={seg === "active" ? t("parcels.sendCta") : undefined}
-              onCta={seg === "active" ? () => router.push("/post-parcel") : undefined}
+              ctaLabel={seg !== "history" ? t("parcels.sendCta") : undefined}
+              onCta={seg !== "history" ? () => router.push("/post-parcel") : undefined}
             />
           }
           refreshControl={

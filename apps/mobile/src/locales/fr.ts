@@ -490,8 +490,10 @@ export const fr = {
   },
   parcels: {
     title: "Mes demandes",
+    segmentNew: "Nouvelles",
     segmentActive: "En cours",
     segmentHistory: "Historique",
+    emptyNewTitle: "Aucune nouvelle demande",
     emptyActiveTitle: "Aucune demande en cours",
     emptyHistoryTitle: "Rien dans l'historique",
     emptySubtitle: "Vos envois et leurs statuts apparaîtront ici.",
